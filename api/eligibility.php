@@ -5,7 +5,7 @@ require_once __DIR__ . '/validation.php';
 
 function evaluateDonorEligibility(array $donor, array $vitals = []): array {
     $reasons = [];
-    $cooldownDays = 56; // Standard 8-week whole blood donation interval
+    $cooldownDays = 56; 
 
     $isDeferred = !empty($donor['is_deferred']) && (int)$donor['is_deferred'] === 1;
     if ($isDeferred) {
@@ -78,19 +78,19 @@ function evaluateDonorEligibility(array $donor, array $vitals = []): array {
     $isEligible = !$isDeferred && $passedCooldown && $passedAge && $passedWeight && $passedHemoglobin && $passedPulse;
 
     return [
-        'is_eligible'              => $isEligible,
-        'status_label'             => $isEligible ? 'Eligible' : 'Deferred',
+        'is_eligible' => $isEligible,
+        'status_label' => $isEligible ? 'Eligible' : 'Deferred',
         'days_since_last_donation' => $daysSinceLast,
-        'days_until_eligible'      => $daysUntilEligible,
-        'next_eligible_date'       => $nextEligibleDate,
-        'age'                      => $age,
-        'checks'                   => [
-            'not_deferred'    => !$isDeferred,
+        'days_until_eligible' => $daysUntilEligible,
+        'next_eligible_date' => $nextEligibleDate,
+        'age' => $age,
+        'checks' => [
+            'not_deferred' => !$isDeferred,
             'passed_cooldown' => $passedCooldown,
-            'passed_age'      => $passedAge,
-            'passed_weight'   => $passedWeight,
-            'passed_hb'       => $passedHemoglobin,
-            'passed_pulse'    => $passedPulse
+            'passed_age' => $passedAge,
+            'passed_weight' => $passedWeight,
+            'passed_hb' => $passedHemoglobin,
+            'passed_pulse' => $passedPulse
         ],
         'reasons'                  => $reasons
     ];
@@ -127,7 +127,7 @@ if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'eligibility.php') {
     $eligibility = evaluateDonorEligibility($donor, $input);
 
     sendJson(true, 'Eligibility evaluated successfully.', [
-        'donor'       => $donor,
+        'donor' => $donor,
         'eligibility' => $eligibility
     ]);
 }

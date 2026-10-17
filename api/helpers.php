@@ -6,9 +6,9 @@ require_once __DIR__ . '/config.php';
 function sendJson(bool $success, string $message, mixed $data = null, int $statusCode = 200): void {
     http_response_code($statusCode);
     echo json_encode([
-        'success'   => $success,
-        'message'   => $message,
-        'data'      => $data,
+        'success' => $success,
+        'message' => $message,
+        'data' => $data,
         'timestamp' => date('Y-m-d H:i:s')
     ], JSON_UNESCAPED_UNICODE);
     exit;

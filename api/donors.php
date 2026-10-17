@@ -51,12 +51,12 @@ function handleGetDonors(mysqli $conn, array $input): void {
     $deferred  = isset($input['is_deferred']) && $input['is_deferred'] !== '' ? (int)$input['is_deferred'] : null;
 
     $allowedSort = [
-        'donor_id'           => 'donor_id',
-        'full_name'          => 'full_name',
-        'blood_type'         => 'blood_type',
-        'weight_kg'          => 'weight_kg',
+        'donor_id' => 'donor_id',
+        'full_name' => 'full_name',
+        'blood_type' => 'blood_type',
+        'weight_kg' => 'weight_kg',
         'last_donation_date' => 'last_donation_date',
-        'created_at'         => 'created_at'
+        'created_at' => 'created_at'
     ];
     $sortKey = $input['sort_by'] ?? 'full_name';
     $sortCol = $allowedSort[$sortKey] ?? 'full_name';
@@ -116,13 +116,13 @@ function handleGetDonors(mysqli $conn, array $input): void {
 function handleCreateDonor(mysqli $conn, array $input): void {
     requireFields($input, ['full_name', 'blood_type', 'sex', 'birth_date', 'weight_kg', 'contact_no']);
 
-    $fullName   = sanitizeString($input['full_name']);
-    $bloodType  = validateBloodType((string)$input['blood_type']);
-    $sex        = validateEnum(ucfirst(strtolower((string)$input['sex'])), ['Male', 'Female'], 'sex');
-    $birthDate  = validateDateString((string)$input['birth_date'], 'birth_date');
-    $weightKg   = validateFloatRange($input['weight_kg'], 30.0, 250.0, 'weight_kg');
-    $contactNo  = sanitizeString($input['contact_no']);
-    $qrToken    = !empty($input['qr_token'])
+    $fullName = sanitizeString($input['full_name']);
+    $bloodType = validateBloodType((string)$input['blood_type']);
+    $sex = validateEnum(ucfirst(strtolower((string)$input['sex'])), ['Male', 'Female'], 'sex');
+    $birthDate = validateDateString((string)$input['birth_date'], 'birth_date');
+    $weightKg = validateFloatRange($input['weight_kg'], 30.0, 250.0, 'weight_kg');
+    $contactNo = sanitizeString($input['contact_no']);
+    $qrToken = !empty($input['qr_token'])
         ? sanitizeString($input['qr_token'])
         : 'DONOR-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(3)));
 
@@ -159,12 +159,12 @@ function handleCreateDonor(mysqli $conn, array $input): void {
 function handleUpdateDonor(mysqli $conn, array $input): void {
     requireFields($input, ['donor_id', 'full_name', 'blood_type', 'weight_kg', 'contact_no']);
 
-    $donorId        = validateIntRange($input['donor_id'], 1, PHP_INT_MAX, 'donor_id');
-    $fullName       = sanitizeString($input['full_name']);
-    $bloodType      = validateBloodType((string)$input['blood_type']);
-    $weightKg       = validateFloatRange($input['weight_kg'], 30.0, 250.0, 'weight_kg');
-    $contactNo      = sanitizeString($input['contact_no']);
-    $isDeferred     = isset($input['is_deferred']) ? (int)((bool)$input['is_deferred']) : 0;
+    $donorId = validateIntRange($input['donor_id'], 1, PHP_INT_MAX, 'donor_id');
+    $fullName = sanitizeString($input['full_name']);
+    $bloodType = validateBloodType((string)$input['blood_type']);
+    $weightKg = validateFloatRange($input['weight_kg'], 30.0, 250.0, 'weight_kg');
+    $contactNo = sanitizeString($input['contact_no']);
+    $isDeferred = isset($input['is_deferred']) ? (int)((bool)$input['is_deferred']) : 0;
     $deferralReason = !empty($input['deferral_reason']) ? sanitizeString($input['deferral_reason']) : null;
 
     $stmt = $conn->prepare(
