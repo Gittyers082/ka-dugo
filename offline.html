@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline ka, Jo - Ka-dugo</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body {
+            background-color: #2b0000;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .heart-icon {
+            width: 120px;
+            height: auto;
+            margin: 30px 0;
+            fill: #f5ece9;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .btn-reconnect {
+            background-color: #ffffff;
+            color: #660000;
+            border: none;
+            padding: 12px 36px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+        .subtext {
+            color: #d1b8b8;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Offline ka, Jo.</h1>
+
+<svg class="heart-icon" viewBox="0 0 24 24">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+</svg>
+
+<button class="btn-reconnect" onclick="window.location.reload()">Reconnect</button>
+<div class="subtext" onclick="alert('You can still view cached donation logs and add new donations offline.')">What still Works</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
