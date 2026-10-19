@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#660000">
   <title>Ka-dugo | Bank Dashboard</title>
-  <link rel="manifest" href="/PWA/manifest.json">
-  <link rel="stylesheet" href="/PWA/css/styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <!-- Network Status Banner -->
@@ -85,7 +85,7 @@
 </div>
 
 <!-- PWA Logic Scripts -->
-<script src="/PWA/js/app.js"></script>
+<script src="js/app.js"></script>
 <script>
   async function handleDonationSubmit(event) {
       event.preventDefault();
@@ -97,23 +97,17 @@
           timestamp: new Date().toISOString()
       };
 
-      if (!navigator.onLine) {
-          await saveDonationLocally(formData);
-          document.getElementById('donation-form').reset();
+      const result = await KadugoPWA.submitDonation(formData);
+
+      if (result.status === 'saved') {
+          alert('Donation logged successfully to the server!');
+      } else if (result.status === 'queued') {
+          alert('Saved on this device. It will upload automatically when you are back online.');
       } else {
-          fetch('/api/donations.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(formData)
-          }).then(res => res.json()).then(data => {
-              alert('Donation Logged Successfully to Server!');
-              document.getElementById('donation-form').reset();
-          }).catch(err => {
-              // Fallback to offline storage if backend API isn't ready
-              saveDonationLocally(formData);
-              document.getElementById('donation-form').reset();
-          });
+          alert('Could not save: ' + result.message);
+          return;                                   // keep the form filled so the user can fix it
       }
+      document.getElementById('donation-form').reset();
   }
 </script>
 </body>
