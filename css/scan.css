@@ -1,0 +1,487 @@
+/* ==========================================================================
+   KA-DUGO: SCAN & LOG DONATION PROTOCOL STYLES
+   ========================================================================== */
+
+/* --- 1. DASHBOARD STRUCTURE & SIDEBAR --- */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  font-family: var(--font-body);
+}
+
+.sidebar {
+  width: var(--sidebar-width, 240px);
+  background-color: var(--oxblood);
+  color: var(--bone);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-4);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--bone);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s ease;
+}
+
+.nav-item.active {
+  background-color: var(--action);
+  color: var(--bone);
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* --- 2. MAIN CONTENT & CENTERING FLOW --- */
+.dashboard-content {
+  flex: 1;
+  padding: var(--space-6) var(--space-8);
+  overflow-y: auto;
+}
+
+.centered-flow {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.log-form-wrapper {
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background-color: var(--bone-light);
+  padding: var(--space-6);
+}
+
+/* --- 3. HEADERS & PROGRESS STEPPER --- */
+.page-header {
+  padding: var(--space-4) 0;
+}
+
+.icon-btn-plain {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--maroon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-stepper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.step-line {
+  height: 4px;
+  background-color: var(--maroon);
+  border-radius: var(--radius-md);
+  margin-right: var(--space-2);
+}
+
+.step-line.pending {
+  background-color: var(--line);
+}
+
+.step:last-child .step-line {
+  margin-right: 0;
+}
+
+/* --- 4. DATA CARDS & DISPLAYS --- */
+.log-card {
+  background-color: transparent;
+  border: none;
+  padding: 0 0 var(--space-6) 0;
+  border-bottom: 2px solid var(--bone-light);
+  margin-bottom: var(--space-4);
+}
+
+.blood-type-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.data-cell {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--bone-light);
+}
+
+/* --- 5. QR SCANNER VIEWPORT --- */
+.scanner-viewport {
+  position: relative;
+  height: 240px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+.scanner-brackets {
+  flex: 1;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  margin: var(--space-4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.scanner-brackets::before,
+.scanner-brackets::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--bone);
+}
+
+.scanner-brackets::before {
+  top: -4px;
+  left: -4px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.scanner-brackets::after {
+  bottom: -4px;
+  right: -4px;
+  border-left: none;
+  border-top: none;
+}
+
+.laser-line {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background-color: var(--urgent);
+  box-shadow: 0 0 8px 2px rgba(122, 0, 0, 0.5);
+}
+
+/* --- 6. INPUTS & FORM CONTROLS --- */
+.input-with-button {
+  display: flex;
+  background-color: var(--bone-light);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  align-items: center;
+}
+
+.input-prefix {
+  padding: 0 var(--space-3);
+  display: flex;
+  align-items: center;
+}
+
+.input-with-button input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: var(--space-2) 0;
+}
+
+.input-padded {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--bone-light);
+  border: none;
+  outline: none;
+}
+
+.input-with-icon {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--bone-light);
+  gap: var(--space-2);
+}
+
+.custom-select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--bone-light);
+  border: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="%232a0605" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  outline: none;
+}
+
+.custom-textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--bone-light);
+  border: none;
+  resize: vertical;
+  outline: none;
+  font-family: var(--font-body);
+}
+
+.stepper-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  background-color: var(--bone-light);
+}
+
+/* --- 7. BUTTONS --- */
+.btn-primary {
+  background-color: var(--maroon) !important;
+  color: var(--bone) !important;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md) !important;
+  cursor: pointer;
+  text-align: center;
+  border: none !important;
+  font-weight: 700;
+}
+
+.btn-secondary {
+  background-color: var(--bone-light) !important;
+  color: var(--oxblood) !important;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md) !important;
+  cursor: pointer;
+  border: none !important;
+  font-weight: 700;
+}
+
+.btn-outline-small {
+  background: transparent;
+  border: 1px solid var(--oxblood);
+  color: var(--oxblood);
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+.form-actions {
+  gap: var(--space-4);
+}
+/* --- 8. spacings & stuff --- */
+.block {
+  display: block;
+}
+.gap-2 {
+  gap: var(--space-2);
+}
+.mt-2 {
+  margin-top: var(--space-2);
+}
+.mt-6 {
+  margin-top: var(--space-6);
+}
+.mb-1 {
+  margin-bottom: var(--space-1);
+}
+.mb-2 {
+  margin-bottom: var(--space-2);
+}
+.mb-4 {
+  margin-bottom: var(--space-4);
+}
+.mb-6 {
+  margin-bottom: var(--space-6);
+}
+.mb-8 {
+  margin-bottom: var(--space-8);
+}
+.p-3 {
+  padding: var(--space-3);
+}
+.p-4 {
+  padding: var(--space-4);
+}
+.px-6 {
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+.pb-4 {
+  padding-bottom: var(--space-4);
+}
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+.items-start {
+  align-items: flex-start;
+}
+.justify-center {
+  justify-content: center;
+}
+.text-center {
+  text-align: center;
+}
+.flex-1 {
+  flex: 1;
+}
+.w-full {
+  width: 100%;
+}
+.bg-transparent {
+  background-color: transparent;
+}
+.border-none {
+  border: none;
+}
+.font-normal {
+  font-weight: 400;
+}
+.font-bold {
+  font-weight: 700;
+}
+.text-oxblood {
+  color: var(--oxblood);
+}
+.text-maroon {
+  color: var(--maroon);
+}
+.text-urgent {
+  color: var(--urgent);
+}
+.text-success {
+  color: #2e7d32;
+}
+.bg-bone-light {
+  background-color: var(--bone-light);
+}
+.bg-oxblood {
+  background-color: var(--oxblood);
+}
+.bg-maroon {
+  background-color: var(--maroon);
+}
+.text-bone {
+  color: var(--bone);
+}
+.border-radius-md {
+  border-radius: var(--radius-md);
+}
+.success-alert {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+/* ==========================================================================
+   MOBILE RESPONSIVE LAYOUT (Max 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Change layout from side-by-side to stacked */
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  /* Transform Sidebar into a Bottom App Navigation Bar */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    padding: var(--space-2);
+    z-index: 100;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15); /* Adds separation shadow */
+  }
+
+  .nav-menu {
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    gap: 0;
+  }
+
+  /* Stack icon and text vertically for mobile nav buttons */
+  .nav-item {
+    flex-direction: column;
+    padding: var(--space-2);
+    font-size: 11px;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+    border-radius: var(--radius-md);
+  }
+
+  /* Adjust main content spacing to prevent bottom nav overlap */
+  .dashboard-content {
+    padding: var(--space-4);
+    padding-bottom: 90px; /* Leaves room for the fixed bottom bar */
+  }
+
+  /* Ensure the form uses full mobile width */
+  .log-form-wrapper {
+    max-width: 100%;
+  }
+
+  /* Stack 2-column data grids into 1 column on small phones */
+  .data-grid {
+    grid-template-columns: 1fr; /* Single column for mobile */
+    gap: var(--space-2);
+  }
+}
