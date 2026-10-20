@@ -40,7 +40,7 @@ CREATE TABLE `account` (
 
 LOCK TABLES `account` WRITE;
 /*!40000 ALTER TABLE `account` DISABLE KEYS */;
-INSERT INTO `account` VALUES (1,'admin@kadugo.org','$2y$10$8K1p/a0dL1LXMIgoTDAiVOU8leM5t58hGZpX1vEokKxU/8R6v/25O','admin',1,'2026-10-15 08:30:00'),(2,'redcross.cavite@org.ph','$2y$10$8K1p/a0dL1LXMIgoTDAiVOU8leM5t58hGZpX1vEokKxU/8R6v/25O','organizer',1,'2026-10-16 09:15:00'),(3,'trece.bloodbank@kadugo.org','$2y$10$8K1p/a0dL1LXMIgoTDAiVOU8leM5t58hGZpX1vEokKxU/8R6v/25O','bank',1,'2026-10-16 10:00:00'),(4,'phleb.juan@kadugo.org','$2y$10$8K1p/a0dL1LXMIgoTDAiVOU8leM5t58hGZpX1vEokKxU/8R6v/25O','phlebotomist',1,'2026-10-14 14:20:00'),(5,'miguel.cruz@gmail.com','$2y$10$8K1p/a0dL1LXMIgoTDAiVOU8leM5t58hGZpX1vEokKxU/8R6v/25O','donor',1,'2026-10-16 11:45:00'),(6,'ana.reyes@gmail.com','$2y$10$8K1p/a0dL1LXMIgoTDAiVOU8leM5t58hGZpX1vEokKxU/8R6v/25O','donor',1,NULL);
+INSERT INTO `account` VALUES (1,'admin@kadugo.org','$2y$10$GZY0R0eS1lg/GB3sAnSYyuVW.6/diJglZvdt2Nj2ucZUD/q8vtgGm','admin',1,'2026-10-15 08:30:00'),(2,'redcross.cavite@org.ph','$2y$10$GZY0R0eS1lg/GB3sAnSYyuVW.6/diJglZvdt2Nj2ucZUD/q8vtgGm','organizer',1,'2026-10-16 09:15:00'),(3,'trece.bloodbank@kadugo.org','$2y$10$GZY0R0eS1lg/GB3sAnSYyuVW.6/diJglZvdt2Nj2ucZUD/q8vtgGm','bank',1,'2026-10-16 10:00:00'),(4,'phleb.juan@kadugo.org','$2y$10$GZY0R0eS1lg/GB3sAnSYyuVW.6/diJglZvdt2Nj2ucZUD/q8vtgGm','phlebotomist',1,'2026-10-14 14:20:00'),(5,'miguel.cruz@gmail.com','$2y$10$GZY0R0eS1lg/GB3sAnSYyuVW.6/diJglZvdt2Nj2ucZUD/q8vtgGm','donor',1,'2026-10-16 11:45:00'),(6,'ana.reyes@gmail.com','$2y$10$GZY0R0eS1lg/GB3sAnSYyuVW.6/diJglZvdt2Nj2ucZUD/q8vtgGm','donor',1,NULL);
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 UNLOCK TABLES;
 

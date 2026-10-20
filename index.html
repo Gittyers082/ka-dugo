@@ -1,25 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KA-DUGO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ka-dugo Login and PWA Install">
+  <title>Sign In - Ka-dugo</title>
+
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" type="image/x-icon" href="assets/icons/kadugo-ico.ico">
 </head>
 
-<body>
-  <header>
-    <h1>Welcome to KA-DUGO</h1>
+<body class="login-layout">
+  <header class="login-header">
+    <img src="assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo Crimson Logo" id="login-logo" width="166"
+      height="166">
+    <h1 id="login-title">Sign In</h1>
   </header>
-  <main>
-    <p>This is the main content area.</p>
+
+  <main class="login-container">
+    <!-- Form Section -->
+    <form id="login-form" action="api/login.php" method="POST" class="sign-in-form" novalidate>
+
+      <!-- Email Field -->
+      <div class="input-group">
+        <label for="email" class="t-label">Email</label>
+        <input type="email" id="email" name="email" autocomplete="username" required>
+      </div>
+
+      <!-- Password Field -->
+      <div class="input-group">
+        <label for="password" class="t-label">Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" name="password" autocomplete="current-password" required>
+          <button type="button" class="icon-btn toggle-password" aria-label="Show password" aria-pressed="false">
+            <!-- Inline SVG for Eye-Slash Icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+              </path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- message area for errors -->
+      <p id="login-error" class="login-error t-caption" role="alert" aria-live="polite"></p>
+      <!-- Submit Button -->
+      <button type="submit" class="btn-primary t-button">Sign In</button>
+    </form>
+
+    <!-- Offline Install Prompt Card -->
+    <section class="install-card">
+      <p class="t-body text-center">Find Blood banks near you,<br>even offline</p>
+
+      <button type="button" id="pwa-install-btn" class="btn-secondary t-button">
+        <!-- Inline SVG for Cloud Download Icon -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+          <path d="M12 12v9"></path>
+          <path d="m8 17 4 4 4-4"></path>
+        </svg>
+        INSTALL
+      </button>
+
+      <a href="#" class="not-now-link t-label">Not Now</a>
+    </section>
   </main>
-  <footer>
-    <p>&copy; 2024 KA-DUGO. All rights reserved.</p>
-  </footer>
+  <script src="js/login.js" defer></script>
 </body>
 
 </html>
