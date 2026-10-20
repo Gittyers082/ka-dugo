@@ -1,0 +1,104 @@
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 var(--text-body)/1.5 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+/* Text styles (match the Figma styles) */
+.t-display {
+  font: 400 var(--text-display)/1.1 var(--font-heading);
+}
+
+.t-title {
+  font: 400 var(--text-title)/1.15 var(--font-heading);
+}
+
+.t-heading {
+  font: 400 var(--text-heading)/1.2 var(--font-heading);
+}
+
+.t-body {
+  font: 400 var(--text-body)/1.5 var(--font-body);
+}
+
+.t-label {
+  font: 500 var(--text-label)/1.4 var(--font-body);
+}
+
+.t-button {
+  font: 600 var(--text-button)/1 var(--font-body);
+}
+
+.t-caption {
+  font: 400 var(--text-caption)/1.4 var(--font-body);
+  color: var(--muted);
+}
+
+.t-nav {
+  font: 400 var(--text-nav)/1 var(--font-body);
+}
+
+/* Accessibility */
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
