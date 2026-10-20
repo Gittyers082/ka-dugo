@@ -1,0 +1,264 @@
+/* ==========================================================================
+   BANK DASHBOARD LAYOUT & COMPONENTS
+   ========================================================================== */
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  font-family: var(--font-body);
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--oxblood);
+  color: var(--bone);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-4);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--bone);
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+  transition: background-color 0.2s ease;
+}
+
+.nav-item.active {
+  background-color: var(--action);
+  color: var(--bone);
+}
+
+.nav-profile {
+  padding: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+/* --- Main Content Grid --- */
+.dashboard-content {
+  flex: 1;
+  padding: var(--space-6) var(--space-8);
+  overflow-y: auto;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.col-metrics,
+.col-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* --- Generic Card Styles --- */
+.card {
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Soft shadow for light theme */
+}
+
+.card.outline {
+  border: 2px solid var(--maroon);
+  box-shadow: none;
+}
+
+.card.outline-urgent {
+  border: 2px solid var(--urgent);
+}
+
+/* --- Utility Classes --- */
+.text-maroon {
+  color: var(--maroon);
+}
+.text-oxblood {
+  color: var(--oxblood);
+}
+.text-urgent {
+  color: var(--urgent);
+}
+.text-bone {
+  color: var(--bone);
+}
+.text-muted {
+  color: var(--muted);
+}
+
+.bg-maroon {
+  background-color: var(--maroon);
+  color: var(--bone);
+}
+.bg-oxblood {
+  background-color: var(--oxblood);
+  color: var(--bone);
+}
+.bg-bone-light {
+  background-color: var(--bone-light);
+  color: var(--oxblood);
+}
+
+.font-bold {
+  font-weight: 700;
+}
+.font-heading {
+  font-family: var(--font-heading);
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.w-full {
+  width: 100%;
+}
+.border-none {
+  border: none;
+}
+
+.mt-1 {
+  margin-top: var(--space-1);
+}
+.mt-2 {
+  margin-top: var(--space-2);
+}
+.mt-4 {
+  margin-top: var(--space-4);
+}
+.mb-1 {
+  margin-bottom: var(--space-1);
+}
+.mb-4 {
+  margin-bottom: var(--space-4);
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* --- Specific Components --- */
+.quota-stats {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.badge-pill {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Progress Bars */
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--line);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--maroon);
+  border-radius: var(--radius-full);
+}
+
+/* Priority Card Alert Box */
+.badge-urgent {
+  display: inline-block;
+  background-color: var(--urgent);
+  color: var(--bone);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-2);
+}
+
+.alert-box {
+  background-color: var(--bone-light);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  margin: var(--space-4) 0;
+}
+
+/* Buttons */
+.btn-primary {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  text-align: center;
+  border: none;
+}
+
+.btn-secondary {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  border: none;
+}
+
+/* Feed Headers & Boxes */
+.count-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blood-type-box {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.urgency-pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+}

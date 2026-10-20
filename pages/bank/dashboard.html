@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Dashboard - Ka-dugo</title>
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/bank-dashboard.css">
+</head>
+
+<body class="dashboard-layout">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active t-button" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Home
+            </a>
+            <a href="pages/bank/log.html" class="nav-item t-button" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Log
+            </a>
+            <a href="pages/bank/scan.html" class="nav-item t-button" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <path d="M3 9h18"></path>
+                    <path d="M9 21V9"></path>
+                </svg>
+                Scan
+            </a>
+            <a href="pages/bank/requests.html" class="nav-item t-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Requests
+            </a>
+        </nav>
+        <div class="nav-profile">
+            <img src="../../assets/img/avatar-placeholder.png" alt="Profile" class="avatar">
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dashboard-content">
+        <div class="dashboard-grid">
+
+            <!-- Left Column: Metrics & Priority -->
+            <section class="col-metrics">
+                <header class="date-header">
+                    <h1 class="t-heading">Thursday, October 24</h1>
+                </header>
+
+                <!-- Daily Quota Card -->
+                <article class="card quota-card">
+                    <h2 class="t-title text-maroon">Daily Quota</h2>
+                    <div class="quota-stats">
+                        <span class="t-display text-maroon font-bold">42/50</span>
+                        <span class="t-label text-maroon">↗ +12%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width: 84%;"></div>
+                    </div>
+                    <p class="t-caption text-muted">8 Units Remaining to Reach Shift Goal</p>
+                    <div class="tag-group">
+                        <span class="badge-pill bg-maroon">PRBC: 24/28</span>
+                        <span class="badge-pill bg-maroon">Platelets: 10/12</span>
+                        <span class="badge-pill bg-maroon">Whole Blood: 8/10</span>
+                    </div>
+                </article>
+
+                <!-- Open Requests Stat -->
+                <article class="card stat-card">
+                    <h2 class="t-heading text-maroon">OPEN REQUESTS</h2>
+                    <p class="t-title">6 Active</p>
+                    <p class="t-caption text-urgent">3 urgent protocol</p>
+                </article>
+
+                <!-- Pending Sync Stat -->
+                <article class="card stat-card outline">
+                    <h2 class="t-heading text-maroon">PENDING SYNC</h2>
+                    <p class="t-title text-maroon">3 Records</p>
+                    <p class="t-caption text-muted">Local Queue Secure</p>
+                </article>
+
+                <!-- Priority Alert Card -->
+                <article class="card priority-card outline-urgent">
+                    <span class="badge-urgent t-caption">HIGH PRIORITY</span>
+                    <h3 class="t-label font-bold">Donor Emergency Broadcast & Outreach</h3>
+                    <div class="alert-box">
+                        <div class="flex-between">
+                            <span class="t-label font-bold">Targeted Notification Ready</span>
+                            <span class="t-caption text-urgent font-bold">Instant Delivery</span>
+                        </div>
+                        <p class="t-caption">142 O- & B+ Donors within 15km</p>
+                    </div>
+                    <button class="btn-primary t-button w-full bg-maroon">Dispatch Push & SMS Alert to Donors</button>
+                </article>
+            </section>
+
+            <!-- Right Column: Scanner Banner & Request Feed -->
+            <section class="col-feed">
+
+                <!-- Scanner Banner -->
+                <article class="card scanner-banner bg-dark">
+                    <div class="banner-content">
+                        <span class="t-label text-light">⚡ RAPID ADMISSION</span>
+                        <h2 class="t-display text-light">Scan Donor QR</h2>
+                        <button class="btn-primary w-full bg-maroon">Launch Scanner</button>
+                        <div class="banner-actions">
+                            <button class="btn-secondary t-label">Donation Log</button>
+                            <button class="btn-secondary t-label">Post Request</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Requests Feed Header -->
+                <div class="feed-header flex-between">
+                    <div>
+                        <h2 class="t-title text-maroon">Open Blood Requests</h2>
+                        <p class="t-caption text-muted">Ranked by protocol urgency and transfusion deadline</p>
+                    </div>
+                    <div class="count-badge bg-maroon text-light t-heading">3</div>
+                </div>
+
+                <!-- Request Card: Critical -->
+                <article class="card request-card">
+                    <div class="request-top flex-between">
+                        <div class="request-info flex-row">
+                            <div class="blood-type-box bg-maroon text-light t-title">O-</div>
+                            <div>
+                                <h3 class="t-heading">Trauma Center ICU</h3>
+                                <p class="t-label text-urgent font-bold">Status: Urgent Need</p>
+                            </div>
+                        </div>
+                        <div class="request-meta text-right">
+                            <p class="t-caption text-muted">DEADLINE <span class="text-maroon font-bold">Today, 6:00
+                                    PM</span></p>
+                            <span class="urgency-pill bg-maroon text-light t-button">CRITICAL</span>
+                        </div>
+                    </div>
+                    <div class="progress-track mt-4">
+                        <div class="progress-fill bg-maroon" style="width: 66%;"></div>
+                    </div>
+                    <div class="request-bottom flex-between mt-2">
+                        <p class="t-label text-muted">8 of 12 units fulfilled</p>
+                        <p class="t-label font-bold">66%</p>
+                    </div>
+                    <div class="request-bottom flex-between">
+                        <p class="t-label text-muted">Required: Whole Blood or PRBC</p>
+                        <p class="t-label text-urgent font-bold">4 units remaining</p>
+                    </div>
+                </article>
+
+                <!-- Additional cards (B+, O+) follow the same structure... -->
+
+            </section>
+        </div>
+    </main>
+</body>
+
+</html>
