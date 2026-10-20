@@ -23,3 +23,34 @@
   --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.25);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.35);
 }
+/* Default state (Dark Theme): Show Beige logo, hide Maroon logo */
+.logo-light {
+  display: none;
+}
+.logo-dark {
+  display: block;
+  height: 40px; /* Adjust based on your --nav-height */
+  width: auto;
+}
+
+/* Auto Light Theme: Follows system preference */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .logo-dark {
+    display: none;
+  }
+  :root:not([data-theme="dark"]) .logo-light {
+    display: block;
+    height: 40px;
+    width: auto;
+  }
+}
+
+/* Manual Light Theme Toggle */
+:root[data-theme="light"] .logo-dark {
+  display: none;
+}
+:root[data-theme="light"] .logo-light {
+  display: block;
+  height: 40px;
+  width: auto;
+}
