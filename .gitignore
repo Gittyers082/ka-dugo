@@ -1,0 +1,17 @@
+# IDE and editor settings
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies and build output
+node_modules/
+
+# Local secrets (each developer keeps their own copy)
+api/config.php
+
+# Logs and temp files
+*.log
+*.tmp
