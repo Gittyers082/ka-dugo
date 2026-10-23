@@ -1,3 +1,4 @@
+if (document.querySelector(".app-shell")) {
 const template = "URGENT: Metro Red Cross & Civic Health Org need O- donors for City Hall Blood Drive this Saturday, Nov 2. Immediate slots open. Tap to confirm booking.";
 const bloodButtons = document.querySelectorAll(".blood");
 const notice = document.querySelector(".notice");
@@ -167,3 +168,29 @@ document.querySelectorAll(".bottom-nav a").forEach((link) => link.addEventListen
 
 updateRadius();
 updateMessage();
+}
+
+if (document.querySelector(".drive-app")) {
+  const API = "../../api/drives.php";
+  const driveForm = document.querySelector("#drive-form"), list = document.querySelector("#drive-list"), slotsValue = document.querySelector("#slots-value"), toast = document.querySelector("#toast");
+  let slots = 60, timer;
+  const note = (text) => { toast.textContent = text; toast.classList.add("show"); clearTimeout(timer); timer = setTimeout(() => toast.classList.remove("show"), 3000); };
+  const esc = (value) => { const el = document.createElement("div"); el.textContent = value ?? ""; return el.innerHTML; };
+  const localDate = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
+  const date = (value) => new Intl.DateTimeFormat("en-PH", { month: "short", day: "2-digit", year: "numeric" }).format(new Date(`${value}T00:00:00`));
+  const time = (value) => { const [h, m] = value.slice(0, 5).split(":").map(Number); return new Intl.DateTimeFormat("en-PH", { hour: "numeric", minute: "2-digit" }).format(new Date(2026, 0, 1, h, m)); };
+  const drivePayload = () => ({ organizer_id: 1, bank_id: 1, title: document.querySelector("#title").value.trim(), venue: document.querySelector("#venue").value.trim(), drive_date: document.querySelector("#drive-date").value, start_time: document.querySelector("#start-time").value, end_time: document.querySelector("#end-time").value, slots_total: slots, category: document.querySelector("#category").value, status: "scheduled", blood_type_ids: [1, 3, 7, 8] });
+  const setSlots = (change) => { slots = Math.max(4, Math.min(2000, slots + change)); slotsValue.textContent = slots; };
+  function render(drives) {
+    document.querySelector("#drive-total").textContent = drives.length; document.querySelector("#managed-count").textContent = drives.length;
+    document.querySelector("#active-count").textContent = drives.filter((d) => ["scheduled", "ongoing"].includes(d.status)).length;
+    document.querySelector("#registration-count").textContent = drives.reduce((n, d) => n + Number(d.registered_count || 0), 0);
+    list.innerHTML = drives.length ? drives.map((d) => { const booked = Number(d.registered_count || 0), total = Number(d.slots_total || 0), rate = total ? Math.min(100, Math.round(booked / total * 100)) : 0; return `<article class="drive-item"><div class="top"><span class="status ${esc(d.status)}">${esc(d.status).toUpperCase()}</span><small>${esc(d.ref_code)}</small></div><h3>${esc(d.title)}</h3><div class="meta"><span>▦ ${date(d.drive_date)}</span><span>◷ ${time(d.start_time)} – ${time(d.end_time)}</span><span>⌾ ${esc(d.venue)}</span></div><div class="progress-label"><span>${booked} / ${total} Slots Booked</span><span>${rate}% Fill Rate</span></div><div class="progress"><i style="width:${rate}%"></i></div><div class="drive-actions"><button type="button">Manage Registrations</button><button type="button" class="cancel" data-id="${d.drive_id}">Cancel Drive</button></div></article>`; }).join("") : '<p class="empty">No drives have been scheduled yet.</p>';
+  }
+  async function loadDrives() { try { const response = await fetch(`${API}?organizer_id=1`), result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "Unable to load drives."); render(result.data.drives); } catch (error) { list.innerHTML = `<p class="empty">${esc(error.message)} Start PHP and MySQL, then refresh.</p>`; } }
+  driveForm.addEventListener("submit", async (event) => { event.preventDefault(); const data = drivePayload(); if (data.end_time <= data.start_time) return note("End time must be later than start time."); const button = driveForm.querySelector(".publish"); button.disabled = true; button.textContent = "Publishing…"; try { const response = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(data) }), result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "The drive could not be created."); note(`Drive ${result.data.ref_code} published with ${result.data.slots_created} slots.`); loadDrives(); } catch (error) { note(error.message); } finally { button.disabled = false; button.textContent = "↥   Publish & Open Donor Registration"; } });
+  document.querySelector("#plus").onclick = () => setSlots(4); document.querySelector("#minus").onclick = () => setSlots(-4); document.querySelector("#reload").onclick = () => { loadDrives(); note("Drive list refreshed"); }; document.querySelector("#view-drives").onclick = () => document.querySelector("#scheduled").scrollIntoView({ behavior: "smooth" });
+  document.querySelector("#location").onclick = () => { if (!navigator.geolocation) return note("GPS is not available in this browser."); navigator.geolocation.getCurrentPosition((p) => { document.querySelector("#latitude").value = `${p.coords.latitude.toFixed(4)}° N`; document.querySelector("#longitude").value = `${p.coords.longitude.toFixed(4)}° E`; note("Current GPS location captured"); }, () => note("Location permission was not granted."), { enableHighAccuracy: true, timeout: 10000 }); };
+  list.addEventListener("click", async (event) => { const button = event.target.closest(".cancel"); if (!button || !confirm("Cancel this drive? Registered donors may be affected.")) return; try { const response = await fetch(API, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ drive_id: Number(button.dataset.id) }) }), result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "Unable to cancel drive."); note("Drive cancelled"); loadDrives(); } catch (error) { note(error.message); } });
+  document.querySelector("#drive-date").value = localDate(); loadDrives();
+}
