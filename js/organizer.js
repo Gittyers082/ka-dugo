@@ -194,3 +194,26 @@ if (document.querySelector(".drive-app")) {
   list.addEventListener("click", async (event) => { const button = event.target.closest(".cancel"); if (!button || !confirm("Cancel this drive? Registered donors may be affected.")) return; try { const response = await fetch(API, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ drive_id: Number(button.dataset.id) }) }), result = await response.json(); if (!response.ok || !result.success) throw new Error(result.message || "Unable to cancel drive."); note("Drive cancelled"); loadDrives(); } catch (error) { note(error.message); } });
   document.querySelector("#drive-date").value = localDate(); loadDrives();
 }
+
+if (document.querySelector(".dashboard-app")) {
+  const dashDrives = document.querySelector("#dash-drives");
+  const dashRegistrations = document.querySelector("#dash-registrations");
+  const dashAlerts = document.querySelector("#dash-alerts");
+  const dashList = document.querySelector("#dashboard-drives");
+  const escapeDashboard = (value) => { const element = document.createElement("div"); element.textContent = value ?? ""; return element.innerHTML; };
+  const dashboardDate = (value) => new Intl.DateTimeFormat("en-PH", { month: "short", day: "numeric", year: "numeric" }).format(new Date(`${value}T00:00:00`));
+  async function refreshDashboard() {
+    try {
+      const [drivesResponse, alertsResponse] = await Promise.all([fetch("../../api/drives.php?organizer_id=1"), fetch("../../api/alerts.php?organizer_id=1")]);
+      const drivesResult = await drivesResponse.json(), alertsResult = await alertsResponse.json();
+      if (!drivesResponse.ok || !drivesResult.success) throw new Error(drivesResult.message || "Unable to load drives.");
+      const drives = drivesResult.data.drives;
+      dashDrives.textContent = drives.filter((drive) => ["scheduled", "ongoing"].includes(drive.status)).length;
+      dashRegistrations.textContent = drives.reduce((total, drive) => total + Number(drive.registered_count || 0), 0);
+      dashList.innerHTML = drives.length ? drives.slice(0, 3).map((drive) => `<article class="dashboard-drive"><h3>${escapeDashboard(drive.title)}</h3><p>${dashboardDate(drive.drive_date)} · ${escapeDashboard(drive.venue)} · ${Number(drive.registered_count || 0)} registrations</p></article>`).join("") : '<p class="empty">No drives have been scheduled yet.</p>';
+      dashAlerts.textContent = alertsResponse.ok && alertsResult.success ? alertsResult.data.alerts.filter((alert) => alert.status === "active").length : "—";
+    } catch (error) { dashDrives.textContent = dashRegistrations.textContent = dashAlerts.textContent = "—"; dashList.innerHTML = `<p class="empty">${escapeDashboard(error.message)} Start PHP and MySQL, then refresh.</p>`; }
+  }
+  document.querySelector("#dashboard-refresh").addEventListener("click", refreshDashboard);
+  refreshDashboard();
+}
