@@ -25,53 +25,57 @@
     });
   }
 
-  /* ---------- 2. INSTALL BUTTON ---------- */
+  /* ---------- 2. INSTALL BUTTON & NATIVE PROMPT ---------- */
   let deferredPrompt = null;
   const DISMISS_KEY = "kadugo-install-dismissed";
 
-  function installBanner() {
-    return (
-      document.getElementById("install-banner-container") ||
-      document.querySelector(".install-card")
-    );
-  }
-  function showInstallBanner() {
-    const el = installBanner();
-    if (el) el.style.display = "";
-  }
-  function hideInstallBanner() {
-    const el = installBanner();
-    if (el) el.style.display = "none";
-  }
+  const installCard = document.getElementById('install-card');
+  const installBtn = document.getElementById('install-btn');
+  const notNowBtn = document.getElementById('not-now-btn');
+
+  // Hide the custom card by default (only show if app is installable)
+  if (installCard) installCard.style.display = 'none';
 
   window.addEventListener("beforeinstallprompt", (e) => {
+    // Prevent the default mini-infobar from appearing on mobile
     e.preventDefault();
     deferredPrompt = e;
-    if (!sessionStorage.getItem(DISMISS_KEY)) showInstallBanner();
+
+    // Only show the custom install card if the user hasn't dismissed it before
+    if (!sessionStorage.getItem(DISMISS_KEY)) {
+      if (installCard) installCard.style.display = 'block';
+    }
   });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+
+      // Show the native browser install prompt
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond
+      const { outcome } = await deferredPrompt.userChoice;
+
+      // Clear the saved prompt and hide the custom card
+      deferredPrompt = null;
+      if (installCard) installCard.style.display = 'none';
+    });
+  }
+
+  if (notNowBtn) {
+    notNowBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      sessionStorage.setItem(DISMISS_KEY, "1");
+      if (installCard) installCard.style.display = 'none';
+    });
+  }
 
   window.addEventListener("appinstalled", () => {
     deferredPrompt = null;
-    hideInstallBanner();
-    notify(
-      "Ka-dugo installed",
-      "Open Ka-dugo from your home screen or desktop.",
-    );
+    if (installCard) installCard.style.display = 'none';
+    notify("Ka-dugo installed", "Open Ka-dugo from your home screen or desktop.");
   });
-
-  window.triggerPWAInstall = async function () {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    hideInstallBanner();
-  };
-
-  window.dismissInstallBanner = function (e) {
-    if (e) e.preventDefault();
-    sessionStorage.setItem(DISMISS_KEY, "1");
-    hideInstallBanner();
-  };
 
   /* ---------- 3. INDEXEDDB ---------- */
   let dbPromise = null;
@@ -116,7 +120,7 @@
   const putRecord = (rec) => withStore("readwrite", (s) => s.put(rec));
   const deleteRecord = (id) => withStore("readwrite", (s) => s.delete(id));
 
-  /* ---------- 4. SAVING A DONATION (ONLINE OR OFFLINE) ---------- */
+  /* ---------- 4. SAVING A DONATION ---------- */
   function makeUuid() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -239,15 +243,6 @@
         new CustomEvent("kadugo:synced", { detail: { count: synced } }),
       );
     }
-    if (failed > 0) {
-      notify(
-        "Some records need attention",
-        failed +
-        " record" +
-        (failed === 1 ? " was" : "s were") +
-        " rejected by the server.",
-      );
-    }
   }
 
   /* ---------- 6. ONLINE / OFFLINE STATUS BANNER ---------- */
@@ -270,9 +265,7 @@
       const all = await getAllRecords();
       pending = all.filter((r) => r.status === "Pending Sync").length;
       failed = all.filter((r) => r.status === "Failed").length;
-    } catch (e) {
-      /* IndexedDB unavailable */
-    }
+    } catch (e) { }
 
     const bar = ensureStatusBar();
     const label = pending === 1 ? "1 record" : pending + " records";
@@ -294,12 +287,6 @@
       bar.textContent = "Online";
     }
     if (failed > 0) bar.textContent += " • " + failed + " need attention";
-
-    const dash = document.getElementById("dashboard-sync-count");
-    if (dash) dash.textContent = pending + " Records";
-    document.querySelectorAll("[data-pending-count]").forEach((el) => {
-      el.textContent = pending;
-    });
   }
 
   window.addEventListener("online", () => {
@@ -327,25 +314,15 @@
         body: body,
         icon: ICON,
         badge: ICON,
-        vibrate: [100, 50, 100],
         tag: "kadugo-" + title,
-        data: { url: APP_BASE + "index.html" },
       });
     });
   }
 
-  /* ---------- 8. INIT ---------- */
+  /* ---------- 8. INIT & LOGOUT ---------- */
   function init() {
     ensureStatusBar();
     refreshStatus();
-
-    const installBtn = document.getElementById("pwa-install-btn");
-    if (installBtn)
-      installBtn.addEventListener("click", window.triggerPWAInstall);
-
-    const dismissLink = document.querySelector(".not-now-link");
-    if (dismissLink)
-      dismissLink.addEventListener("click", window.dismissInstallBanner);
 
     if (navigator.onLine) syncPendingDonations();
     setInterval(() => {
@@ -357,26 +334,14 @@
     document.addEventListener("DOMContentLoaded", init);
   else init();
 
-  window.requestNotificationPermission = requestNotificationPermission;
-  window.saveDonationLocally = (formData) => queueRecord(buildRecord(formData));
-  window.KadugoPWA = {
-    submitDonation: submitDonation,
-    syncNow: syncPendingDonations,
-    getPendingDonations: getAllRecords,
-    notify: notify,
-    refreshStatus: refreshStatus,
-    makeUuid: makeUuid,
-  };
+  // Global Logout binding
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", (e) => {
       e.preventDefault();
-
-      // 1. Clear local/session storage auth tokens
       sessionStorage.clear();
-
-      // 2. Redirect to your XAMPP login page 
       window.location.href = "../../index.html";
     });
   }
+
 })();

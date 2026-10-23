@@ -4,15 +4,14 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v2"; // bump this whenever STATIC_ASSETS changes
+const VERSION = "v3";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
-const BASE = self.registration.scope; // e.g. http://localhost/PWA/
+const BASE = self.registration.scope; // e.g. http://localhost/kadugo/
 const abs = (path) => new URL(path, BASE).href;
 const OFFLINE_URL = abs("offline.html");
 
-// ADD EVERY PAGE / CSS / JS / IMAGE / FONT the team creates to this list
 const STATIC_ASSETS = [
   "./",
   "index.html",
@@ -21,12 +20,17 @@ const STATIC_ASSETS = [
   "css/styles.css",
   "css/base.css",
   "css/tokens.css",
+  "css/bank-requests.css",
+  "css/bank_css/bank-dashboard.css",
   "js/app.js",
   "js/login.js",
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",
+  "assets/icons/bone/192-bone_icon.png",
   "pages/bank/dashboard.html",
   "pages/bank/scan.html",
+  "pages/bank/requests.html",
+  "pages/bank/active-requests.html",
   "pages/donor/donor-dashboard.html",
   "pages/organizer/drives.html",
 ].map(abs);
@@ -70,10 +74,10 @@ self.addEventListener("activate", (event) => {
 /* ---------- FETCH ---------- */
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  if (req.method !== "GET") return; // POSTs (donations) go straight to the network
+  if (req.method !== "GET") return;
 
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return; // ignore other sites
+  if (url.origin !== self.location.origin) return;
 
   if (url.pathname.includes("/api/")) {
     event.respondWith(networkFirstApi(event));
@@ -82,12 +86,12 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(staticStrategy(event));
 });
 
-/* API: try network, remember it, fall back to the last copy when offline */
+
 async function networkFirstApi(event) {
   const req = event.request;
   const url = new URL(req.url);
   const cache = await caches.open(DYNAMIC_CACHE);
-  const latestKey = new Request(url.origin + url.pathname); // "last loaded" copy of this endpoint
+  const latestKey = new Request(url.origin + url.pathname);
 
   try {
     const res = await fetch(req);
@@ -104,7 +108,7 @@ async function networkFirstApi(event) {
     const cached = (await cache.match(req)) || (await cache.match(latestKey));
     if (cached) {
       const headers = new Headers(cached.headers);
-      headers.set("X-Served-From", "cache"); // pages can show "showing last loaded data"
+      headers.set("X-Served-From", "cache");
       return new Response(await cached.blob(), {
         status: 200,
         statusText: "OK",
@@ -121,7 +125,6 @@ async function networkFirstApi(event) {
   }
 }
 
-/* Static files: cache first, update in the background, offline page as last resort */
 async function staticStrategy(event) {
   const req = event.request;
   const cache = await caches.open(CACHE_NAME);
@@ -143,8 +146,11 @@ async function staticStrategy(event) {
   const res = await refresh;
   if (res) return res;
 
-  if (req.mode === "navigate")
+  //offline.html reroute
+  if (req.mode === "navigate") {
     return (await cache.match(OFFLINE_URL)) || Response.error();
+  }
+
   return Response.error();
 }
 

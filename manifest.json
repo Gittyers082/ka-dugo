@@ -2,10 +2,11 @@
   "name": "Ka-dugo Blood Donation",
   "short_name": "Ka-dugo",
   "description": "Find blood banks near you and log donations, even offline.",
+  "id": "/",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#1c1c1a",
+  "background_color": "#e6dfd8",
   "theme_color": "#2a0605",
   "lang": "en",
   "icons": [
