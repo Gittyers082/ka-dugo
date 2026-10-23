@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Post Blood Request | Ka-dugo Bank</title>
+
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/bank-requests.css">
+</head>
+
+<body>
+    <main class="app-shell">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo" />
+            <div class="brand-copy">
+                <h1>Post Blood Request</h1>
+                <p>Ka-dugo Bank Management</p>
+            </div>
+            <button class="refresh" aria-label="Refresh" id="refresh-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 2v6h-6"></path>
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 2v6h6"></path>
+                </svg>
+            </button>
+        </header>
+
+        <section class="page-content">
+
+            <!-- Page Header & Quota -->
+            <header class="page-header flex-between items-start mb-4">
+                <div>
+                    <div class="flex-row gap-2 mb-1">
+                        <h2 class="t-title font-heading text-oxblood font-bold m-0">Post Blood Request</h2>
+                        <span class="badge-urgent text-bone font-bold bg-maroon">PRIORITY QUEUE</span>
+                    </div>
+                    <p class="t-caption text-muted m-0">Create urgent supply notice</p>
+                </div>
+            </header>
+
+            <section class="card quota-card p-4 mb-4">
+                <div class="flex-between">
+                    <div class="flex-row gap-3">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--maroon)" stroke="var(--maroon)"
+                            stroke-width="2">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                        <div>
+                            <span class="t-label font-bold text-oxblood block mb-1">BANK DAILY TARGET: <span
+                                    class="text-maroon">42 / 50 Units</span></span>
+                            <span class="t-caption text-urgent font-bold block">Critical Deficit: O- Negative (10 Units
+                                Required)</span>
+                        </div>
+                    </div>
+                    <div class="quota-badge bg-maroon text-bone font-bold text-center">
+                        <span class="block t-body">84%</span>
+                        <span class="block t-caption" style="font-size:10px;">QUOTA</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tabs -->
+            <div class="tabs mb-6">
+                <button class="active" type="button">Create Request</button>
+                <button type="button" onclick="window.location.href='active_requests.html'">Active Requests <span
+                        class="badge-count">6</span></button>
+            </div>
+            <div class="requests-grid">
+
+                <!-- Left Column: Form -->
+                <form id="request-form" class="request-form">
+
+                    <!-- Step 1: Blood Type -->
+                    <section class="form-section">
+                        <div class="section-header flex-between mb-2">
+                            <h3 class="t-label font-bold text-oxblood text-uppercase m-0">1. Select Target Blood Type
+                            </h3>
+                            <span class="t-caption text-urgent font-bold" id="type-label">Universal Red Cell
+                                Donor</span>
+                        </div>
+                        <div class="blood-grid">
+                            <button class="blood" type="button" data-type="O+"
+                                data-role="Positive"><strong>O+</strong><small>Positive</small></button>
+                            <button class="blood selected critical" type="button" data-type="O-"
+                                data-role="Critical Need"><strong>O-</strong><small>Critical Need</small></button>
+                            <button class="blood" type="button" data-type="A+"
+                                data-role="Positive"><strong>A+</strong><small>Positive</small></button>
+                            <button class="blood" type="button" data-type="A-"
+                                data-role="Negative"><strong>A-</strong><small>Negative</small></button>
+                            <button class="blood" type="button" data-type="B+"
+                                data-role="Positive"><strong>B+</strong><small>Positive</small></button>
+                            <button class="blood" type="button" data-type="B-"
+                                data-role="Negative"><strong>B-</strong><small>Negative</small></button>
+                            <button class="blood" type="button" data-type="AB+"
+                                data-role="Universal Rec"><strong>AB+</strong><small>Universal Rec</small></button>
+                            <button class="blood" type="button" data-type="AB-"
+                                data-role="Negative"><strong>AB-</strong><small>Negative</small></button>
+                        </div>
+                    </section>
+
+                    <!-- Step 2: Component -->
+                    <section class="form-section">
+                        <div class="section-header flex-between mb-2">
+                            <h3 class="t-label font-bold text-oxblood text-uppercase m-0">2. Blood Component Required
+                            </h3>
+                            <span class="t-caption text-urgent font-bold" id="component-label">PRBC Selected</span>
+                        </div>
+                        <div class="component-grid">
+                            <button class="component-btn selected" type="button" data-comp="Packed RBC (PRBC)">Packed
+                                Red Blood Cells (PRBC) <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg></button>
+                            <button class="component-btn" type="button" data-comp="Whole Blood">Whole Blood</button>
+                            <button class="component-btn" type="button" data-comp="Platelets Apheresis">Platelets
+                                Apheresis</button>
+                            <button class="component-btn" type="button" data-comp="Fresh Frozen Plasma">Fresh Frozen
+                                Plasma (FFP)</button>
+                            <button class="component-btn full-width" type="button"
+                                data-comp="Cryoprecipitate">Cryoprecipitate (CRYO)</button>
+                        </div>
+                    </section>
+
+                    <!-- Step 3: Logistics Grid -->
+                    <section class="logistics-grid mb-6">
+
+                        <div class="input-card flex-between">
+                            <div>
+                                <label class="t-caption font-bold text-oxblood block mb-1 text-uppercase">Units
+                                    Needed</label>
+                                <span class="t-caption text-muted">450mL Whole/RBC Equiv.</span>
+                            </div>
+                            <div class="stepper bg-surface border-line">
+                                <button type="button" id="units-minus">−</button>
+                                <strong id="units-display" class="text-urgent">10 Units</strong>
+                                <button type="button" id="units-plus">+</button>
+                            </div>
+                        </div>
+
+                        <div class="input-card">
+                            <label class="t-caption font-bold text-oxblood block mb-2 text-uppercase">Urgency
+                                Level</label>
+                            <div class="urgency-grid">
+                                <button class="urgency-btn" type="button"
+                                    data-level="Normal"><strong>Normal</strong><small>Standard Ward</small></button>
+                                <button class="urgency-btn" type="button"
+                                    data-level="Urgent"><strong>Urgent</strong><small>
+                                        < 12 Hours</small></button>
+                                <button class="urgency-btn selected critical" type="button"
+                                    data-level="Critical"><strong>Critical</strong><small>Immediate</small></button>
+                            </div>
+                        </div>
+
+                        <div class="input-card">
+                            <label class="t-caption font-bold text-oxblood block mb-2 text-uppercase">Clinical
+                                Department / Target Ward</label>
+                            <div class="input-with-badge bg-surface border-line">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)"
+                                    stroke-width="2">
+                                    <path d="M3 21h18"></path>
+                                    <path d="M9 8h6"></path>
+                                    <path d="M12 5v6"></path>
+                                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                                </svg>
+                                <input type="text" id="ward-input" value="Trauma Center ICU - Bay 4"
+                                    class="t-body text-oxblood font-bold">
+                                <span class="inner-badge">Bed T-04</span>
+                            </div>
+                        </div>
+
+                        <div class="input-card">
+                            <label class="t-caption font-bold text-oxblood block mb-2 text-uppercase">Clinical Rationale
+                                & Notes</label>
+                            <textarea id="notes-input"
+                                class="custom-textarea bg-surface border-line t-body text-oxblood" rows="3">Acute hemorrhagic shock secondary to multi-trauma MVA; emergency uncrossmatched to matched protocol activated.
+Protocol #EM-TRANS-9042</textarea>
+                        </div>
+
+                        <div class="input-card">
+                            <label class="t-caption font-bold text-oxblood block mb-2 text-uppercase">Requesting
+                                Physician / Attending</label>
+                            <div class="input-with-badge bg-surface border-line">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)"
+                                    stroke-width="2">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                                </svg>
+                                <div style="flex:1">
+                                    <input type="text" id="doctor-input" value="Dr. H. Vance, Trauma Attending"
+                                        class="t-body text-oxblood font-bold w-full"
+                                        style="border:none; background:transparent; outline:none;">
+                                    <span class="t-caption text-muted block mt-1">Pager: #8812 • Verified by Charge
+                                        Nurse S. Kelly</span>
+                                </div>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#287a4b"
+                                    stroke-width="2.5">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="input-card broadcast-options-card border-line p-4">
+                            <div class="flex-between mb-4">
+                                <label class="t-caption font-bold text-oxblood text-uppercase flex-row gap-2 m-0">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--urgent)"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                    Donor Alert Broadcast Options
+                                </label>
+                                <span class="t-caption font-bold text-urgent text-uppercase">Live Match Ready</span>
+                            </div>
+
+                            <p class="t-caption text-oxblood mb-2">Broadcast Radius:</p>
+                            <div class="radius-grid mb-3">
+                                <button class="radius-btn" type="button" data-radius="5">5 km</button>
+                                <button class="radius-btn selected" type="button" data-radius="15"><strong>15
+                                        km</strong><small>(Standard)</small></button>
+                                <button class="radius-btn" type="button" data-radius="25">25 km (Metro)</button>
+                            </div>
+
+                            <div class="flex-between">
+                                <span class="t-caption text-success font-bold flex-row gap-1"><svg width="14"
+                                        height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg> Push App Alert + Urgent SMS Dispatch</span>
+                                <span class="t-label font-bold text-urgent" id="donor-reach-count">142 Donors</span>
+                            </div>
+                        </div>
+
+                        <div class="data-grid">
+                            <div class="form-group">
+                                <label class="t-caption text-oxblood font-bold mb-2 block text-uppercase">Needed by Date
+                                    & Time</label>
+                                <div class="input-with-icon bg-surface border-line">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                    <input type="text" value="Today, Oct 24 - 18:00"
+                                        class="t-body text-oxblood font-bold bg-transparent border-none w-full flex-1">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)"
+                                        stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="t-caption text-oxblood font-bold mb-2 block text-uppercase">Broadcasting
+                                    Status</label>
+                                <div class="input-with-badge bg-surface border-line">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--urgent)"
+                                        stroke-width="2">
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                    </svg>
+                                    <span class="t-body text-oxblood font-bold flex-1">Open - High Priority</span>
+                                    <span class="badge-pill bg-charcoal text-bone text-uppercase"
+                                        style="font-size:10px;">Auto-Routed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </form>
+
+                <!-- Right Column: Preview & Feed -->
+                <div class="requests-sidebar">
+
+                    <div class="preview-header flex-between mb-2">
+                        <span class="t-label font-bold text-oxblood text-uppercase">Live Ward & Donor Preview</span>
+                        <span class="t-caption text-success font-bold flex-row gap-1"><span
+                                class="status-dot-green"></span> Syncing Live</span>
+                    </div>
+
+                    <!-- Emergency Notice Preview Card -->
+                    <div class="emergency-preview-card border-line mb-4">
+                        <div class="ep-header bg-maroon text-bone flex-between p-3">
+                            <div class="flex-row gap-2">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                    <line x1="4.93" y1="19.07" x2="19.07" y2="4.93"></line>
+                                </svg>
+                                <h3 class="t-heading font-heading m-0 text-bone">EMERGENCY<br>NOTICE</h3>
+                            </div>
+                            <span
+                                class="ep-badge bg-charcoal text-bone font-bold text-uppercase">Critical<br>Urgency</span>
+                        </div>
+
+                        <div class="ep-body p-4 bg-surface">
+                            <div class="flex-between items-start mb-4">
+                                <div class="flex-row gap-3">
+                                    <div class="blood-type-box bg-maroon text-bone t-title font-heading font-bold"
+                                        id="preview-blood">O-</div>
+                                    <div>
+                                        <h4 class="t-heading text-oxblood font-heading m-0" id="preview-title"><span
+                                                id="preview-units">10</span> Units <span id="preview-comp">Packed
+                                                RBC<br>(PRBC)</span></h4>
+                                        <p class="t-caption text-muted m-0 mt-1" id="preview-ward">Trauma Center ICU -
+                                            Bay 4 • Bed T-04</p>
+                                    </div>
+                                </div>
+                                <span class="ep-tag text-urgent font-bold text-uppercase bg-urgent-light p-1">ICU
+                                    Priority</span>
+                            </div>
+
+                            <div class="ep-clinical bg-bone p-3 mb-4">
+                                <span class="t-caption text-muted text-uppercase block mb-1">Clinical Indication:</span>
+                                <p class="t-caption text-oxblood m-0" id="preview-notes">Acute hemorrhagic shock •
+                                    Attending: Dr. H. Vance (Pager #8812)</p>
+                            </div>
+
+                            <div class="ep-footer flex-between border-top pt-3">
+                                <span class="t-caption text-urgent font-bold flex-row gap-1"><svg width="14" height="14"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg> Deadline in 03h 42m</span>
+                                <span class="t-caption text-oxblood font-bold text-uppercase">Radius: <span
+                                        id="preview-radius">15</span> KM Reach + <span id="preview-donors">142</span>
+                                    Donors</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        class="btn-primary w-full bg-maroon text-bone t-heading font-bold p-4 mb-2 flex-row justify-center gap-2"
+                        id="dispatch-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 2L11 13"></path>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                        </svg>
+                        Broadcast Request & Alert Donors Now
+                    </button>
+                    <p class="t-caption text-muted text-center mb-6">Will push immediate alert to <span
+                            id="footer-donors">142</span> matched <span id="footer-type">O-</span> registered donors.
+                    </p>
+
+                    <!-- Existing Requests Feed -->
+                    <div class="feed-header flex-between mb-4" id="existing">
+                        <h3 class="t-title font-heading text-oxblood m-0">Existing Requests</h3>
+                        <a href="active_requests.html" class="t-caption text-urgent font-bold">View All (6)</a>
+                    </div>
+
+                    <div class="feed-list">
+                        <!-- Feed Card 1 -->
+                        <article class="card p-4 border-line mb-3">
+                            <div class="flex-between items-start mb-2">
+                                <div class="flex-row gap-3">
+                                    <div class="mini-blood-box bg-maroon-light text-maroon font-bold t-label">O-</div>
+                                    <div>
+                                        <h4 class="t-heading text-oxblood font-heading m-0">O- Negative</h4>
+                                        <p class="t-caption text-muted m-0 mt-1">12 Units PRBC • Surgical Ward 3B (8
+                                            fulfilled, 4 remaining)</p>
+                                    </div>
+                                </div>
+                                <span class="badge-pill bg-urgent-light text-urgent font-bold">Critical</span>
+                            </div>
+                            <div class="progress-track mt-2 mb-3">
+                                <div class="progress-fill bg-maroon" style="width: 66%;"></div>
+                            </div>
+                            <div class="flex-row justify-end gap-2">
+                                <button class="btn-outline-small">Edit</button>
+                                <button class="btn-outline-small text-urgent" style="border-color:var(--urgent);">Close
+                                    Request</button>
+                            </div>
+                        </article>
+
+                        <!-- Feed Card 2 -->
+                        <article class="card p-4 border-line mb-3">
+                            <div class="flex-between items-start mb-2">
+                                <div class="flex-row gap-3">
+                                    <div class="mini-blood-box bg-bone text-oxblood font-bold t-label">B+</div>
+                                    <div>
+                                        <h4 class="t-heading text-oxblood font-heading m-0">B+ Positive</h4>
+                                        <p class="t-caption text-muted m-0 mt-1">8 Units Whole Blood • Emergency Resus
+                                            Bay 2 (5 fulfilled, 3 pending)</p>
+                                    </div>
+                                </div>
+                                <span class="badge-pill bg-warning-light text-warning font-bold">Urgent</span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboard.html">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg></span>
+                Home
+            </a>
+            <a href="donation-log.html">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg></span>
+                Log
+            </a>
+            <a href="scan.html">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                    </svg></span>
+                Scan
+            </a>
+            <a class="active" href="requests.html">
+                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg></span>
+                Requests
+            </a>
+        </nav>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="../../js/bank-requests.js" defer></script>
+</body>
+
+</html>
