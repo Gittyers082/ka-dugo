@@ -43,6 +43,7 @@ form?.addEventListener("submit", async (e) => {
             showError(json.error || "Couldn't sign you in. Try again.");
         }
     } catch {
+        console.error("Login Error:", error);
         showError("Couldn't reach the server. Check your connection and try again.");
     } finally {
         btn.disabled = false;
