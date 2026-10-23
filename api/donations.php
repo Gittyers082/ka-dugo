@@ -60,4 +60,30 @@ if ($method === 'GET') {
     $stmt->bind_param('si', $input['status'], $input['donation_id']);
     if ($stmt->execute()) sendJson(true, 'Donation updated.', []);
     sendJson(false, 'Update failed.', null, 400);
-}
+    
+} elseif ($method === 'PUT') {
+    requireFields($input, ['donation_id']);
+    $donationId = (int)$input['donation_id'];
+    $units = isset($input['units']) ? (float)$input['units'] : 1.0;
+    $status = sanitizeString($input['status'] ?? 'collected');
+
+    $stmt = $conn->prepare("UPDATE donation SET units = ?, status = ? WHERE donation_id = ?");
+    $stmt->bind_param('dsi', $units, $status, $donationId);
+    if ($stmt->execute()) {
+        sendJson(true, 'Donation updated.', ['donation_id' => $donationId]);
+    }
+    sendJson(false, 'Update failed: ' . $stmt->error, null, 400);
+
+} elseif ($method === 'DELETE') {
+    requireFields($input, ['donation_id']);
+    $donationId = (int)$input['donation_id'];
+
+    // Unlink from blood_history first if referenced, then delete
+    $conn->query("UPDATE blood_history SET donation_id = NULL WHERE donation_id = {$donationId}");
+    $stmt = $conn->prepare("DELETE FROM donation WHERE donation_id = ?");
+    $stmt->bind_param('i', $donationId);
+    if ($stmt->execute()) {
+        sendJson(true, 'Donation deleted.', ['donation_id' => $donationId]);
+    }
+    sendJson(false, 'Delete failed: ' . $stmt->error, null, 400);
+} 
