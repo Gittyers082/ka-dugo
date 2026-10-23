@@ -25,8 +25,8 @@ const STATIC_ASSETS = [
   "js/login.js",
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",
-  "assets/icons/crimson/crimson-logo.svg",
   "pages/bank/dashboard.html",
+  "pages/bank/scan.html",
   "pages/donor/donor-dashboard.html",
   "pages/organizer/drives.html",
 ].map(abs);

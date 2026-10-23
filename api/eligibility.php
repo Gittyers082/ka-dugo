@@ -1,4 +1,5 @@
 <?php
+// this is eligibility.php - evaluates donor eligibility based on deferrals, last donation date, age, and weight
 declare(strict_types=1);
 require_once __DIR__ . '/validation.php';
 

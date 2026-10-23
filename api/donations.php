@@ -1,4 +1,5 @@
 <?php
+// this is donations.php - handles donation records creation, retrieval, and updates
 declare(strict_types=1);
 require_once __DIR__ . '/eligibility.php';
 

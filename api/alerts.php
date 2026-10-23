@@ -1,4 +1,5 @@
 <?php
+// this is alerts.php - handles alert creation, retrieval, updating, and dispatching to eligible donors
 declare(strict_types=1);
 require_once __DIR__ . '/eligibility.php';
 

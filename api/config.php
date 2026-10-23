@@ -1,4 +1,5 @@
 <?php
+// this is config.php - contains configuration settings and database connection function
 declare(strict_types=1);
 
 ini_set('display_errors', '0');
