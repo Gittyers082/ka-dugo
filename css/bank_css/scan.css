@@ -649,3 +649,85 @@ body {
     background: var(--line);
   }
 }
+
+/* el steven epic proportions*/
+.scanner-viewport {
+  cursor: pointer;
+  user-select: none;
+}
+
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scanner-viewport.camera-active .scanner-video {
+  opacity: 0.85;
+}
+
+.scanner-viewport.flash-boost .scanner-video {
+  filter: brightness(1.35) contrast(1.15);
+}
+
+.scanner-brackets,
+.scanner-viewport > p {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes laserSweep {
+  0% {
+    top: 12%;
+    opacity: 0.6;
+  }
+  50% {
+    top: 86%;
+    opacity: 1;
+  }
+  100% {
+    top: 12%;
+    opacity: 0.6;
+  }
+}
+
+.laser-line {
+  animation: laserSweep 2.4s ease-in-out infinite;
+}
+
+.scanner-viewport.scan-success .scanner-brackets::before,
+.scanner-viewport.scan-success .scanner-brackets::after {
+  border-color: #287a4b;
+}
+
+.quick-scan-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quick-scan-chip {
+  flex: 1;
+  min-width: 140px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px dashed var(--line);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: 0.2s;
+}
+
+.quick-scan-chip:hover {
+  border-color: var(--urgent);
+  color: var(--urgent);
+}
