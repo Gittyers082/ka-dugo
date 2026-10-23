@@ -1,0 +1,914 @@
+
+/* DONOR DASHBOARD */
+
+/* Theme and Main Layout */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+.donor-dashboard {
+  display: flex;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* Sidebar Navigation */
+.donor-dashboard .sidebar {
+  flex: 0 0 var(--sidebar-width);
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 27px 18px 20px;
+  background: var(--oxblood);
+  color: var(--bone);
+}
+
+.donor-dashboard .nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.donor-dashboard .nav-item {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 0 16px;
+  border-radius: 0;
+  color: var(--bone);
+  text-decoration: none;
+  font: 600 var(--text-button)/1 var(--font-body);
+  transition: background-color .15s ease;
+}
+
+.donor-dashboard .nav-item svg {
+  display: block;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.donor-dashboard .nav-item.active {
+  background: var(--action);
+  color: var(--bone);
+}
+
+.donor-dashboard .nav-item:hover:not(.active) {
+  background: rgba(255, 255, 255, .09);
+}
+
+.donor-dashboard .nav-profile {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+.donor-dashboard .profile-image-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.donor-dashboard .profile-image-link:hover {
+  opacity: .88;
+}
+
+.donor-dashboard .avatar {
+  display: block;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #bd7e80;
+}
+
+/* Main Content and Header */
+.donor-dashboard .dashboard-content {
+  flex: 1;
+  min-width: 0;
+  padding: 25px 26px 20px;
+  overflow-y: auto;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  min-height: 65px;
+  margin-bottom: 14px;
+}
+
+.eyebrow {
+  color: var(--urgent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  line-height: 1.5;
+}
+
+.header-greeting h1 {
+  font: 700 27px/1.18 var(--font-body);
+  letter-spacing: -.7px;
+  color: #282124;
+  margin: 1px 0 4px;
+}
+
+.greeting-heart {
+  color: var(--crimson);
+}
+
+.greeting-subtitle {
+  color: #8c7b77;
+  font-size: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 14px;
+}
+
+.header-actions time {
+  color: #594748;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.notification-button {
+  position: relative;
+  background: #fffaf7;
+  border: 1px solid #e7dcd7;
+  border-radius: 11px;
+  width: 36px;
+  height: 36px;
+  padding: 9px;
+  color: var(--oxblood);
+}
+
+.notification-button svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  width: 17px;
+  height: 17px;
+}
+
+.notification-dot {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  height: 6px;
+  width: 6px;
+  border-radius: 100%;
+  background: var(--crimson);
+  border: 1px solid #fff;
+}
+
+.donor-id {
+  background: #fbf7f4;
+  border-radius: 10px;
+  color: #786360;
+  padding: 10px 13px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Reserved Logo Placeholder */
+.kadugo-logo-placeholder {
+  display: block;
+  width: 0;
+  height: 0;
+  flex: none;
+  /* Reserved for future actual logo in header */
+}
+
+/* Generic Card Styles */
+.donor-dashboard .card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fbf8f5;
+  border: 1px solid #f3ebe6;
+  box-shadow: 0 5px 20px rgba(58, 25, 18, .045);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Donor Overview */
+.dashboard-overview {
+  display: grid;
+  grid-template-columns: 1.43fr 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+/* Eligibility and Donation Profile */
+.eligibility-card,
+.donation-profile-card {
+  height: 188px;
+}
+
+.eligibility-card {
+  padding: 18px 20px;
+}
+
+.status-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: #24795d;
+  font-weight: 700;
+}
+
+.status-dot {
+  display: inline-block;
+  height: 9px;
+  width: 9px;
+  border-radius: 50%;
+  background: #31a888;
+}
+
+.status-badge {
+  white-space: nowrap;
+  display: inline-block;
+  padding: 6px 9px;
+  border-radius: 50px;
+  background: #d9f5e9;
+  color: #25775d;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.eligibility-card h2 {
+  font: 700 25px/1.12 var(--font-body);
+  letter-spacing: -.75px;
+  margin: 10px 0 5px;
+}
+
+.eligibility-explanation {
+  max-width: 450px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #837674;
+}
+
+.eligibility-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.detail-item {
+  background: #f2ece7;
+  border-radius: 9px;
+  padding: 9px 11px;
+  min-height: 50px;
+}
+
+.detail-label {
+  color: #8b7c7a;
+  font-size: 8px;
+  letter-spacing: .5px;
+  font-weight: 700;
+}
+
+.detail-item strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.18;
+  margin-top: 4px;
+}
+
+.detail-note {
+  color: #338b6f;
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.donation-profile-card {
+  padding: 16px;
+}
+
+.donation-profile-card>h2 {
+  font: 700 15px/1.2 var(--font-body);
+  margin-bottom: 9px;
+}
+
+.donation-profile-details {
+  display: grid;
+  grid-template-columns: 138px minmax(0, 1fr);
+  gap: 12px;
+  height: 130px;
+}
+
+.blood-type-summary {
+  background: #92091a;
+  color: #fff;
+  padding: 13px 12px;
+  border-radius: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.blood-type-summary p {
+  text-transform: uppercase;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  line-height: 1.25;
+}
+
+.blood-type-summary strong {
+  display: block;
+  font: 700 48px/.95 var(--font-body);
+  letter-spacing: -2px;
+}
+
+.blood-type-summary span {
+  font-size: 9px;
+}
+
+.donation-statistics {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 13px;
+  background: #f3eeea;
+}
+
+.donation-counts {
+  display: flex;
+  gap: 19px;
+}
+
+.donation-counts>div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.donation-counts strong {
+  color: #720814;
+  font: 700 24px/1 var(--font-body);
+}
+
+.donation-counts span {
+  white-space: nowrap;
+  color: #7f706d;
+  font-size: 9px;
+}
+
+.milestone-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  color: #675653;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.milestone p {
+  font-size: 9px;
+  color: #96817b;
+  margin-top: 5px;
+}
+
+.progress-track {
+  background: #e3d7d0;
+  height: 7px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #980b1f;
+  border-radius: 12px;
+}
+
+/* Admission Pass and Emergency Request Grid */
+.dashboard-highlights {
+  display: grid;
+  grid-template-columns: .66fr 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+/* Fast Admission Pass */
+.admission-card,
+.matching-request-card {
+  height: 246px;
+}
+
+.admission-card {
+  background: var(--oxblood) !important;
+  color: var(--bone);
+  padding: 19px 20px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.admission-content {
+  width: 100%;
+  max-width: 210px;
+  position: relative;
+  z-index: 1;
+}
+
+.admission-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: #d8b4b7;
+  letter-spacing: .6px;
+  margin-bottom: 9px;
+}
+
+.admission-card h2 {
+  font: 700 22px/1.05 var(--font-body);
+  letter-spacing: -.5px;
+  margin-bottom: 6px;
+  color: #fff;
+}
+
+.admission-summary {
+  font-size: 12px;
+  color: #e5cacc;
+}
+
+.admission-identification {
+  font-size: 11px;
+  margin: 5px 0 16px;
+  color: #f2dadd;
+}
+
+.admission-instructions {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #cfb0b3;
+}
+
+.qr-code-placeholder {
+  width: 120px;
+  height: 120px;
+  padding: 8px;
+  background: #fff;
+  border-radius: 11px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.qr-code-placeholder img {
+  width: 100%;
+  height: 100%;
+}
+
+.admission-footnote {
+  position: absolute;
+  bottom: 13px;
+  right: 20px;
+  font-size: 9px;
+  color: #d7b9bc;
+}
+
+/* Matching Emergency Request */
+.matching-request-card {
+  padding: 17px 19px;
+  background: #fffaf6 !important;
+  border: 1.5px solid #ae1529 !important;
+}
+
+.request-eyebrow {
+  font-weight: 700;
+  color: var(--urgent);
+  font-size: 11px;
+  letter-spacing: .4px;
+}
+
+.blood-match-badge {
+  border-radius: 8px;
+  background: #f9e1e5;
+  color: #960c21;
+  font-weight: 700;
+  padding: 6px 9px;
+  font-size: 10px;
+}
+
+.matching-request-card h2 {
+  font: 700 20px/1.15 var(--font-body);
+  letter-spacing: -.5px;
+  margin: 8px 0 4px;
+}
+
+.priority-badge {
+  font-size: 9px;
+  letter-spacing: 0;
+  background: #950f23;
+  color: #fff;
+  padding: 4px 7px;
+  border-radius: 5px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.request-location {
+  color: #88716e;
+  font-size: 11px;
+}
+
+.request-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 8px;
+}
+
+.request-blood-type {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 62px;
+  height: 61px;
+  border-radius: 10px;
+  color: #fff;
+  background: #950e23;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.request-details strong {
+  display: block;
+  font-size: 13px;
+}
+
+.request-details p {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #6a5958;
+}
+
+.request-notice {
+  border-left: 3px solid var(--crimson);
+  background: #f6ece8;
+  color: #745c59;
+  border-radius: 7px;
+  padding: 8px 10px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.request-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 11px;
+}
+
+.request-actions a {
+  color: #89716c;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.respond-button {
+  background: #950e22;
+  border: 0;
+  color: #fff;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font: 700 11px var(--font-body);
+  white-space: nowrap;
+}
+
+/* Scheduled Blood Drive */
+.scheduled-drive-section {
+  height: 210px;
+  padding: 17px 18px;
+}
+
+.scheduled-drive-section .card-header {
+  margin-bottom: 10px;
+}
+
+.scheduled-drive-section h2 {
+  font: 700 17px/1.2 var(--font-body);
+}
+
+.drive-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 274px;
+  gap: 15px;
+  align-items: center;
+  padding: 14px;
+  min-height: 117px;
+  border-radius: 12px;
+  background: #f3eeea;
+}
+
+.drive-date {
+  background: #90081b;
+  color: #fff;
+  border-radius: 10px;
+  min-height: 70px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.drive-date span {
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.drive-date strong {
+  font-size: 27px;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.drive-details h3 {
+  font: 700 16px/1.2 var(--font-body);
+}
+
+.drive-details>p {
+  color: #81716d;
+  font-size: 10.5px;
+  margin-top: 5px;
+}
+
+.drive-details>p strong {
+  color: #584946;
+}
+
+.drive-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.drive-actions button {
+  background: #fffaf7;
+  border: 1px solid #e1d3cd;
+  color: #603d3c;
+  border-radius: 7px;
+  font: 700 10px var(--font-body);
+  padding: 6px 10px;
+}
+
+.arrival-reminder {
+  background: #fffaf6;
+  border: 1px solid #e8d9d1;
+  border-radius: 10px;
+  padding: 14px 15px;
+}
+
+.arrival-reminder h3 {
+  color: #830f1c;
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+
+.arrival-reminder p {
+  color: #766461;
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+.dashboard-footer {
+  font-size: 9px;
+  text-align: right;
+  color: #938581;
+  margin-top: 8px;
+}
+
+/* Responsive Layout */
+@media (max-width: 1180px) {
+  .dashboard-overview {
+    grid-template-columns: 1.2fr 1fr;
+  }
+
+  .dashboard-highlights {
+    grid-template-columns: .85fr 1fr;
+  }
+
+  .drive-card {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .arrival-reminder {
+    grid-column: 1/-1;
+  }
+
+  .scheduled-drive-section {
+    height: auto;
+  }
+}
+
+@media (max-width: 970px) {
+  .dashboard-overview,
+  .dashboard-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .eligibility-card,
+  .donation-profile-card,
+  .admission-card,
+  .matching-request-card {
+    height: auto;
+    min-height: 188px;
+  }
+
+  .header-actions time {
+    display: none;
+  }
+
+  .sidebar {
+    min-width: 210px !important;
+    width: 210px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .donor-dashboard {
+    display: block;
+  }
+
+  .donor-dashboard .sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto;
+    min-height: 0;
+    position: static;
+    padding: 12px 14px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .donor-dashboard .nav-menu {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    padding-top: 0;
+    flex: 1;
+  }
+
+  .donor-dashboard .nav-item {
+    padding: 7px 10px;
+    white-space: nowrap;
+    min-height: 38px;
+    font-size: 11px;
+  }
+
+  .donor-dashboard .nav-item svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .donor-dashboard .avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .donor-dashboard .dashboard-content {
+    padding: 20px 15px;
+  }
+
+  .dashboard-header {
+    align-items: flex-start;
+  }
+
+  .header-greeting h1 {
+    font-size: 22px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .donor-id {
+    display: none;
+  }
+
+  .eligibility-details {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .detail-item {
+    padding: 7px;
+  }
+
+  .donation-profile-details {
+    height: 130px;
+  }
+
+  .admission-card {
+    min-height: 242px;
+  }
+
+  .drive-card {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .arrival-reminder {
+    grid-column: 1/-1;
+  }
+}
+
+/* Desktop Fit: 1280 × 800 (ginaya nasa figma) */
+@media (min-width: 1181px) {
+  .dashboard-header {
+    height: 65px;
+    min-height: 65px;
+    margin-bottom: 14px;
+  }
+
+  .eligibility-card h2 {
+    margin-top: 7px;
+  }
+
+  .eligibility-details {
+    margin-top: 9px;
+  }
+
+  .detail-item {
+    padding-top: 8px;
+    padding-bottom: 7px;
+  }
+
+  .matching-request-card h2 {
+    margin-top: 6px;
+  }
+
+  .request-details {
+    margin-top: 8px;
+    margin-bottom: 6px;
+  }
+
+  .request-actions {
+    margin-top: 7px;
+  }
+}
+
+.kadugo-logo-placeholder {
+  width: 36px;
+  height: 36px;
+  flex: none;
+}
+
+.kadugo-logo-placeholder img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .kadugo-logo-placeholder {
+    display: none;
+  }
+}
+
+/* --- Heading Font: Unbounded --- */
+.donor-dashboard h1,
+.donor-dashboard h2,
+.donor-dashboard h3 {
+  font-family: "Unbounded", sans-serif;
+}
