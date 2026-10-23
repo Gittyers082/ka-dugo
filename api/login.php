@@ -1,67 +1,76 @@
 <?php
-require_once __DIR__ . '/db.php';
+// this is login.php - handles user authentication and session management
+declare(strict_types=1);
+require_once __DIR__ . '/config.php';
 
 session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
+header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    json_response(['ok' => false, 'error' => 'Method not allowed.'], 405);
+    http_response_code(405);
+    echo json_encode(['ok' => false, 'error' => 'Method not allowed.']);
+    exit;
 }
 
-// Where each role lands after login (paths are relative to the site root)
 $home = [
-    'donor'        => 'pages/donor/dashboard.html',
-    'bank'         => 'pages/bank/dashboard.html',
-    'phlebotomist' => 'pages/bank/dashboard.html',   
-    'organizer'    => 'pages/organizer/drives.html', 
-    'admin'        => 'pages/bank/dashboard.html',   
+    'donor' => 'pages/donor/donor-dashboard.html',
+    'bank' => 'pages/bank/dashboard.html',
+    'phlebotomist' => 'pages/bank/scan.html',   
+    'organizer' => 'pages/organizer/drives.html', 
+    'admin' => 'pages/bank/dashboard.html',   
 ];
 
-// Validate input
 $email = strtolower(trim($_POST['email'] ?? ''));
 $pass  = $_POST['password'] ?? '';
 
 if ($email === '' || $pass === '') {
-    json_response(['ok' => false, 'error' => 'Enter your email and password.'], 422);
-}
-if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100 || strlen($pass) > 255) {
-    json_response(['ok' => false, 'error' => 'Enter a valid email address.'], 422);
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Enter your email and password.']);
+    exit;
 }
 
-// Look up the account (prepared statement)
-$stmt = $db->prepare(
-    'SELECT account_id, password_hash, role, is_active
-     FROM account WHERE email = ? LIMIT 1'
-);
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100 || strlen($pass) > 255) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'Enter a valid email address.']);
+    exit;
+}
+
+$conn = getDbConnection();
+$stmt = $conn->prepare('SELECT account_id, password_hash, role, is_active FROM account WHERE email = ? LIMIT 1');
 $stmt->bind_param('s', $email);
 $stmt->execute();
 $acct = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// One generic message, so attackers can't tell which emails exist
 if (!$acct || !password_verify($pass, $acct['password_hash'])) {
-    json_response(['ok' => false, 'error' => 'Incorrect email or password.'], 401);
+    http_response_code(401);
+    echo json_encode(['ok' => false, 'error' => 'Incorrect email or password.']);
+    exit;
 }
 
 if ((int) $acct['is_active'] !== 1) {
-    json_response(['ok' => false, 'error' => 'This account is inactive. Contact your administrator.'], 403);
+    http_response_code(403);
+    echo json_encode(['ok' => false, 'error' => 'This account is inactive. Contact your administrator.']);
+    exit;
 }
 
-// Success: start a fresh session
 session_regenerate_id(true);
 $_SESSION['account_id'] = (int) $acct['account_id'];
-$_SESSION['email']      = $email;
-$_SESSION['role']       = $acct['role'];
+$_SESSION['email'] = $email;
+$_SESSION['role'] = $acct['role'];
 
-$upd = $db->prepare('UPDATE account SET last_login = NOW() WHERE account_id = ?');
+$upd = $conn->prepare('UPDATE account SET last_login = NOW() WHERE account_id = ?');
 $upd->bind_param('i', $_SESSION['account_id']);
 $upd->execute();
 $upd->close();
 
-json_response([
+http_response_code(200);
+echo json_encode([
     'ok'   => true,
     'data' => [
-        'role'     => $acct['role'],
+        'role' => $acct['role'],
         'redirect' => $home[$acct['role']] ?? 'index.html',
     ],
 ]);
+exit;
