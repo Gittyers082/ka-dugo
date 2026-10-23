@@ -14,6 +14,8 @@ const form = document.querySelector("form");
 const dialog = document.querySelector(".confirm-dialog");
 const toast = document.querySelector(".toast");
 let toastTimer;
+const ALERTS_API = "../../api/alerts.php";
+const bloodTypeIds = { "A+": 1, "A-": 2, "B+": 3, "B-": 4, "AB+": 5, "AB-": 6, "O+": 7, "O-": 8 };
 
 function showToast(text) {
   toast.textContent = text;
@@ -61,6 +63,37 @@ function updateMessage() {
 }
 message.addEventListener("input", updateMessage);
 
+function selectedChannel() {
+  const channels = [...document.querySelectorAll(".delivery-option input")]
+    .filter((input) => input.checked)
+    .map((input) => input.parentElement.textContent.includes("Push") ? "push" : "sms");
+  return channels.includes("push") ? "push" : channels[0];
+}
+
+function alertPayload(status) {
+  return {
+    sender_type: "organizer",
+    organizer_id: 1,
+    drive_id: 1,
+    blood_type_id: bloodTypeIds[document.querySelector(".blood.selected").dataset.type],
+    level: 2,
+    message: message.value.trim(),
+    status,
+    channel: selectedChannel()
+  };
+}
+
+async function saveAlert(status) {
+  const response = await fetch(ALERTS_API, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(alertPayload(status))
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.success) throw new Error(result.message || "The alert could not be saved.");
+  return result.data;
+}
+
 document.querySelector(".editor-footer button").addEventListener("click", () => {
   const type = document.querySelector(".blood.selected").dataset.type;
   message.value = template.replace("O-", type);
@@ -69,9 +102,18 @@ document.querySelector(".editor-footer button").addEventListener("click", () => 
 });
 
 document.querySelector(".draft").addEventListener("click", () => {
-  const draft = { message: message.value, radius: radiusInput.value, blood: document.querySelector(".blood.selected").dataset.type };
+  if (!message.value.trim()) return showToast("Add an alert message before saving a draft");
+  const draft = {
+    message: message.value,
+    radius: radiusInput.value,
+    blood: document.querySelector(".blood.selected").dataset.type,
+    push: document.querySelectorAll(".delivery-option input")[0].checked,
+    sms: document.querySelectorAll(".delivery-option input")[1].checked
+  };
   localStorage.setItem("hemasync-alert-draft", JSON.stringify(draft));
-  showToast("Draft saved on this device");
+  saveAlert("draft")
+    .then((data) => showToast(`Draft #${data.alert_id} saved to Ka-dugo`))
+    .catch(() => showToast("Draft saved locally; backend is unavailable"));
 });
 
 document.querySelector(".refresh").addEventListener("click", () => {
@@ -80,6 +122,10 @@ document.querySelector(".refresh").addEventListener("click", () => {
   const target = [...bloodButtons].find((button) => button.dataset.type === draft.blood);
   target?.click();
   radiusInput.value = draft.radius;
+  const deliveryInputs = document.querySelectorAll(".delivery-option input");
+  deliveryInputs[0].checked = draft.push ?? true;
+  deliveryInputs[1].checked = draft.sms ?? true;
+  deliveryInputs.forEach((input) => input.closest(".delivery-option").classList.toggle("off", !input.checked));
   updateRadius();
   message.value = draft.message;
   updateMessage();
@@ -94,11 +140,22 @@ document.querySelector(".dispatch").addEventListener("click", () => {
 });
 document.querySelector(".close-dialog").addEventListener("click", () => dialog.close());
 document.querySelector(".cancel-dialog").addEventListener("click", () => dialog.close());
-document.querySelector(".approve-dialog").addEventListener("click", () => {
-  dialog.close();
-  document.querySelector(".dispatch").textContent = "✓  Alert Dispatched";
-  document.querySelector(".dispatch").classList.add("sent");
-  showToast("Alert dispatched to eligible donors");
+document.querySelector(".approve-dialog").addEventListener("click", async () => {
+  const approveButton = document.querySelector(".approve-dialog");
+  approveButton.disabled = true;
+  approveButton.textContent = "Dispatching…";
+  try {
+    const data = await saveAlert("active");
+    dialog.close();
+    document.querySelector(".dispatch").textContent = "✓  Alert Dispatched";
+    document.querySelector(".dispatch").classList.add("sent");
+    showToast(`Alert sent to ${data.recipients_notified ?? 0} eligible donors`);
+  } catch (error) {
+    showToast(error.message);
+  } finally {
+    approveButton.disabled = false;
+    approveButton.textContent = "Dispatch now";
+  }
 });
 dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
 document.querySelectorAll(".bottom-nav a").forEach((link) => link.addEventListener("click", (event) => {
