@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drive Scheduler | Ka-dugo</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/tokens.css"><link rel="stylesheet" href="../../css/base.css">
     <link rel="stylesheet" href="../../css/organizer.css">
 </head>
 <body>
 <main class="drive-app">
-    <header class="topbar"><span class="brand-icon">✥</span><div><h1>Ka-dugo Organizer</h1><p>Philippine Red Cross Cavite Chapter</p></div><button class="sync" id="reload" title="Refresh drives">↻</button></header>
+    <header class="topbar"><img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo"><div><h1>Ka-dugo Organizer</h1><p>Philippine Red Cross Cavite Chapter</p></div><button class="sync" id="reload" title="Refresh drives">↻</button></header>
     <section class="content">
         <header class="page-title"><div><h2>Drive Scheduler</h2><p>Linked to Organizer UID: <b>org_98024_rc</b></p></div><span class="gps">● GPS Live</span></header>
         <section class="stats"><article><small>ACTIVE<br>DRIVES</small><strong id="active-count">—</strong><span>Scheduled / ongoing</span></article><article><small>REGISTRATIONS</small><strong id="registration-count">—</strong><span>Across all drives</span></article><article><small>TELEMETRY</small><b class="locked">◎ Locked</b><span>± 4m Precision</span></article></section>
@@ -28,7 +27,7 @@
         <section class="scheduled" id="scheduled"><div class="scheduled-heading"><h2>Active &amp; Scheduled Drives</h2><b><span id="managed-count">0</span> MANAGED DRIVES</b></div><p class="month">SCHEDULED DRIVES</p><div id="drive-list" class="drive-list"><p class="empty">Loading drives…</p></div></section>
         <section class="warning"><span>⚠</span><div><h2>Cancellation Notice Protocol</h2><p>Cancelling a drive notifies all registered donors and releases their booking slots for other local drives.</p></div></section>
     </section>
-    <nav class="bottom-nav"><a class="active" href="drives.html"><span>♧</span>Drives</a><a href="organizerholder.html"><span>⌁</span>Alerts</a></nav>
+    <nav class="bottom-nav"><a href="#" data-placeholder="true"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22v-8h6v8"/></svg></span>Home</a><a class="active" href="drives.html"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 17h14l-1.5-7H6.5z"/><path d="M3 17h18v3H3z"/><circle cx="7" cy="20" r="1.8"/><circle cx="17" cy="20" r="1.8"/><path d="M8 10h8"/></svg></span>Drives</a><a href="organizerholder.html"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4z"/><path d="M12 9v5"/><path d="M12 17h.01"/></svg></span>Alerts</a><a href="#" data-placeholder="true"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 3.5-6 8-6s7.2 2 8 6"/></svg></span>Account</a></nav>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../../js/organizer.js"></script>

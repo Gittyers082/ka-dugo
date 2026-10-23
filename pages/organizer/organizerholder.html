@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Broadcast Alert | HemaSync</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+    <title>Broadcast Alert | Ka-dugo</title>
+    <link rel="stylesheet" href="../../css/tokens.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
     <link rel="stylesheet" href="../../css/organizer.css" />
 </head>
 <body>
 <main class="app-shell">
     <header class="topbar">
-        <div class="brand-mark" aria-hidden="true">♙</div>
-        <div class="brand-copy"><h1>Broadcast Alert</h1><p>Civic Health Org / Organizer Portal</p></div>
+        <img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo" />
+        <div class="brand-copy"><h1>Ka-dugo Broadcast Alert</h1><p>Philippine Red Cross Cavite / Organizer Portal</p></div>
         <button class="refresh" aria-label="Refresh">↻</button>
     </header>
 
@@ -64,12 +63,12 @@
             </section>
         </form>
 
-        <section class="preview-section"><div class="preview-heading"><b>LIVE DONOR LOCK SCREEN PREVIEW</b><span>Recipient Viewport</span></div><article class="alert-preview"><div class="preview-top"><span class="preview-logo">♙</span><span><b>HemaSync Alert</b><small>Civic Health Org · Node #ORG-98024</small></span><strong>ORGANIZER DRIVE<br>ALERT</strong><time>Just<br>now</time></div><p>URGENT: Metro Red Cross &amp; Civic Health Org need O- donors for City Hall Blood Drive this Saturday, Nov 2. Immediate slots open. Tap to confirm booking.</p><footer>⌾ &nbsp;Within geofence (City Hall Metro)<b>Open App&nbsp; ›</b></footer></article></section>
+        <section class="preview-section"><div class="preview-heading"><b>LIVE DONOR LOCK SCREEN PREVIEW</b><span>Recipient Viewport</span></div><article class="alert-preview"><div class="preview-top"><img class="preview-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo"><span><b>Ka-dugo Alert</b><small>Philippine Red Cross Cavite · Organizer #ORG-98024</small></span><strong>ORGANIZER DRIVE<br>ALERT</strong><time>Just<br>now</time></div><p>URGENT: Metro Red Cross &amp; Civic Health Org need O- donors for City Hall Blood Drive this Saturday, Nov 2. Immediate slots open. Tap to confirm booking.</p><footer>⌾ &nbsp;Within geofence (City Hall Metro)<b>Open App&nbsp; ›</b></footer></article></section>
         <button class="dispatch" type="button">⌁ &nbsp; Confirm &amp; Dispatch Alert</button>
         <button class="draft" type="button">♢ &nbsp; Save Draft</button>
     </section>
 
-    <nav class="bottom-nav"><a href="drives.html"><span>▣</span>Drives</a><a class="active" href="organizerholder.html"><span>●</span>Alerts</a></nav>
+    <nav class="bottom-nav"><a href="#" data-placeholder="true"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22v-8h6v8"/></svg></span>Home</a><a href="drives.html"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 17h14l-1.5-7H6.5z"/><path d="M3 17h18v3H3z"/><circle cx="7" cy="20" r="1.8"/><circle cx="17" cy="20" r="1.8"/><path d="M8 10h8"/></svg></span>Drives</a><a class="active" href="organizerholder.html"><span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4z"/><path d="M12 9v5"/><path d="M12 17h.01"/></svg></span>Alerts</a><a href="#" data-placeholder="true"><span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 3.5-6 8-6s7.2 2 8 6"/></svg></span>Account</a></nav>
 </main>
 <div class="toast" role="status" aria-live="polite"></div>
 <dialog class="confirm-dialog"><section><button class="close-dialog" aria-label="Close">×</button><span class="dialog-icon">✓</span><h2>Ready to dispatch?</h2><p>The alert will be sent to eligible donors using your selected delivery channels.</p><div class="dialog-actions"><button class="cancel-dialog">Review alert</button><button class="approve-dialog">Dispatch now</button></div></section></dialog>

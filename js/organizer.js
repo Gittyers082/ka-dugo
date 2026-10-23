@@ -160,10 +160,11 @@ document.querySelector(".approve-dialog").addEventListener("click", async () => 
 });
 dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
 document.querySelectorAll(".bottom-nav a").forEach((link) => link.addEventListener("click", (event) => {
+  if (!link.dataset.placeholder) return;
   event.preventDefault();
   document.querySelectorAll(".bottom-nav a").forEach((item) => item.classList.remove("active"));
   link.classList.add("active");
-  showToast(`${link.textContent.trim()} section selected`);
+  showToast(`${link.textContent.trim()} is outside this organizer module`);
 }));
 
 updateRadius();
