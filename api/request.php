@@ -1,4 +1,5 @@
 <?php
+// this is request.php - handles incoming HTTP requests for blood drive management
 declare(strict_types=1);
 require_once __DIR__ . '/validation.php';
 

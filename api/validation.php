@@ -1,4 +1,5 @@
 <?php
+// this is validation.php - contains functions for input validation and sanitization
 declare(strict_types=1);
 
 require_once __DIR__ . '/helpers.php';

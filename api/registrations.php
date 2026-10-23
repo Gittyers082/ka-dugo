@@ -1,4 +1,5 @@
 <?php
+// this is registrations.php - handles blood drive registration creation, retrieval, and status updates
 declare(strict_types=1);
 require_once __DIR__ . '/eligibility.php';
 

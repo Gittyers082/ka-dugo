@@ -1,4 +1,5 @@
 <?php
+// this is helpers.php - contains utility functions for JSON responses, request data handling, and method overrides
 declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
