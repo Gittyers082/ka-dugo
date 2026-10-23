@@ -231,9 +231,9 @@
       notify(
         "Sync complete",
         synced +
-          " offline record" +
-          (synced === 1 ? "" : "s") +
-          " synced to Ka-dugo servers.",
+        " offline record" +
+        (synced === 1 ? "" : "s") +
+        " synced to Ka-dugo servers.",
       );
       window.dispatchEvent(
         new CustomEvent("kadugo:synced", { detail: { count: synced } }),
@@ -243,9 +243,9 @@
       notify(
         "Some records need attention",
         failed +
-          " record" +
-          (failed === 1 ? " was" : "s were") +
-          " rejected by the server.",
+        " record" +
+        (failed === 1 ? " was" : "s were") +
+        " rejected by the server.",
       );
     }
   }
@@ -367,4 +367,16 @@
     refreshStatus: refreshStatus,
     makeUuid: makeUuid,
   };
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      // 1. Clear local/session storage auth tokens
+      sessionStorage.clear();
+
+      // 2. Redirect to your XAMPP login page 
+      window.location.href = "../../index.html";
+    });
+  }
 })();
