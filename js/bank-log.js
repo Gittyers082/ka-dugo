@@ -36,7 +36,7 @@ const MOCK_DONATIONS = [
       "Smooth draw via left median cubital vein; donor vitals stable post-donation (BP 118/74). Rapid dispatch requested.",
     status: "synced",
     status_sub: "10:02 AM",
-    can_delete: false,
+    can_delete: true,
   },
   {
     id: "d-1040",
@@ -156,29 +156,39 @@ function closeEdit() {
   if (dialog) dialog.close();
 }
 
-function handleEditSubmit(e) {
+async function handleEditSubmit(e) {
   e.preventDefault();
   if (!state.editingId) return;
 
+  const newUnits = parseInt(document.getElementById("edit-units").value, 10);
   const recordIndex = state.donations.findIndex(
     (d) => d.id === state.editingId,
   );
+
+  if (String(state.editingId).startsWith("db-")) {
+    const dbId = Number(String(state.editingId).replace("db-", ""));
+    await fetch("../../api/donations.php", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        donation_id: dbId,
+        units: newUnits,
+        status: "processed",
+      }),
+    });
+  }
+
   if (recordIndex > -1) {
     state.donations[recordIndex].component =
       document.getElementById("edit-component").value;
-    state.donations[recordIndex].units = parseInt(
-      document.getElementById("edit-units").value,
-      10,
-    );
+    state.donations[recordIndex].units = newUnits;
     state.donations[recordIndex].station =
       document.getElementById("edit-station").value;
     state.donations[recordIndex].notes =
       document.getElementById("edit-notes").value;
-
     renderList();
-    showToast("Record updated successfully");
+    showToast("Record updated in database");
   }
-
   closeEdit();
 }
 
@@ -223,14 +233,24 @@ function closeDeleteConfirm() {
   if (dialog) dialog.close();
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!state.pendingDeleteId) return;
+
+  if (String(state.pendingDeleteId).startsWith("db-")) {
+    const dbId = Number(String(state.pendingDeleteId).replace("db-", ""));
+    await fetch("../../api/donations.php", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ donation_id: dbId }),
+    });
+  }
+
   state.donations = state.donations.filter(
     (d) => d.id !== state.pendingDeleteId,
   );
   closeDeleteConfirm();
   renderList();
-  showToast("Donation record deleted successfully");
+  showToast("Donation record deleted from database");
 }
 
 // ============================================================================
