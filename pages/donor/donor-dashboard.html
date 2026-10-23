@@ -1,390 +1,349 @@
 <!doctype html>
 <html lang="en" data-theme="light">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Donor Dashboard - Ka-dugo</title>
 
-    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
-    <link rel="stylesheet" href="../../css/tokens.css">
-    <link rel="stylesheet" href="../../css/base.css">
-    <link rel="stylesheet" href="../../css/styles.css">
-    <link rel="stylesheet" href="../../css/Donor_Css/donor-dashboard.css">
-</head>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="../../assets/icons/kadugo-ico.ico"
+    />
+    <link rel="stylesheet" href="../../css/tokens.css" />
+    <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="../../css/styles.css" />
+    <link rel="stylesheet" href="../../css/Donor_Css/donor-dashboard.css" />
+  </head>
 
-<body class="dashboard-layout donor-dashboard">
-
+  <body class="dashboard-layout donor-dashboard">
     <!-- Sidebar Navigation -->
     <aside class="sidebar" aria-label="Donor navigation">
+      <nav class="nav-menu" aria-label="Main menu">
+        <!-- Dashboard -->
+        <a href="#" class="nav-item active t-button" aria-current="page">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Dashboard</span>
+        </a>
 
-        <nav class="nav-menu" aria-label="Main menu">
+        <!-- My Donations -->
+        <a href="my-donations.html" class="nav-item t-button">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>My Donations</span>
+        </a>
 
-            <!-- Dashboard -->
-            <a href="#" class="nav-item active t-button" aria-current="page">
-                <svg width="20" height="20" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     aria-hidden="true">
-                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span>Dashboard</span>
-            </a>
+        <!-- Drives & Booking -->
+        <a href="drives-booking.html" class="nav-item t-button">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+            <path d="M7 3v5M17 3v5M3 10h18"></path>
+          </svg>
+          <span>Drives &amp; Booking</span>
+        </a>
+      </nav>
 
-            <!-- My Donations -->
-            <a href="my-donations.html" class="nav-item t-button">
-                <svg width="20" height="20" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                </svg>
-                <span>My Donations</span>
-            </a>
-
-            <!-- Drives & Booking -->
-            <a href="drives-booking.html" class="nav-item t-button">
-                <svg width="20" height="20" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2"
-                     aria-hidden="true">
-                    <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                    <path d="M7 3v5M17 3v5M3 10h18"></path>
-                </svg>
-                <span>Drives &amp; Booking</span>
-            </a>
-
-        </nav>
-
-        <!-- Clickable Profile Picture -->
-        <div class="nav-profile">
-            <a href="#" class="profile-image-link"
-               aria-label="Open donor account">
-                <img src="../../assets/img/avatar-placeholder.svg"
-                     alt="Donor Profile"
-                     class="avatar">
-            </a>
-        </div>
-
+      <!-- Clickable Profile Picture -->
+      <div class="nav-profile">
+        <a href="#" class="profile-image-link" aria-label="Open donor account">
+          <img
+            src="../../assets/img/avatar-placeholder.svg"
+            alt="Donor Profile"
+            class="avatar"
+          />
+        </a>
+      </div>
     </aside>
 
     <!-- Main Content Area -->
     <main class="dashboard-content">
+      <!-- Dashboard Header -->
+      <header class="dashboard-header">
+        <div class="header-greeting">
+          <p class="eyebrow">DONOR DASHBOARD</p>
+          <h1>
+            Good morning, Marcus
+            <span class="greeting-heart">♥</span>
+          </h1>
+          <p class="greeting-subtitle">
+            Your next opportunity to make a difference starts here.
+          </p>
+        </div>
 
-        <!-- Dashboard Header -->
-        <header class="dashboard-header">
+        <div class="header-actions">
+          <time datetime="2024-10-24"> Thursday, October 24 </time>
 
-            <div class="header-greeting">
-                <p class="eyebrow">DONOR DASHBOARD</p>
-                <h1>
-                    Good morning, Marcus
-                    <span class="greeting-heart">♥</span>
-                </h1>
-                <p class="greeting-subtitle">
-                    Your next opportunity to make a difference starts here.
-                </p>
+          <button
+            class="notification-button"
+            type="button"
+            aria-label="Notifications"
+            title="Notifications (preview only)"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9M10 21h4"
+              ></path>
+            </svg>
+            <span class="notification-dot"></span>
+          </button>
+
+          <span class="donor-id">ID: DN-99410</span>
+
+          <!-- Placeholder for the original top-right Ka-dugo logo -->
+          <div
+            class="kadugo-logo-placeholder"
+            aria-label="Reserved logo position"
+          ></div>
+        </div>
+      </header>
+
+      <!-- Donor Overview -->
+      <section class="dashboard-overview" aria-label="Donor overview">
+        <!-- Eligibility Card -->
+        <article class="card eligibility-card">
+          <div class="card-header">
+            <p class="status-label">
+              <span class="status-dot"></span>
+              CLINICAL STATUS: CLEARED
+            </p>
+            <span class="status-badge">Active Clearance</span>
+          </div>
+
+          <h2>Eligible to Donate Today</h2>
+
+          <p class="eligibility-explanation">
+            56-day recovery period completed. Your recorded donor details meet
+            the displayed eligibility checks.
+          </p>
+
+          <div class="eligibility-details">
+            <div class="detail-item">
+              <p class="detail-label">LAST DONATION</p>
+              <strong>Jul 14, 2024</strong>
+              <p class="detail-note">102 days ago</p>
             </div>
 
-            <div class="header-actions">
-
-                <time datetime="2024-10-24">
-                    Thursday, October 24
-                </time>
-
-                <button class="notification-button"
-                        type="button"
-                        aria-label="Notifications"
-                        title="Notifications (preview only)">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9M10 21h4"></path>
-                    </svg>
-                    <span class="notification-dot"></span>
-                </button>
-
-                <span class="donor-id">ID: DN-99410</span>
-
-                <!-- Placeholder for the original top-right Ka-dugo logo -->
-                <div class="kadugo-logo-placeholder"
-                     aria-label="Reserved logo position">
-                </div>
-
-            </div>
-        </header>
-
-        <!-- Donor Overview -->
-        <section class="dashboard-overview" aria-label="Donor overview">
-
-            <!-- Eligibility Card -->
-            <article class="card eligibility-card">
-
-                <div class="card-header">
-                    <p class="status-label">
-                        <span class="status-dot"></span>
-                        CLINICAL STATUS: CLEARED
-                    </p>
-                    <span class="status-badge">Active Clearance</span>
-                </div>
-
-                <h2>Eligible to Donate Today</h2>
-
-                <p class="eligibility-explanation">
-                    56-day recovery period completed. Your recorded donor
-                    details meet the displayed eligibility checks.
-                </p>
-
-                <div class="eligibility-details">
-
-                    <div class="detail-item">
-                        <p class="detail-label">LAST DONATION</p>
-                        <strong>Jul 14, 2024</strong>
-                        <p class="detail-note">102 days ago</p>
-                    </div>
-
-                    <div class="detail-item">
-                        <p class="detail-label">RECORDED WEIGHT</p>
-                        <strong>74.2 kg</strong>
-                        <p class="detail-note">Requirement passed</p>
-                    </div>
-
-                    <div class="detail-item">
-                        <p class="detail-label">DONOR AGE</p>
-                        <strong>31 years</strong>
-                        <p class="detail-note">Eligible age range</p>
-                    </div>
-
-                </div>
-
-            </article>
-
-            <!-- Donation Profile Card -->
-            <article class="card donation-profile-card">
-
-                <h2>Your Donation Profile</h2>
-
-                <div class="donation-profile-details">
-
-                    <div class="blood-type-summary">
-                        <p>UNIVERSAL RED-CELL DONOR</p>
-                        <strong>O−</strong>
-                        <span>O Negative</span>
-                    </div>
-
-                    <div class="donation-statistics">
-
-                        <div class="donation-counts">
-
-                            <div>
-                                <strong>8</strong>
-                                <span>Units donated</span>
-                            </div>
-
-                            <div>
-                                <strong>4</strong>
-                                <span>Lives impacted</span>
-                            </div>
-
-                        </div>
-
-                        <div class="milestone">
-
-                            <div class="milestone-heading">
-                                <strong>Gold Hero milestone</strong>
-                                <strong>8 / 10 units</strong>
-                            </div>
-
-                            <div class="progress-track">
-                                <div class="progress-fill"
-                                     style="width:80%">
-                                </div>
-                            </div>
-
-                            <p>2 more units to your next badge</p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </article>
-
-        </section>
-
-        <!-- Admission Pass and Matching Request -->
-        <section class="dashboard-highlights"
-                 aria-label="Admission pass and matching request">
-
-            <!-- Admission Pass Card -->
-            <article class="card admission-card">
-
-                <div class="admission-content">
-
-                    <p class="admission-eyebrow">QUICK CHECK-IN</p>
-
-                    <h2>Fast Admission Pass</h2>
-
-                    <p class="admission-summary">
-                        Ready for your next visit
-                    </p>
-
-                    <p class="admission-identification">
-                        Marcus Vance · #DN-99410
-                    </p>
-
-                    <p class="admission-instructions">
-                        Present this QR code at the blood drive
-                        registration desk for check-in.
-                    </p>
-
-                </div>
-
-                <div class="qr-code-placeholder"
-                     aria-label="Decorative QR code placeholder. Not a real donor QR code.">
-
-                    <img src="../../assets/icons/qr-sample.svg"
-                         alt="Sample QR placeholder">
-
-                </div>
-
-                <p class="admission-footnote">Digital Donor ID</p>
-
-            </article>
-
-            <!-- Matching Emergency Request -->
-            <article class="card matching-request-card">
-
-                <div class="card-header request-heading">
-
-                    <p class="request-eyebrow">
-                        MATCHING EMERGENCY REQUESTS
-                    </p>
-
-                    <span class="blood-match-badge">
-                        O− REQUIRED
-                    </span>
-
-                </div>
-
-                <h2>
-                    Trauma Center ICU (Bay 4)
-                    <span class="priority-badge">
-                        HIGH PRIORITY
-                    </span>
-                </h2>
-
-                <p class="request-location">
-                    Metro Red Cross Blood Center · Approx. 2.1 miles away
-                </p>
-
-                <div class="request-details">
-
-                    <div class="request-blood-type">O−</div>
-
-                    <div>
-                        <strong>4 units remaining</strong>
-                        <p>
-                            Urgent red-cell request for a patient
-                            requiring emergency transfusion.
-                        </p>
-                    </div>
-
-                </div>
-
-                <p class="request-notice">
-                    Immediate call for O-Negative donors.
-                    Contact the center to confirm availability
-                    and donation steps.
-                </p>
-
-                <div class="request-actions">
-
-                    <a href="#">
-                        View request details →
-                    </a>
-
-                    <button class="respond-button" type="button">
-                        Respond to Request →
-                    </button>
-
-                </div>
-
-            </article>
-
-        </section>
-
-        <!-- Scheduled Blood Drive -->
-        <section class="card scheduled-drive-section"
-                 aria-labelledby="scheduled-drive-title">
-
-            <div class="card-header">
-
-                <h2 id="scheduled-drive-title">
-                    Your Scheduled Blood Drive
-                </h2>
-
-                <span class="status-badge slot-confirmed">
-                    ● Slot Confirmed
-                </span>
-
+            <div class="detail-item">
+              <p class="detail-label">RECORDED WEIGHT</p>
+              <strong>74.2 kg</strong>
+              <p class="detail-note">Requirement passed</p>
             </div>
 
-            <article class="drive-card">
+            <div class="detail-item">
+              <p class="detail-label">DONOR AGE</p>
+              <strong>31 years</strong>
+              <p class="detail-note">Eligible age range</p>
+            </div>
+          </div>
+        </article>
 
-                <div class="drive-date">
-                    <span>NOV</span>
-                    <strong>02</strong>
-                    <span>SAT</span>
+        <!-- Donation Profile Card -->
+        <article class="card donation-profile-card">
+          <h2>Your Donation Profile</h2>
+
+          <div class="donation-profile-details">
+            <div class="blood-type-summary">
+              <p>UNIVERSAL RED-CELL DONOR</p>
+              <strong>O−</strong>
+              <span>O Negative</span>
+            </div>
+
+            <div class="donation-statistics">
+              <div class="donation-counts">
+                <div>
+                  <strong>8</strong>
+                  <span>Units donated</span>
                 </div>
 
-                <div class="drive-details">
+                <div>
+                  <strong>4</strong>
+                  <span>Lives impacted</span>
+                </div>
+              </div>
 
-                    <h3>City Hall Community Drive</h3>
-
-                    <p>
-                        Community Outreach Initiative ·
-                        Main Concourse, 100 Civic Plaza
-                    </p>
-
-                    <p>
-                        <strong>10:00 AM – 10:30 AM</strong>
-                        · Fast-track check-in
-                    </p>
-
-                    <div class="drive-actions">
-
-                        <button type="button">
-                            ↗ View Directions
-                        </button>
-
-                        <button type="button">
-                            ↺ Reschedule
-                        </button>
-
-                    </div>
-
+              <div class="milestone">
+                <div class="milestone-heading">
+                  <strong>Gold Hero milestone</strong>
+                  <strong>8 / 10 units</strong>
                 </div>
 
-                <aside class="arrival-reminder">
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: 80%"></div>
+                </div>
 
-                    <h3>Before you arrive</h3>
+                <p>2 more units to your next badge</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
 
-                    <p>
-                        Keep yourself hydrated before your visit.
-                        Bring a valid ID and your Fast Admission Pass.
-                    </p>
+      <!-- Admission Pass and Matching Request -->
+      <section
+        class="dashboard-highlights"
+        aria-label="Admission pass and matching request"
+      >
+        <!-- Admission Pass Card -->
+        <article class="card admission-card">
+          <div class="admission-content">
+            <p class="admission-eyebrow">QUICK CHECK-IN</p>
 
-                </aside>
+            <h2>Fast Admission Pass</h2>
 
-            </article>
+            <p class="admission-summary">Ready for your next visit</p>
 
-            <footer class="dashboard-footer">
-                Dashboard concept · Example donor data for design preview
-            </footer>
+            <p class="admission-identification">Marcus Vance · #DN-99410</p>
 
-        </section>
+            <p class="admission-instructions">
+              Present this QR code at the blood drive registration desk for
+              check-in.
+            </p>
+          </div>
 
+          <div
+            class="qr-code-placeholder"
+            aria-label="Decorative QR code placeholder. Not a real donor QR code."
+          >
+            <img
+              src="../../assets/icons/qr-sample.svg"
+              alt="Sample QR placeholder"
+            />
+          </div>
+
+          <p class="admission-footnote">Digital Donor ID</p>
+        </article>
+
+        <!-- Matching Emergency Request -->
+        <article class="card matching-request-card">
+          <div class="card-header request-heading">
+            <p class="request-eyebrow">MATCHING EMERGENCY REQUESTS</p>
+
+            <span class="blood-match-badge"> O− REQUIRED </span>
+          </div>
+
+          <h2>
+            Trauma Center ICU (Bay 4)
+            <span class="priority-badge"> HIGH PRIORITY </span>
+          </h2>
+
+          <p class="request-location">
+            Metro Red Cross Blood Center · Approx. 2.1 miles away
+          </p>
+
+          <div class="request-details">
+            <div class="request-blood-type">O−</div>
+
+            <div>
+              <strong>4 units remaining</strong>
+              <p>
+                Urgent red-cell request for a patient requiring emergency
+                transfusion.
+              </p>
+            </div>
+          </div>
+
+          <p class="request-notice">
+            Immediate call for O-Negative donors. Contact the center to confirm
+            availability and donation steps.
+          </p>
+
+          <div class="request-actions">
+            <a href="#"> View request details → </a>
+
+            <button class="respond-button" type="button">
+              Respond to Request →
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <!-- Scheduled Blood Drive -->
+      <section
+        class="card scheduled-drive-section"
+        aria-labelledby="scheduled-drive-title"
+      >
+        <div class="card-header">
+          <h2 id="scheduled-drive-title">Your Scheduled Blood Drive</h2>
+
+          <span class="status-badge slot-confirmed"> ● Slot Confirmed </span>
+        </div>
+
+        <article class="drive-card">
+          <div class="drive-date">
+            <span>NOV</span>
+            <strong>02</strong>
+            <span>SAT</span>
+          </div>
+
+          <div class="drive-details">
+            <h3>City Hall Community Drive</h3>
+
+            <p>
+              Community Outreach Initiative · Main Concourse, 100 Civic Plaza
+            </p>
+
+            <p>
+              <strong>10:00 AM – 10:30 AM</strong>
+              · Fast-track check-in
+            </p>
+
+            <div class="drive-actions">
+              <button type="button">↗ View Directions</button>
+
+              <button type="button">↺ Reschedule</button>
+            </div>
+          </div>
+
+          <aside class="arrival-reminder">
+            <h3>Before you arrive</h3>
+
+            <p>
+              Keep yourself hydrated before your visit. Bring a valid ID and
+              your Fast Admission Pass.
+            </p>
+          </aside>
+        </article>
+
+        <footer class="dashboard-footer">
+          Dashboard concept · Example donor data for design preview
+        </footer>
+      </section>
     </main>
 
+    <script src="../../js/donor-dashboard.js" defer></script>
     <script src="../../js/app.js" defer></script>
-</body>
+  </body>
 </html>
