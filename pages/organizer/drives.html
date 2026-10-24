@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,63 +8,65 @@
     <link rel="stylesheet" href="../../css/base.css">
     <link rel="stylesheet" href="../../css/organizer.css">
     <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
-
 </head>
-
 <body>
     <main class="drive-app">
-        <header class="topbar"><img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+        <header class="topbar">
+            <img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
             <div>
                 <h1>Ka-dugo Organizer</h1>
                 <p>Philippine Red Cross Cavite Chapter</p>
-            </div><button class="sync" id="reload" title="Refresh drives">↻</button>
+            </div>
+            <button class="sync" id="reload" title="Refresh drives"> </button>
         </header>
         <section class="content">
             <header class="page-title">
                 <div>
                     <h2>Drive Scheduler</h2>
                     <p>Linked to Organizer UID: <b>org_98024_rc</b></p>
-                </div><span class="gps">● GPS Live</span>
+                </div>
+                <span class="gps">  GPS Live</span>
             </header>
             <section class="stats">
-                <article><small>ACTIVE<br>DRIVES</small><strong id="active-count">—</strong><span>Scheduled /
-                        ongoing</span></article>
-                <article><small>REGISTRATIONS</small><strong id="registration-count">—</strong><span>Across all
-                        drives</span></article>
-                <article><small>TELEMETRY</small><b class="locked">◎ Locked</b><span>± 4m Precision</span></article>
+                <article><small>ACTIVE<br>DRIVES</small><strong id="active-count"> </strong><span>Scheduled / ongoing</span></article>
+                <article><small>REGISTRATIONS</small><strong id="registration-count"> </strong><span>Across all drives</span></article>
+                <article><small>TELEMETRY</small><b class="locked">  Locked</b><span>  4m Precision</span></article>
             </section>
-            <div class="tabs"><button class="active" type="button">Schedule New Drive</button><button type="button"
-                    id="view-drives">My Scheduled Drives (<span id="drive-total">0</span>)</button></div>
+            <div class="tabs">
+                <button class="active" type="button">Schedule New Drive</button>
+                <button type="button" id="view-drives">My Scheduled Drives (<span id="drive-total">0</span>)</button>
+            </div>
             <section class="drive-card" id="scheduler">
                 <div class="card-heading">
-                    <h2><span>⊕</span>Drive Entry<br>Specification</h2><b>Status:<br>Scheduled</b>
+                    <h2><span> </span>Drive Entry<br>Specification</h2><b>Status:<br>Scheduled</b>
                 </div>
                 <hr>
                 <form id="drive-form">
-                    <label>DRIVE TITLE<input id="title" required value="City Hall Rotunda Emergency Drive"
-                            maxlength="150"></label>
-                    <label>VENUE &amp; FACILITY NAME<input id="venue" required value="Civic Center Plaza, 450 Grand Ave"
-                            maxlength="255"></label>
+                    <label>DRIVE TITLE<input id="title" required value="City Hall Rotunda Emergency Drive" maxlength="150"></label>
+                    <label>VENUE &amp; FACILITY NAME<input id="venue" required value="Civic Center Plaza, 450 Grand Ave" maxlength="255"></label>
                     <div class="field-label">GPS COORDINATES &amp; GEOFENCE <span>High Accuracy</span></div>
-                    <div class="grid two"><label>LATITUDE<input id="latitude" value="14.2816° N"
-                                readonly></label><label>LONGITUDE<input id="longitude" value="120.8682° E"
-                                readonly></label></div><button type="button" class="location" id="location">⌾ &nbsp; Use
-                        Current GPS Location</button>
+                    <div class="grid two">
+                        <label>LATITUDE<input id="latitude" value="14.2816" readonly></label>
+                        <label>LONGITUDE<input id="longitude" value="120.8682" readonly></label>
+                    </div>
+                    <button type="button" class="location" id="location">  &nbsp; Use Current GPS Location</button>
                     <label>DRIVE DATE<input id="drive-date" type="date" required></label>
-                    <div class="grid two"><label>START TIME<input id="start-time" type="time" required
-                                value="09:00"></label><label>END TIME<input id="end-time" type="time" required
-                                value="16:00"></label></div>
-                    <label>CATEGORY<select id="category">
+                    <div class="grid two">
+                        <label>START TIME<input id="start-time" type="time" required value="09:00"></label>
+                        <label>END TIME<input id="end-time" type="time" required value="16:00"></label>
+                    </div>
+                    <label>CATEGORY
+                        <select id="category">
                             <option value="community">Community</option>
                             <option value="corporate">Corporate</option>
                             <option value="university">University</option>
-                        </select></label>
+                        </select>
+                    </label>
                     <div class="capacity">
-                        <div><b><span id="slots-value">60</span> Slots Total</b><small>30-minute operational
-                                intervals<br>(4 donors/interval)</small></div>
-                        <div><button type="button" id="minus">−</button><button type="button" id="plus">+</button></div>
+                        <div><b><span id="slots-value">60</span> Slots Total</b><small>30-minute operational intervals<br>(4 donors/interval)</small></div>
+                        <div><button type="button" id="minus"> </button><button type="button" id="plus">+</button></div>
                     </div>
-                    <button class="publish" type="submit">↥ &nbsp; Publish &amp; Open Donor Registration</button>
+                    <button class="publish" type="submit">  &nbsp; Publish &amp; Open Donor Registration</button>
                     <p class="form-note">Creates a scheduled drive and opens its registration slots.</p>
                 </form>
             </section>
@@ -75,47 +76,62 @@
                 </div>
                 <p class="month">SCHEDULED DRIVES</p>
                 <div id="drive-list" class="drive-list">
-                    <p class="empty">Loading drives…</p>
+                    <p class="empty">Loading drives </p>
                 </div>
             </section>
-            <section class="warning"><span>⚠</span>
+            <section class="warning">
+                <span> </span>
                 <div>
                     <h2>Cancellation Notice Protocol</h2>
-                    <p>Cancelling a drive notifies all registered donors and releases their booking slots for other
-                        local drives.</p>
+                    <p>Cancelling a drive notifies all registered donors and releases their booking slots for other local drives.</p>
                 </div>
             </section>
         </section>
-        <nav class="bottom-nav"><a href="#" data-placeholder="true"><span class="nav-icon"><svg viewBox="0 0 24 24">
+        <nav class="bottom-nav">
+            <a href="organizer.dash.html">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
                         <path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                         <path d="M9 22v-8h6v8" />
-                    </svg></span>Home</a><a class="active" href="drives.html"><span class="nav-icon"><svg
-                        viewBox="0 0 24 24">
+                    </svg>
+                </span>Home
+            </a>
+            <a class="active" href="drives.html">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
                         <path d="M5 17h14l-1.5-7H6.5z" />
                         <path d="M3 17h18v3H3z" />
                         <circle cx="7" cy="20" r="1.8" />
                         <circle cx="17" cy="20" r="1.8" />
                         <path d="M8 10h8" />
-                    </svg></span>Drives</a><a href="organizerholder.html"><span class="nav-icon"><svg
-                        viewBox="0 0 24 24">
+                    </svg>
+                </span>Drives
+            </a>
+            <a href="organizerholder.html">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
                         <path d="M12 3 2.8 20h18.4z" />
                         <path d="M12 9v5" />
                         <path d="M12 17h.01" />
-                    </svg></span>Alerts</a><a href="#" data-placeholder="true"><span class="nav-icon"><svg
-                        viewBox="0 0 24 24">
+                    </svg>
+                </span>Alerts
+            </a>
+            <a href="#" data-placeholder="true">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
                         <circle cx="12" cy="8" r="4" />
                         <path d="M4 21c.8-4 3.5-6 8-6s7.2 2 8 6" />
-                    </svg></span>Account</a>
+                    </svg>
+                </span>Account
+            </a>
             <a href="index.html" id="logout-btn" class="logout-link">
                 <span class="nav-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>
                         <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
-                </span>
-                Logout
+                </span>Logout
             </a>
         </nav>
     </main>
@@ -123,5 +139,4 @@
     <script type="module" src="../../js/pages/account.js"></script>
     <script type="module" src="../../js/pages/organizer-scheduler.js"></script>
 </body>
-
 </html>
