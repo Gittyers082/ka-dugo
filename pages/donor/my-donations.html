@@ -1,363 +1,158 @@
-<!doctype html>
-<html lang="en" data-theme="light">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Donations - Ka-dugo</title>
-    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
-
-    <link rel="stylesheet" href="../../css/tokens.css">
-    <link rel="stylesheet" href="../../css/base.css">
-    <link rel="stylesheet" href="../../css/styles.css">
-    <link rel="stylesheet" href="../../css/Donor_Css/my-donations.css">
-</head>
-
-<body class="dashboard-layout donations-page">
-
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar" aria-label="Donor navigation">
-        <nav class="nav-menu" aria-label="Main menu">
-            <a class="nav-item t-button" href="donor-dashboard.html">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
-                <span>Dashboard</span>
-            </a>
-            <a class="nav-item active t-button" href="my-donations.html" aria-current="page">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                </svg>
-                <span>My Donations</span>
-            </a>
-            <a class="nav-item t-button" href="drives-booking.html">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                    <path d="M7 3v5M17 3v5M3 10h18"></path>
-                </svg>
-                <span>Drives &amp; Booking</span>
-            </a>
-            <a href="index.html" id="logout-btn" class="logout-link">
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                </span>
-                Logout
-            </a>
-        </nav>
-        <div class="nav-profile">
-            <a class="profile-image-link" href="#" aria-label="Donor account (not connected)"
-                title="Account page coming soon">
-                <img class="avatar" src="../../assets/img/avatar-placeholder.svg" alt="Donor profile picture">
-            </a>
-        </div>
-    </aside>
-    <main class="dashboard-content">
-
-        <!-- Page Header -->
-        <header class="page-header">
-            <div class="page-heading">
-                <p class="eyebrow">DONOR PORTAL / HISTORY</p>
-                <h1>My Donations</h1>
-                <p class="page-subtitle">Verified biological records &amp; apheresis logs</p>
+<!DOCTYPE html>
+<html data-theme="light" lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="width=device-width, initial-scale=1" name="viewport"/>
+        <title>My Donations - Ka-dugo</title>
+        <link href="../../assets/icons/kadugo-ico.ico" rel="icon" type="image/x-icon"/>
+        <link href="../../css/tokens.css" rel="stylesheet"/>
+        <link href="../../css/base.css" rel="stylesheet"/>
+        <link href="../../css/styles.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/my-donations.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/donor-shell.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/donor-data.css?db-1" rel="stylesheet"/>
+    </head>
+    <body class="dashboard-layout donations-page">
+        <!-- Sidebar Navigation -->
+        <aside aria-label="Donor navigation" class="sidebar">
+            <!-- Sidebar Branding -->
+            <div aria-label="Ka-dugo Donor" class="sidebar-brand">
+                <span>KA-DUGO</span>
+                <span>DONOR</span>
             </div>
-            <div class="header-actions">
-                <span class="blood-pill">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12 2C8.6 7.5 5 11.2 5 15a7 7 0 0 0 14 0c0-3.8-3.6-7.5-7-13z"></path>
+            <nav aria-label="Main menu" class="nav-menu">
+                <a class="nav-item t-button" href="donor-dashboard.html">
+                    <svg aria-hidden="true" viewbox="0 0 24 24">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
                     </svg>
-                    <span><b>O NEG</b> <small>Universal red-cell donor</small></span>
-                </span>
-                <button class="notification-button" type="button" title="Notifications (preview only)"
-                    aria-label="Notifications (preview only)">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9M10 21h4"></path>
+                    <span>Dashboard</span>
+                </a>
+                <a aria-current="page" class="nav-item active t-button" href="my-donations.html">
+                    <svg aria-hidden="true" viewbox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" x2="8" y1="13" y2="13"></line>
+                        <line x1="16" x2="8" y1="17" y2="17"></line>
                     </svg>
-                    <span class="notification-dot"></span>
+                    <span>My Donations</span>
+                </a>
+                <a class="nav-item t-button" href="drives-booking.html">
+                    <svg aria-hidden="true" viewbox="0 0 24 24">
+                        <rect height="16" rx="2" width="18" x="3" y="5"></rect>
+                        <path d="M7 3v5M17 3v5M3 10h18"></path>
+                    </svg>
+                    <span>Drives &amp; Booking</span>
+                </a>
+            </nav>
+            <div class="nav-profile">
+                <a aria-label="Open donor profile" class="profile-image-link" href="profile.html" title="View profile">
+                    <img alt="Donor profile picture" class="avatar" src="../../assets/img/avatar-placeholder.svg"/>
+                </a>
+            </div>
+        </aside>
+        <!-- Workspace -->
+        <div class="dashboard-workspace">
+            <!-- Fixed Top Header -->
+            <header class="topbar">
+                <img alt="Ka-dugo logo" class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg"/>
+                <div class="brand-copy">
+                    <h2>My Donations</h2>
+                    <p>Ka-dugo Donor Portal</p>
+                </div>
+                <!-- Refresh Control -->
+                <button aria-label="Refresh this page" class="refresh-button" title="Refresh" type="button">
+                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="24">
+                        <path d="M3 11a9 9 0 0 1 15.4-6.4L21 7"></path>
+                        <path d="M21 3v4h-4"></path>
+                        <path d="M21 13a9 9 0 0 1-15.4 6.4L3 17"></path>
+                        <path d="M3 21v-4h4"></path>
+                    </svg>
                 </button>
-                <span class="donor-id">ID: DN-99410</span>
-            </div>
-        </header>
-
-        <!-- Donation Summary and Filters -->
-        <div class="top-grid">
-            <section class="lifetime-card" aria-label="Lifetime donation summary">
-                <div class="lifetime-heading">
-                    <div>
-                        <p class="panel-eyebrow">CLINICAL LIFETIME CADENCE</p>
-                        <h2>3,600 mL <span>Total Volume</span></h2>
+            </header>
+            <main class="dashboard-content">
+                <div aria-live="polite" class="donor-data-status" id="donor-page-status" role="status">Loading your donation records...</div>
+                <div class="top-grid">
+                    <section aria-label="Donation summary" class="lifetime-card">
+                        <div class="lifetime-heading">
+                            <div>
+                                <p class="panel-eyebrow">MY DONATION HISTORY</p>
+                                <h2 id="history-volume">— <span>Verified units</span></h2>
+                            </div>
+                            <span class="ready-badge" id="history-eligibility">Checking eligibility</span>
+                        </div>
+                        <div class="lifetime-stats">
+                            <div>
+                                <strong id="history-count">—</strong>
+                                <span>History records</span>
+                            </div>
+                            <div>
+                                <strong id="history-verified">—</strong>
+                                <span>Verified records</span>
+                            </div>
+                            <div>
+                                <strong id="history-last-date">—</strong>
+                                <span>Latest record</span>
+                            </div>
+                        </div>
+                    </section>
+                    <section aria-label="Donation history filters" class="filter-card">
+                        <div class="filter-title-row">
+                            <div>
+                                <p class="filter-kicker">YOUR RECORDS</p>
+                                <h2>Browse donation history</h2>
+                            </div>
+                            <span class="blood-pill" id="history-blood-pill">Blood type: —</span>
+                        </div>
+                        <div aria-label="Filter records by year" class="year-tabs" id="history-years" role="group"></div>
+                        <div aria-label="Filter by source" class="type-filters" role="group">
+                            <span class="filter-caption">FILTER:</span>
+                            <button aria-pressed="true" class="type-filter active" data-type="all" type="button">All records</button>
+                            <button aria-pressed="false" class="type-filter" data-type="system" type="button">System records</button>
+                            <button aria-pressed="false" class="type-filter" data-type="manual" type="button">Self-reported</button>
+                        </div>
+                    </section>
+                </div>
+                <section aria-label="Add self-reported donation" class="historical-section">
+                    <button aria-controls="historical-form" aria-expanded="false" class="historical-toggle" id="historical-toggle" type="button">
+                        <span class="history-icon">+</span>
+                        <span class="historical-copy"><strong>Add Historical / Self-Reported Donation</strong><small>Records are submitted as pending verification</small></span>
+                        <span class="add-label">Add record</span>
+                        <span class="chevron">⌄</span>
+                    </button>
+                    <form class="historical-form" hidden="" id="historical-form">
+                        <p>The database stores your donation date, blood type, and units. Self-reported records are not automatically verified.</p>
+                        <div class="form-row">
+                            <label>
+                                Donation date
+                                <input name="donated_on" required="" type="date"/>
+                            </label>
+                            <label>
+                                Blood type
+                                <input name="blood_type_display" readonly="" type="text"/>
+                            </label>
+                            <label>
+                                Units donated
+                                <input max="10" min="0.01" name="units" required="" step="0.01" type="number" value="1"/>
+                            </label>
+                        </div>
+                        <button id="save-history-local" type="submit">Save Donation</button>
+                        <p aria-live="polite" class="history-save-status" id="history-save-status" role="status"></p>
+                    </form>
+                </section>
+                <section aria-labelledby="logs-title" class="logs-section">
+                    <div class="logs-heading">
+                        <div>
+                            <p class="eyebrow">DONATION ACTIVITY</p>
+                            <h2 id="logs-title">Your Donation History</h2>
+                        </div>
                     </div>
-                    <span class="ready-badge"><span class="ready-dot"></span> Ready to donate</span>
-                </div>
-                <div class="lifetime-stats">
-                    <div><strong>8</strong> <span>Total Units</span></div>
-                    <div><strong>24</strong> <span>Lives Impacted</span></div>
-                    <div><strong>Jul 14, ’24</strong> <span>Latest Donation</span></div>
-                </div>
-            </section>
-            <section class="filter-card" aria-label="Filter donation records">
-                <div class="filter-title-row">
-                    <div>
-                        <p class="filter-kicker">YOUR RECORDS</p>
-                        <h2>Browse donation history</h2>
-                    </div>
-                    <span class="sort-label">Newest first ↓</span>
-                </div>
-                <div class="year-tabs" role="group" aria-label="Filter records by year">
-                    <button type="button" class="year-tab active" data-year="all" aria-pressed="true">All
-                        <span>(8)</span></button>
-                    <button type="button" class="year-tab" data-year="2024" aria-pressed="false">2024
-                        <span>(3)</span></button>
-                    <button type="button" class="year-tab" data-year="2023" aria-pressed="false">2023
-                        <span>(4)</span></button>
-                    <button type="button" class="year-tab" data-year="2022" aria-pressed="false">2022
-                        <span>(1)</span></button>
-                </div>
-                <div class="type-filters" role="group" aria-label="Filter by donation type">
-                    <span class="filter-caption">FILTER:</span>
-                    <button type="button" class="type-filter active" data-type="all" aria-pressed="true">All
-                        Types</button>
-                    <button type="button" class="type-filter" data-type="whole" aria-pressed="false">Whole
-                        Blood</button>
-                    <button type="button" class="type-filter" data-type="platelets"
-                        aria-pressed="false">Platelets</button>
-                    <button type="button" class="type-filter" data-type="official" aria-pressed="false">Official
-                        Records</button>
-                </div>
-            </section>
+                    <div class="logs-grid" id="logs-grid"></div>
+                    <div class="empty-drive-results" hidden="" id="empty-state">No donation history matches these filters.</div>
+                </section>
+            </main>
         </div>
-
-        <!-- Historical Donation Form -->
-        <section class="historical-section" aria-label="Historical donation records">
-            <button class="historical-toggle" id="historical-toggle" type="button" aria-expanded="false"
-                aria-controls="historical-form">
-                <span class="history-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M7 3h10v4H7zM5 5H3v16h18V5h-2M7 13h10M12 9v8M8 13h8"></path>
-                    </svg>
-                </span>
-                <span class="historical-copy">
-                    <strong>Add Historical / Self-Reported Donation</strong>
-                    <small>Log contributions completed outside the Ka-dugo network</small>
-                </span>
-                <span class="add-label">Add record</span>
-                <span class="chevron" aria-hidden="true">⌄</span>
-            </button>
-            <div class="historical-form" id="historical-form" hidden>
-                <p>This is a preview-only form. Your details will not be saved to the database.</p>
-                <div class="form-row">
-                    <label>
-                        Donation date
-                        <input type="date" name="history-date">
-                    </label>
-                    <label>
-                        Blood drive or facility
-                        <input type="text" name="facility" placeholder="Facility name">
-                    </label>
-                    <label>
-                        Component
-                        <select name="component">
-                            <option>Whole Blood</option>
-                            <option>PRBC</option>
-                            <option>Platelets</option>
-                        </select>
-                    </label>
-                </div>
-                <button type="button" disabled title="Backend not connected">Save record (not connected)</button>
-            </div>
-        </section>
-
-        <!-- Verified Procedure Logs -->
-        <section class="logs-section" aria-labelledby="logs-title">
-            <div class="logs-heading">
-                <div>
-                    <p class="eyebrow">DONATION ACTIVITY</p>
-                    <h2 id="logs-title">Verified Procedure Logs</h2>
-                </div>
-                <div class="logs-count" id="logs-count">4 sample records · Sorted chronologically</div>
-            </div>
-            <div class="logs-grid" id="logs-grid">
-
-                <!-- Metro Red Cross Blood Center -->
-                <article class="log-card" data-year="2024" data-type="whole" data-verification="official">
-                    <div class="log-card-top">
-                        <div class="log-title">
-                            <span class="log-dot verified"></span>
-                            <div>
-                                <h3>Metro Red Cross Blood Center</h3>
-                                <p class="log-date">▣ &nbsp; July 14, 2024 · 09:30 AM</p>
-                            </div>
-                        </div>
-                        <span class="verification verified-badge"><span>✓</span> Official Record
-                            <small>Verified</small></span>
-                    </div>
-                    <div class="component-strip">
-                        <div><span>COMPONENT TYPE</span> <strong>Whole Blood (450 mL)</strong></div>
-                        <div><span>LINKED CLINICAL NEED</span> <strong class="accent-strong">✚ REQ-104 Trauma
-                                ICU</strong></div>
-                    </div>
-                    <div class="log-footer"><span>♧ Phlebotomist: D. Clark (Cert #608)</span>
-                        <code>UUID: 9f8c2b1a-4d3e</code>
-                    </div>
-                </article>
-
-                <!-- St. Jude Mobile Drive -->
-                <article class="log-card" data-year="2024" data-type="prbc" data-verification="official">
-                    <div class="log-card-top">
-                        <div class="log-title">
-                            <span class="log-dot verified"></span>
-                            <div>
-                                <h3>St. Jude Mobile Drive</h3>
-                                <p class="log-date">▣ &nbsp; March 20, 2024 · 14:15 PM</p>
-                            </div>
-                        </div>
-                        <span class="verification verified-badge"><span>✓</span> Official Record
-                            <small>Verified</small></span>
-                    </div>
-                    <div class="component-strip">
-                        <div><span>COMPONENT TYPE</span> <strong>PRBC (Packed Red Cells – 2 Units)</strong></div>
-                        <div><span>ALLOCATION SECTOR</span> <strong>Pediatric Oncology Bank</strong></div>
-                    </div>
-                    <div class="log-footer"><span>▣ Unit: St. Jude Mobile Van #04</span>
-                        <code>UUID: 4e3a77bc-9102</code>
-                    </div>
-                </article>
-
-                <!-- Community Church Drive -->
-                <article class="log-card" data-year="2023" data-type="whole" data-verification="official">
-                    <div class="log-card-top">
-                        <div class="log-title">
-                            <span class="log-dot verified"></span>
-                            <div>
-                                <h3>Community Church Drive</h3>
-                                <p class="log-date">▣ &nbsp; November 12, 2023 · 11:00 AM</p>
-                            </div>
-                        </div>
-                        <span class="verification verified-badge"><span>✓</span> Official Record
-                            <small>Verified</small></span>
-                    </div>
-                    <div class="component-strip">
-                        <div><span>COMPONENT TYPE</span> <strong>Whole Blood (450 mL)</strong></div>
-                        <div><span>DISTRIBUTION</span> <strong>Regional Trauma Reserve</strong></div>
-                    </div>
-                    <div class="log-footer"><span>♧ Phlebotomist: M. Ramos (Cert #412)</span>
-                        <code>UUID: 1b990f3c-88ab</code>
-                    </div>
-                </article>
-
-                <!-- Regional Blood Drive (Self-Reported) -->
-                <article class="log-card self-record" data-year="2023" data-type="whole" data-verification="self">
-                    <div class="log-card-top">
-                        <div class="log-title">
-                            <span class="log-dot self"></span>
-                            <div>
-                                <h3>Regional Blood Drive <em>(Self-Reported)</em></h3>
-                                <p class="log-date">▣ &nbsp; June 5, 2023 · Reported Manually</p>
-                            </div>
-                        </div>
-                        <span class="verification self-badge"><span>◷</span> Self-Reported <small>Entry</small></span>
-                    </div>
-                    <div class="component-strip">
-                        <div><span>CLAIMED COMPONENT</span> <strong>Whole Blood (450 mL)</strong></div>
-                        <div><span>AUDIT VERIFICATION</span> <strong class="pending-strong">Pending Facility
-                                Match</strong></div>
-                    </div>
-                    <div class="log-footer">
-                        <span>ⓘ Unattested clinical telemetry</span>
-                        <button class="upload-link" type="button" title="Certificate upload is not connected">Upload
-                            Cert ↗</button>
-                    </div>
-                    <p class="self-note">“Donated during employer corporate blood drive at TechPark campus. Awaiting
-                        physical card validation.”</p>
-                </article>
-            </div>
-            <p class="empty-state" id="empty-state" hidden>No sample procedure logs match these filters. The counters
-                above refer to the original design's full history, while this preview contains four sample cards.</p>
-            <p class="preview-disclaimer">Ka-dugo frontend preview · Sample donor information only · No backend
-                connection</p>
-        </section>
-    </main>
-    <script>
-        // Frontend-only filtering using the sample donation records.
-        // Year counters reflect the original mobile design.
-        const yearButtons = document.querySelectorAll('.year-tab');
-        const typeButtons = document.querySelectorAll('.type-filter');
-        const entries = document.querySelectorAll('.log-card');
-        const countLabel = document.getElementById('logs-count');
-
-        let selectedYear = 'all';
-        let selectedType = 'all';
-
-        function updateFilters() {
-            let count = 0;
-
-            entries.forEach(entry => {
-                const yearMatch = selectedYear === 'all' ||
-                    entry.dataset.year === selectedYear;
-
-                const typeMatch = selectedType === 'all' ||
-                    entry.dataset.type === selectedType ||
-                    (selectedType === 'official' && entry.dataset.verification === 'official');
-
-                const visible = yearMatch && typeMatch;
-                entry.hidden = !visible;
-
-                if (visible) {
-                    count++;
-                }
-            });
-
-            countLabel.textContent = `${count} sample record${count === 1 ? '' : 's'} · Newest first`;
-            document.getElementById('empty-state').hidden = count !== 0;
-        }
-
-        function setupGroup(buttons, setting) {
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    buttons.forEach(other => {
-                        other.classList.remove('active');
-                        other.setAttribute('aria-pressed', 'false');
-                    });
-
-                    button.classList.add('active');
-                    button.setAttribute('aria-pressed', 'true');
-
-                    if (setting === 'year') {
-                        selectedYear = button.dataset.year;
-                    } else {
-                        selectedType = button.dataset.type;
-                    }
-
-                    updateFilters();
-                });
-            });
-        }
-
-        setupGroup(yearButtons, 'year');
-        setupGroup(typeButtons, 'type');
-
-        const toggle = document.getElementById('historical-toggle');
-        const form = document.getElementById('historical-form');
-
-        toggle.addEventListener('click', () => {
-            const expanded = toggle.getAttribute('aria-expanded') !== 'true';
-            toggle.setAttribute('aria-expanded', String(expanded));
-            form.hidden = !expanded;
-        });
-
-        document.querySelector('.upload-link').addEventListener('click', () => {
-            alert('Certificate uploads are not connected in this frontend preview.');
-        });
-    </script>
-    <script src="../../js/app.js" defer></script>
-</body>
-
+        <script defer="" src="../../js/donor_js/donor-common.js?db-1"></script>
+        <script defer="" src="../../js/donor_js/my-donations.js?db-1"></script>
+    </body>
 </html>
