@@ -1,5 +1,3 @@
-// js/pages/account.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const logoutBtns = document.querySelectorAll("#logout-btn, .logout-link");
 

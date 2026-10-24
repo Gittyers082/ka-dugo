@@ -49,6 +49,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 2. Radius Slider
     if (radiusSlider) {
+        const updateSliderVisual = (val) => {
+            const min = radiusSlider.min || 5;
+            const max = radiusSlider.max || 30;
+            const percent = ((val - min) / (max - min)) * 100;
+
+            // Target the <i> element and update its 'left' position to move the red dot
+            const thumb = radiusSlider.previousElementSibling;
+            if (thumb && thumb.tagName.toLowerCase() === 'i') {
+                thumb.style.left = `${percent}%`;
+            }
+        };
+
         radiusSlider.addEventListener("input", (e) => {
             state.radius = e.target.value;
             if (radiusTag) radiusTag.textContent = `${state.radius} km Radius`;
@@ -60,8 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (state.radius === "15" && labels[1]) labels[1].classList.add("active");
             if (state.radius === "30" && labels[2]) labels[2].classList.add("active");
 
+            updateSliderVisual(state.radius);
             updateReach();
         });
+
+        // Initialize the slider visual on page load
+        updateSliderVisual(radiusSlider.value);
     }
 
     // 3. Message Editor Sync (No innerHTML)
@@ -105,6 +121,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 1200);
         });
     }
+
+    // 5. Delivery Options Toggle (Custom Checkboxes)
+    const deliveryCheckboxes = document.querySelectorAll(".delivery-option input[type='checkbox']");
+    deliveryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", (e) => {
+            const optionCard = e.target.closest(".delivery-option");
+            if (e.target.checked) {
+                optionCard.classList.remove("off");
+            } else {
+                optionCard.classList.add("off");
+            }
+        });
+    });
 
     // Initialize
     updateReach();
