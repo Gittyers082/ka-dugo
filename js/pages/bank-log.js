@@ -14,8 +14,7 @@ const MOCK_DONATIONS = [
     link_value: "Trauma ICU - Bay 4 (Stat Reserve)",
     link_icon: "building",
     drive: "Downtown Blood Drive #D-401",
-    notes:
-      "Clean right antecubital puncture; donor well-tolerated 450 mL draw without vasovagal reaction or hematoma.",
+    notes: "Clean right antecubital puncture; donor well-tolerated 450 mL draw without vasovagal reaction or hematoma.",
     status: "pending",
     status_sub: "uuid: c7a2-41e9",
     can_delete: true,
@@ -32,8 +31,7 @@ const MOCK_DONATIONS = [
     link_type: "Linked Request",
     link_value: "REQ-104 (Emergency Dept Resus - Trauma Bay)",
     link_icon: "asterisk",
-    notes:
-      "Smooth draw via left median cubital vein; donor vitals stable post-donation (BP 118/74). Rapid dispatch requested.",
+    notes: "Smooth draw via left median cubital vein; donor vitals stable post-donation (BP 118/74). Rapid dispatch requested.",
     status: "synced",
     status_sub: "10:02 AM",
     can_delete: true,
@@ -50,8 +48,7 @@ const MOCK_DONATIONS = [
     link_type: "Target Ward",
     link_value: "Hematology/Oncology Unit (Infusion 3)",
     link_icon: "building",
-    notes:
-      "Apheresis cycle runtime 68 min. Anticoagulant infusion tolerated; mild perioral paresthesia resolved with oral calcium tablet.",
+    notes: "Apheresis cycle runtime 68 min. Anticoagulant infusion tolerated; mild perioral paresthesia resolved with oral calcium tablet.",
     status: "synced",
     status_sub: "Oct 23, 16:30 PM",
     can_delete: false,
@@ -68,8 +65,7 @@ const MOCK_DONATIONS = [
     link_type: "Target Ward",
     link_value: "Surgical Ward 3B (Pre-op Crossmatch)",
     link_icon: "building",
-    notes:
-      "Saline compensation 500 mL infused. Pre-procedure Hgb 15.2 g/dL. No complaints, full recovery in observation lounge.",
+    notes: "Saline compensation 500 mL infused. Pre-procedure Hgb 15.2 g/dL. No complaints, full recovery in observation lounge.",
     status: "synced",
     status_sub: "Verified",
     can_delete: false,
@@ -77,7 +73,7 @@ const MOCK_DONATIONS = [
 ];
 
 const state = {
-  donations: MOCK_DONATIONS,
+  donations: [...MOCK_DONATIONS],
   query: "",
   activeType: "All Types",
   sort: "newest",
@@ -86,21 +82,38 @@ const state = {
 };
 
 // ============================================================================
-// DOM HELPER
+// SAFE DOM HELPERS (Zero innerHTML)
 // ============================================================================
-function el(tag, props = {}, ...kids) {
+
+function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
   for (const [key, val] of Object.entries(props)) {
-    if (key === "class") node.className = val;
-    else if (key === "innerHTML") node.innerHTML = val;
-    else if (key === "onclick") node.onclick = val;
+    if (key === "className" || key === "class") node.className = val;
+    else if (key === "text") node.textContent = val;
+    else if (key.startsWith("data-")) node.setAttribute(key, val);
+    else if (key.startsWith("on") && typeof val === "function") node.addEventListener(key.substring(2).toLowerCase(), val);
     else if (val !== null && val !== undefined) node.setAttribute(key, val);
   }
-  kids.flat().forEach((kid) => {
-    if (kid === null || kid === undefined || kid === false) return;
-    node.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  children.flat().forEach(child => {
+    if (child === null || child === undefined || child === false) return;
+    node.append(child instanceof Node ? child : document.createTextNode(String(child)));
   });
   return node;
+}
+
+function createIcon(svgString) {
+  return new DOMParser().parseFromString(svgString, "image/svg+xml").documentElement;
+}
+
+// Safely converts "<br>" strings in mock data into actual <br> elements
+function formatBr(text) {
+  const frag = document.createDocumentFragment();
+  const parts = (text || "").split("<br>");
+  parts.forEach((part, idx) => {
+    frag.appendChild(document.createTextNode(part));
+    if (idx < parts.length - 1) frag.appendChild(document.createElement("br"));
+  });
+  return frag;
 }
 
 const ICONS = {
@@ -135,13 +148,9 @@ function openEdit(id) {
   if (!record) return;
   state.editingId = id;
 
-  const cleanName = record.donor_name.replace("<br>", " ");
-  document.getElementById("edit-donor-name").textContent = cleanName;
+  document.getElementById("edit-donor-name").textContent = record.donor_name.replace(/<br>/g, " ");
   document.getElementById("edit-id").value = record.id;
-  document.getElementById("edit-component").value = record.component.replace(
-    "<br>",
-    " ",
-  );
+  document.getElementById("edit-component").value = record.component.replace(/<br>/g, " ");
   document.getElementById("edit-units").value = record.units;
   document.getElementById("edit-station").value = record.station;
   document.getElementById("edit-notes").value = record.notes;
@@ -161,55 +170,61 @@ async function handleEditSubmit(e) {
   if (!state.editingId) return;
 
   const newUnits = parseInt(document.getElementById("edit-units").value, 10);
-  const recordIndex = state.donations.findIndex(
-    (d) => d.id === state.editingId,
-  );
+  const recordIndex = state.donations.findIndex((d) => d.id === state.editingId);
 
   if (String(state.editingId).startsWith("db-")) {
     const dbId = Number(String(state.editingId).replace("db-", ""));
-    await fetch("../../api/donations.php", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        donation_id: dbId,
-        units: newUnits,
-        status: "processed",
-      }),
-    });
+    try {
+      await fetch("../../api/donations.php", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ donation_id: dbId, units: newUnits, status: "processed" }),
+      });
+    } catch (err) {
+      console.warn("Offline: Edit not synced to DB.");
+    }
   }
 
   if (recordIndex > -1) {
-    state.donations[recordIndex].component =
-      document.getElementById("edit-component").value;
+    state.donations[recordIndex].component = document.getElementById("edit-component").value;
     state.donations[recordIndex].units = newUnits;
-    state.donations[recordIndex].station =
-      document.getElementById("edit-station").value;
-    state.donations[recordIndex].notes =
-      document.getElementById("edit-notes").value;
+    state.donations[recordIndex].station = document.getElementById("edit-station").value;
+    state.donations[recordIndex].notes = document.getElementById("edit-notes").value;
     renderList();
-    showToast("Record updated in database");
+    showToast("Record updated");
   }
   closeEdit();
 }
 
-// ---- Details Flow ----
+// ---- Details Flow (Completely rebuilt for strict DOM safety) ----
 function openDetails(id) {
   const record = state.donations.find((d) => d.id === id);
   if (!record) return;
 
   const content = document.getElementById("details-content");
-  content.innerHTML = `
-        <div class="details-grid">
-            <div><strong>Donor Name</strong><span>${record.donor_name.replace("<br>", " ")} (Type: ${record.blood_type})</span></div>
-            <div><strong>Component</strong><span>${record.component.replace("<br>", " ")}</span></div>
-            <div><strong>Collection</strong><span>${record.units} Unit(s) at ${record.station}</span></div>
-            <div><strong>Time & Staff</strong><span>${record.collected_at} by ${record.collected_by}</span></div>
-            ${record.link_type ? `<div><strong>${record.link_type}</strong><span>${record.link_value}</span></div>` : ""}
-            ${record.drive ? `<div><strong>Drive</strong><span>${record.drive}</span></div>` : ""}
-            <div><strong>Clinical Observations</strong><span>${record.notes || "None"}</span></div>
-            <div><strong>Sync Status</strong><span>${record.status === "pending" ? "Pending Sync" : "Synced"}</span></div>
-        </div>
-    `;
+  content.textContent = "";
+
+  const grid = el("div", { class: "details-grid" },
+    el("div", {}, el("strong", { text: "Donor Name" }), el("span", { text: `${record.donor_name.replace(/<br>/g, " ")} (Type: ${record.blood_type})` })),
+    el("div", {}, el("strong", { text: "Component" }), el("span", { text: record.component.replace(/<br>/g, " ") })),
+    el("div", {}, el("strong", { text: "Collection" }), el("span", { text: `${record.units} Unit(s) at ${record.station}` })),
+    el("div", {}, el("strong", { text: "Time & Staff" }), el("span", { text: `${record.collected_at} by ${record.collected_by}` }))
+  );
+
+  if (record.link_type && record.link_value) {
+    grid.append(el("div", {}, el("strong", { text: record.link_type }), el("span", { text: record.link_value })));
+  }
+
+  if (record.drive) {
+    grid.append(el("div", {}, el("strong", { text: "Drive" }), el("span", { text: record.drive })));
+  }
+
+  grid.append(
+    el("div", {}, el("strong", { text: "Clinical Observations" }), el("span", { text: record.notes || "None" })),
+    el("div", {}, el("strong", { text: "Sync Status" }), el("span", { text: record.status === "pending" ? "Pending Sync" : "Synced" }))
+  );
+
+  content.append(grid);
 
   const dialog = document.getElementById("details-dialog");
   if (dialog) dialog.showModal();
@@ -238,19 +253,21 @@ async function confirmDelete() {
 
   if (String(state.pendingDeleteId).startsWith("db-")) {
     const dbId = Number(String(state.pendingDeleteId).replace("db-", ""));
-    await fetch("../../api/donations.php", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ donation_id: dbId }),
-    });
+    try {
+      await fetch("../../api/donations.php", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ donation_id: dbId }),
+      });
+    } catch (err) {
+      console.warn("Offline: Delete not synced to DB.");
+    }
   }
 
-  state.donations = state.donations.filter(
-    (d) => d.id !== state.pendingDeleteId,
-  );
+  state.donations = state.donations.filter((d) => d.id !== state.pendingDeleteId);
   closeDeleteConfirm();
   renderList();
-  showToast("Donation record deleted from database");
+  showToast("Donation record deleted");
 }
 
 // ============================================================================
@@ -260,158 +277,98 @@ async function confirmDelete() {
 function renderChips() {
   const chipsContainer = document.getElementById("type-chips");
   if (!chipsContainer) return;
-
   chipsContainer.textContent = "";
+
   ["All Types", ...BLOOD_TYPES].forEach((type) => {
-    const chip = el(
-      "button",
-      {
+    chipsContainer.append(
+      el("button", {
         type: "button",
         class: type === state.activeType ? "dl-chip active" : "dl-chip",
+        text: type === "All Types" ? type : `Type ${type}`,
         onclick: () => {
           state.activeType = type;
           renderChips();
           renderList();
-        },
-      },
-      type === "All Types" ? type : `Type ${type}`,
+        }
+      })
     );
-    chipsContainer.append(chip);
   });
 }
 
 function buildCard(d) {
   const isPending = d.status === "pending";
-  const statusIcon = isPending ? ICONS.sync : ICONS.check;
   const statusClass = isPending ? "status-pill pending" : "status-pill synced";
   const cardClass = isPending ? "card dl-card pending-sync" : "card dl-card";
-  const statusLabel = isPending ? "Pending<br>Sync" : "Synced";
 
-  const topRow = el(
-    "div",
-    { class: "card-top" },
-    el(
-      "div",
-      { class: "donor-identity" },
-      el("h3", { innerHTML: d.donor_name }),
-      el("span", { class: "blood-badge" }, d.blood_type),
-      el("span", { class: "component-pill", innerHTML: d.component }),
+  const topRow = el("div", { class: "card-top" },
+    el("div", { class: "donor-identity" },
+      el("h3", {}, formatBr(d.donor_name)),
+      el("span", { class: "blood-badge", text: d.blood_type }),
+      el("span", { class: "component-pill" }, formatBr(d.component))
     ),
-    el(
-      "div",
-      { class: "status-col" },
-      el("span", {
-        class: statusClass,
-        innerHTML: `${statusIcon} <span style="text-align: left;">${statusLabel}</span>`,
-      }),
-      el("span", { class: "status-sub" }, d.status_sub),
-    ),
+    el("div", { class: "status-col" },
+      el("span", { class: statusClass },
+        createIcon(isPending ? ICONS.sync : ICONS.check),
+        el("span", { style: "text-align: left;" }, formatBr(isPending ? "Pending<br>Sync" : "Synced"))
+      ),
+      el("span", { class: "status-sub", text: d.status_sub })
+    )
   );
 
-  const meta = el(
-    "p",
-    { class: "unit-meta" },
-    `${d.units} Unit${d.units > 1 ? "s" : ""} • Station: ${d.station}`,
-  );
+  const meta = el("p", { class: "unit-meta", text: `${d.units} Unit${d.units > 1 ? "s" : ""} • Station: ${d.station}` });
 
-  const details = el(
-    "div",
-    { class: "details-list" },
-    el(
-      "div",
-      { class: "details-item" },
-      el("span", { class: "icon", innerHTML: ICONS.clock }),
-      el("span", {
-        innerHTML: `<span class="label">Collected:</span> ${d.collected_at} by ${d.collected_by}`,
-      }),
-    ),
+  const details = el("div", { class: "details-list" },
+    el("div", { class: "details-item" },
+      el("span", { class: "icon" }, createIcon(ICONS.clock)),
+      el("span", {}, el("span", { class: "label", text: "Collected: " }), document.createTextNode(`${d.collected_at} by ${d.collected_by}`))
+    )
   );
 
   if (d.link_type && d.link_value) {
     details.append(
-      el(
-        "div",
-        { class: "details-item" },
-        el("span", {
-          class: "icon",
-          innerHTML: ICONS[d.link_icon] || ICONS.building,
-        }),
-        el("span", {
-          innerHTML: `<span class="label">${d.link_type}:</span> <span class="highlight">${d.link_value}</span>`,
-        }),
-      ),
+      el("div", { class: "details-item" },
+        el("span", { class: "icon" }, createIcon(ICONS[d.link_icon] || ICONS.building)),
+        el("span", {}, el("span", { class: "label", text: `${d.link_type}: ` }), el("span", { class: "highlight", text: d.link_value }))
+      )
     );
   }
 
   if (d.drive) {
     details.append(
-      el(
-        "div",
-        { class: "details-item" },
-        el("span", { class: "icon", innerHTML: ICONS.pin }),
-        el("span", {
-          innerHTML: `<span class="label">Drive:</span> <span class="highlight" style="color: #3d3a3a;">${d.drive}</span>`,
-        }),
-      ),
+      el("div", { class: "details-item" },
+        el("span", { class: "icon" }, createIcon(ICONS.pin)),
+        el("span", {}, el("span", { class: "label", text: "Drive: " }), el("span", { class: "highlight", style: "color: #3d3a3a;", text: d.drive }))
+      )
     );
   }
 
-  const clinical = el(
-    "div",
-    { class: "clinical-notes" },
-    el("strong", {}, "Clinical Observations:"),
-    el("p", {}, d.notes),
+  const clinical = el("div", { class: "clinical-notes" },
+    el("strong", { text: "Clinical Observations:" }),
+    el("p", { text: d.notes })
   );
 
-  const actions = el(
-    "div",
-    { class: "card-actions" },
-    el("button", {
-      type: "button",
-      class: "btn-action",
-      innerHTML: `${ICONS.edit} Edit`,
-      onclick: () => openEdit(d.id),
-    }),
-    el("button", {
-      type: "button",
-      class: "btn-action",
-      innerHTML: `${ICONS.eye} Details`,
-      onclick: () => openDetails(d.id),
-    }),
-    d.can_delete
-      ? el("button", {
-          type: "button",
-          class: "btn-action delete",
-          innerHTML: `${ICONS.trash} Delete`,
-          onclick: () => openDeleteConfirm(d.id),
-        })
-      : null,
+  const actions = el("div", { class: "card-actions" },
+    el("button", { type: "button", class: "btn-action", onclick: () => openEdit(d.id) }, createIcon(ICONS.edit), document.createTextNode(" Edit")),
+    el("button", { type: "button", class: "btn-action", onclick: () => openDetails(d.id) }, createIcon(ICONS.eye), document.createTextNode(" Details"))
   );
 
-  return el(
-    "div",
-    { class: cardClass },
-    topRow,
-    meta,
-    details,
-    clinical,
-    actions,
-  );
+  if (d.can_delete) {
+    actions.append(el("button", { type: "button", class: "btn-action delete", onclick: () => openDeleteConfirm(d.id) }, createIcon(ICONS.trash), document.createTextNode(" Delete")));
+  }
+
+  return el("div", { class: cardClass }, topRow, meta, details, clinical, actions);
 }
 
 function renderList() {
-  let list = state.donations.filter((d) => {
-    const matchesType =
-      state.activeType === "All Types" || d.blood_type === state.activeType;
+  const list = state.donations.filter((d) => {
+    const matchesType = state.activeType === "All Types" || d.blood_type === state.activeType;
     const q = state.query.trim().toLowerCase();
-    const cleanName = d.donor_name.replace("<br>", " ").toLowerCase();
+    const cleanName = d.donor_name.replace(/<br>/g, " ").toLowerCase();
     const matchesQuery = !q || cleanName.includes(q);
     return matchesType && matchesQuery;
   });
 
-  if (state.sort === "oldest") {
-    list.reverse();
-  }
+  if (state.sort === "oldest") list.reverse();
 
   const cardsContainer = document.getElementById("dl-cards");
   const emptyState = document.getElementById("dl-empty");
@@ -450,63 +407,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const refreshBtn = document.getElementById("refresh-btn");
-  if (refreshBtn)
-    refreshBtn.addEventListener("click", () =>
-      showToast("Refreshing logs from server..."),
-    );
+  if (refreshBtn) refreshBtn.addEventListener("click", () => showToast("Refreshing logs from server..."));
 
-  const broadcastBtn = document.querySelector(".btn-broadcast");
-  if (broadcastBtn)
-    broadcastBtn.addEventListener("click", () =>
-      showToast("Opening emergency broadcast menu..."),
-    );
-
-  // Edit Modal Events
+  // Edit Modal
   const editForm = document.getElementById("edit-form");
   if (editForm) editForm.addEventListener("submit", handleEditSubmit);
-
   const cancelEditX = document.getElementById("cancel-edit-x");
-  if (cancelEditX) cancelEditX.addEventListener("click", closeEdit);
-
   const cancelEditBtn = document.getElementById("cancel-edit-btn");
+  if (cancelEditX) cancelEditX.addEventListener("click", closeEdit);
   if (cancelEditBtn) cancelEditBtn.addEventListener("click", closeEdit);
 
-  const editDialog = document.getElementById("edit-dialog");
-  if (editDialog) {
-    editDialog.addEventListener("click", (event) => {
-      if (event.target === editDialog) closeEdit();
-    });
-  }
-
-  // Details Modal Events
+  // Details Modal
   const closeDetailsX = document.getElementById("close-details-x");
-  if (closeDetailsX) closeDetailsX.addEventListener("click", closeDetails);
-
   const closeDetailsBtn = document.getElementById("close-details-btn");
+  if (closeDetailsX) closeDetailsX.addEventListener("click", closeDetails);
   if (closeDetailsBtn) closeDetailsBtn.addEventListener("click", closeDetails);
 
-  const detailsDialog = document.getElementById("details-dialog");
-  if (detailsDialog) {
-    detailsDialog.addEventListener("click", (event) => {
-      if (event.target === detailsDialog) closeDetails();
-    });
-  }
-
-  // Delete Modal Events
+  // Delete Modal
   const cancelDelX = document.getElementById("cancel-delete-x");
   const cancelDelBtn = document.getElementById("cancel-delete-btn");
   const confirmDelBtn = document.getElementById("confirm-delete-btn");
-  const deleteDialog = document.getElementById("delete-dialog");
-
   if (cancelDelX) cancelDelX.addEventListener("click", closeDeleteConfirm);
   if (cancelDelBtn) cancelDelBtn.addEventListener("click", closeDeleteConfirm);
   if (confirmDelBtn) confirmDelBtn.addEventListener("click", confirmDelete);
-
-  if (deleteDialog) {
-    deleteDialog.addEventListener("click", (event) => {
-      if (event.target === deleteDialog) closeDeleteConfirm();
-    });
-  }
 
   // Initial Render
   renderChips();
@@ -514,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================================================
-// BROADCAST ALERT MODAL LOGIC
+// BROADCAST ALERT MODAL LOGIC (Secure DOM)
 // ============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -523,10 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeBroadcastX = document.getElementById("close-broadcast-x");
   const dispatchBtn = document.getElementById("dispatch-alert-btn");
 
-  // Editor Elements
-  const bloodButtons = document.querySelectorAll(
-    "#broadcast-blood-grid .blood",
-  );
+  const bloodButtons = document.querySelectorAll("#broadcast-blood-grid .blood");
   const radiusSlider = document.getElementById("broadcast-radius");
   const radiusDisplay = document.getElementById("radius-display");
   const reachDisplay = document.getElementById("reach-display");
@@ -534,26 +454,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const charCount = document.getElementById("char-count");
   const previewBody = document.getElementById("preview-body");
 
-  // 1. Open/Close Modal
-  if (broadcastBtn && broadcastDialog) {
-    broadcastBtn.addEventListener("click", () => {
-      broadcastDialog.showModal();
-    });
-  }
+  if (broadcastBtn && broadcastDialog) broadcastBtn.addEventListener("click", () => broadcastDialog.showModal());
+  if (closeBroadcastX && broadcastDialog) closeBroadcastX.addEventListener("click", () => broadcastDialog.close());
 
-  if (closeBroadcastX && broadcastDialog) {
-    closeBroadcastX.addEventListener("click", () => {
-      broadcastDialog.close();
-    });
-  }
-
-  // 2. Blood Type Selector
   bloodButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       bloodButtons.forEach((b) => b.classList.remove("selected"));
       btn.classList.add("selected");
-
-      // Auto-update message template with new blood type
       const type = btn.dataset.type;
       const currentMsg = msgInput.value;
       msgInput.value = currentMsg.replace(/\b(?:O|A|B|AB)[+-]\b/g, type);
@@ -561,55 +468,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 3. Radius Slider Logic
   if (radiusSlider) {
     radiusSlider.addEventListener("input", (e) => {
       const val = e.target.value;
       radiusDisplay.textContent = `${val} km`;
-
-      // Simulate changing reach numbers based on radius
-      const estimatedDonors = {
-        5: 48,
-        10: 91,
-        15: 142,
-        20: 198,
-        25: 251,
-        30: 317,
-      };
+      const estimatedDonors = { 5: 48, 10: 91, 15: 142, 20: 198, 25: 251, 30: 317 };
       reachDisplay.textContent = `${estimatedDonors[val]} Donors`;
-
-      // Update lock screen preview footer
       const footerSpan = document.querySelector(".notif-footer span");
       if (footerSpan) footerSpan.textContent = `⌾ Within ${val}km Geofence`;
     });
   }
 
-  // 4. Live Message Editor Preview
   function updatePreview() {
     const text = msgInput.value;
     charCount.textContent = `${text.length} / 280`;
     previewBody.textContent = text || "Your alert message will appear here.";
   }
 
-  if (msgInput) {
-    msgInput.addEventListener("input", updatePreview);
-  }
+  if (msgInput) msgInput.addEventListener("input", updatePreview);
 
-  // 5. Dispatch Action
   if (dispatchBtn) {
     dispatchBtn.addEventListener("click", () => {
-      const originalText = dispatchBtn.innerHTML;
+      const originalText = dispatchBtn.textContent;
       dispatchBtn.disabled = true;
-      dispatchBtn.innerHTML = "Dispatching...";
+      dispatchBtn.textContent = "Dispatching...";
 
-      // Simulate API request delay
       setTimeout(() => {
         broadcastDialog.close();
         showToast(`Emergency alert dispatched to ${reachDisplay.textContent}`);
-
-        // Reset button
         dispatchBtn.disabled = false;
-        dispatchBtn.innerHTML = originalText;
+        dispatchBtn.textContent = "Confirm & Dispatch Alert";
       }, 1200);
     });
   }
@@ -618,10 +506,10 @@ document.addEventListener("DOMContentLoaded", () => {
 // ============================================================================
 // LIVE API + OFFLINE INDEXEDDB INTEGRATION
 // ============================================================================
+
 async function syncDonationLogWithBackend() {
   const merged = [];
 
-  // 1. Load any unsynced offline records from IndexedDB
   if (window.KadugoPWA && window.KadugoPWA.getPendingDonations) {
     try {
       const pendingList = await window.KadugoPWA.getPendingDonations();
@@ -629,18 +517,12 @@ async function syncDonationLogWithBackend() {
         const p = item.payload || {};
         merged.push({
           id: item.client_uuid,
-          donor_name: (p.donor_name || `Donor #${p.donor_id || 1}`).replace(
-            " ",
-            "<br>",
-          ),
+          donor_name: (p.donor_name || `Donor #${p.donor_id || 1}`).replace(" ", "<br>"),
           blood_type: p.blood_type_code || "O+",
           component: "Whole Blood<br>(450 mL)",
           units: Number(p.units || 1),
           station: "Mobile Bay",
-          collected_at: new Date(item.created_at).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+          collected_at: new Date(item.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           collected_by: "Juan Dela Cruz, RMT",
           link_type: "Offline Queue",
           link_value: "Stored in IndexedDB",
@@ -656,16 +538,10 @@ async function syncDonationLogWithBackend() {
     }
   }
 
-  // 2. Fetch synced donations from api/donations.php
   try {
     const res = await fetch("../../api/donations.php");
     const json = await res.json();
-    if (
-      json &&
-      json.success &&
-      json.data &&
-      Array.isArray(json.data.donations)
-    ) {
+    if (json && json.success && json.data && Array.isArray(json.data.donations)) {
       json.data.donations.forEach((d) => {
         merged.push({
           id: `db-${d.donation_id}`,

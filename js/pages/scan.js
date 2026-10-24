@@ -120,8 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.KadugoPWA && window.KadugoPWA.makeUuid
       ? window.KadugoPWA.makeUuid()
       : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) =>
-          ((Math.random() * 16) | 0).toString(16),
-        );
+        ((Math.random() * 16) | 0).toString(16),
+      );
   if (uuidInput) {
     uuidInput.value = clientUuid;
   }
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("");
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   // --- 5. Component & Volume Stepper Logic ---
@@ -332,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (caps.torch) {
           try {
             await track.applyConstraints({ advanced: [{ torch: flashOn }] });
-          } catch (e) {}
+          } catch (e) { }
         }
       }
 
@@ -362,6 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderMatchedDonor(donor) {
+    document.querySelector(".scan-col-right").hidden = false;
     activeDonor = {
       donor_id: Number(donor.donor_id),
       full_name: donor.full_name,
@@ -459,12 +460,6 @@ document.addEventListener("DOMContentLoaded", () => {
       lookupBtn.disabled = false;
     });
   }
-
-  // Load Donor #1 from MySQL on initial page load so the card shows real DB data immediately
-  lookupDonor("1")
-    .then(renderMatchedDonor)
-    .catch(() => {});
-
   // --- 9. Save & Log Donation via KadugoPWA (Online POST or Offline IndexedDB) ---
   const saveBtn = document.querySelector(".form-actions .btn-primary");
   if (saveBtn) {
