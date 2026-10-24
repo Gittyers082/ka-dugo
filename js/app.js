@@ -1,6 +1,7 @@
 import { syncPendingDonations } from './sync.js';
 import { getAllRecords } from './db.js';
-import { showNotification } from './notify.js';
+import { showNotification, requestNotificationPermission } from './notify.js';
+
 const getBaseUrl = () => {
   const path = window.location.pathname;
   return path.includes('/kadugo/') ? '/kadugo/' : '/';
@@ -138,8 +139,31 @@ function init() {
   setInterval(() => {
     if (navigator.onLine) syncPendingDonations();
   }, SYNC_RETRY_MS);
+
+  // --- Manual Sync Button Trigger ---
+  const manualSyncBtns = document.querySelectorAll(".refresh, .sync");
+  manualSyncBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // Ask for push notification permission when they click sync
+      requestNotificationPermission();
+
+      if (navigator.onLine) {
+        btn.style.transition = "transform 0.5s ease";
+        btn.style.transform = "rotate(360deg)";
+        setTimeout(() => {
+          btn.style.transition = "none";
+          btn.style.transform = "rotate(0deg)";
+        }, 500);
+
+        syncPendingDonations();
+      } else {
+        showNotification("Offline", "Connect to the internet to sync records.", ICON);
+      }
+    });
+  });
 }
 
+// Trigger the bootloader (Moved OUTSIDE of init)
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {
