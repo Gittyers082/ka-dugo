@@ -4,11 +4,11 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
-const BASE = self.registration.scope; // e.g. http://localhost/kadugo/
+const BASE = self.registration.scope;
 const abs = (path) => new URL(path, BASE).href;
 const OFFLINE_URL = abs("offline.html");
 
@@ -20,17 +20,25 @@ const STATIC_ASSETS = [
   "css/styles.css",
   "css/base.css",
   "css/tokens.css",
-  "css/bank-requests.css",
+  "css/bank_css/bank-requests.css",
   "css/bank_css/bank-dashboard.css",
   "js/app.js",
+  "js/db.js",
+  "js/sync.js",
+  "js/notify.js",
+  "js/ui/dom.js",
   "js/login.js",
-  "assets/icons/icon-192.png",
-  "assets/icons/icon-512.png",
+  "js/pages/account.js",
+  "js/pages/bank-dashboard.js",
+  "js/pages/bank-log.js",
+  "js/pages/bank-requests.js",
+  "assets/icons/crimson/192-crimson_icon.png",
+  "assets/icons/crimson/512-crimson_icon.png",
   "assets/icons/bone/192-bone_icon.png",
   "pages/bank/dashboard.html",
   "pages/bank/scan.html",
   "pages/bank/requests.html",
-  "pages/bank/active-requests.html",
+  "pages/bank/active_requests.html",
   "pages/donor/donor-dashboard.html",
   "pages/organizer/drives.html",
 ].map(abs);
@@ -85,7 +93,6 @@ self.addEventListener("fetch", (event) => {
   }
   event.respondWith(staticStrategy(event));
 });
-
 
 async function networkFirstApi(event) {
   const req = event.request;
