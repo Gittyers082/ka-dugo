@@ -198,8 +198,8 @@ body {
   left: 5%;
   right: 5%;
   height: 2px;
-  background-color: #ff3b30;
-  box-shadow: 0 0 10px 3px rgba(255, 59, 48, 0.6);
+  background-color: var(--urgent);
+  box-shadow: 0 0 10px 3px color-mix(in srgb, var(--urgent) 60%, transparent);
 }
 
 .blood-type-badge {

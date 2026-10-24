@@ -172,7 +172,7 @@ body {
   color: var(--text);
 }
 .text-urgent {
-  color: #c8212d;
+  color: var(--urgent);
 }
 .text-bone,
 .text-light {
@@ -236,7 +236,7 @@ body {
 
 .badge-urgent {
   display: inline-block;
-  background-color: #c8212d;
+  background-color: var(--urgent);
   color: var(--on-action);
   padding: 4px 10px;
   border-radius: var(--radius-full);
