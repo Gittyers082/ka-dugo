@@ -34,19 +34,20 @@
             </button>
         </header>
 
-        <!-- Page Content: (organizer.css automatically turns this into a 2-column grid on desktop) -->
+        <!-- Page Content -->
         <section class="page-content">
             
             <!-- Left Column -->
             <div>
-                <h2 class="t-heading" id="currentDate" style="margin: 0 0 24px 0; color: var(--oxblood); font-weight: 700;">Sunday, October 25</h2>
+                <h2 class="t-heading" id="currentDate" style="margin: 0 0 24px 0; color: var(--oxblood); font-weight: 700;">Loading Date...</h2>
 
                 <!-- Primary Stat Card -->
                 <article class="card" style="background: var(--wine); border: none; border-radius: 12px; padding: 24px;">
                     <div class="heading-row" style="align-items: flex-start;">
                         <div>
                             <p style="font-size: 11px; font-weight: 700; color: #d6b8bc; margin: 0 0 8px 0; letter-spacing: 0.5px; text-transform: uppercase;">Active Drives</p>
-                            <h3 style="font-size: 42px; margin: 0; font-family: var(--font-heading); font-weight: 700; color: #fff; line-height: 1;">2</h3>
+                            <!-- Added ID here for DB Fetch -->
+                            <h3 id="dash-active-drives" style="font-size: 42px; margin: 0; font-family: var(--font-heading); font-weight: 700; color: #fff; line-height: 1;">...</h3>
                         </div>
                         <div style="background: #fff; color: var(--wine); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -60,22 +61,24 @@
                     <p style="margin: 20px 0 0 0; font-size: 14px; color: #d6b8bc;">Baguio City Region</p>
                 </article>
 
-                <!-- Secondary Stats Row (Using existing .grid .two from organizer.css) -->
+                <!-- Secondary Stats Row -->
                 <div class="grid two" style="margin-bottom: 24px;">
                     <article class="card" style="margin-bottom: 0; border-radius: 12px; padding: 20px;">
                         <p style="font-size: 11px; font-weight: 700; color: var(--muted); margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">Total Donors Registered</p>
-                        <h3 style="font-size: 32px; margin: 0 0 8px 0; font-family: var(--font-heading); font-weight: 700; color: var(--oxblood); line-height: 1;">342</h3>
-                        <p style="font-size: 12px; color: var(--green); font-weight: 700; margin: 0;">↑ +28 this week</p>
+                        <!-- Added ID here for DB Fetch -->
+                        <h3 id="dash-total-donors" style="font-size: 32px; margin: 0 0 8px 0; font-family: var(--font-heading); font-weight: 700; color: var(--oxblood); line-height: 1;">...</h3>
+                        <p style="font-size: 12px; color: var(--green); font-weight: 700; margin: 0;">Live Updates Active</p>
                     </article>
                     
                     <article class="card" style="margin-bottom: 0; border-radius: 12px; padding: 20px; background: var(--warm); border-color: transparent;">
                         <p style="font-size: 11px; font-weight: 700; color: var(--wine); margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">Pending Sync</p>
-                        <h3 style="font-size: 32px; margin: 0 0 8px 0; font-family: var(--font-heading); font-weight: 700; color: var(--wine); line-height: 1;">4</h3>
+                        <!-- Added ID here for DB Fetch -->
+                        <h3 id="dash-pending-sync" style="font-size: 32px; margin: 0 0 8px 0; font-family: var(--font-heading); font-weight: 700; color: var(--wine); line-height: 1;">...</h3>
                         <p style="font-size: 12px; color: var(--muted); margin: 0;">Local Queue</p>
                     </article>
                 </div>
 
-                <!-- Quick Action Button (Using existing .dispatch from styles.css) -->
+                <!-- Quick Action Button -->
                 <button class="dispatch" onclick="window.location.href='drives.html'" style="margin-top: 0; height: 56px; border-radius: 99px; font-size: 15px; font-family: var(--font-body); display: flex; justify-content: center; align-items: center; gap: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -92,7 +95,7 @@
                     <p style="color: var(--muted); font-size: 13px; margin: 0;">Currently active or upcoming</p>
                 </div>
 
-                <!-- Drive Card 1 -->
+                <!-- Drive Card 1 (In the future, JavaScript will loop through DB results to generate these cards) -->
                 <article class="card" style="border-radius: 12px; padding: 24px; margin-bottom: 16px; background: #fffcf9;">
                     <div class="heading-row" style="margin-bottom: 16px;">
                         <span style="background: #e2f3e8; color: #2e8551; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px;">ONGOING</span>
@@ -193,18 +196,47 @@
         </nav>
     </main>
 
-    <div class="toast" id="toastNotif" role="status" aria-live="polite">Organizer metrics successfully synced.</div>
+    <div class="toast" id="toastNotif" role="status" aria-live="polite">Dashboard metrics successfully synced.</div>
 
     <script type="module" src="../../js/app.js"></script>
     <script type="module" src="../../js/pages/account.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // 1. Set dynamic date
             const dateElement = document.getElementById('currentDate');
             if (dateElement) {
                 const options = { weekday: 'long', month: 'long', day: 'numeric' };
                 dateElement.textContent = new Date().toLocaleDateString('en-US', options);
             }
 
+            // 2. Fetch Dashboard Metrics from Database
+            // 2. Fetch Dashboard Metrics from Database
+            async function loadDashboardMetrics() {
+                try {
+                    // Fetch real data from the PHP API we just built
+                    const response = await fetch('../../api/organizer/dashboard.php');
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Target the IDs and inject the live database numbers
+                        document.getElementById('dash-active-drives').textContent = result.data.active_drives;
+                        document.getElementById('dash-total-donors').textContent = result.data.total_donors;
+                        
+                        // If you have local pending syncs from IndexedDB, you would add them here. 
+                        // For now, we just use the API's default.
+                        document.getElementById('dash-pending-sync').textContent = result.data.pending_sync;
+                    } else {
+                        console.error("Failed to load metrics:", result.error);
+                    }
+                } catch (error) {
+                    console.error("Error loading dashboard metrics:", error);
+                }
+            }
+            
+            // Run the fetch function on load
+            loadDashboardMetrics();
+
+            // 3. Handle Refresh Button
             const refreshBtn = document.getElementById('refreshBtn');
             const refreshIcon = refreshBtn ? refreshBtn.querySelector('svg') : null;
             const toast = document.getElementById('toastNotif');
@@ -214,6 +246,9 @@
                 refreshBtn.addEventListener('click', () => {
                     if (isAnimating) return;
                     isAnimating = true;
+
+                    // Re-fetch the data
+                    loadDashboardMetrics();
 
                     refreshIcon.style.transition = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
                     refreshIcon.style.transform = "rotate(360deg)";
