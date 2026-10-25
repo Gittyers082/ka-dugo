@@ -69,6 +69,7 @@ http_response_code(200);
 echo json_encode([
     'ok'   => true,
     'data' => [
+        'account_id' => $acct['account_id'],
         'role' => $acct['role'],
         'redirect' => $home[$acct['role']] ?? 'index.html',
     ],

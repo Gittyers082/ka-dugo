@@ -1,43 +1,53 @@
 <?php
-header('Content-Type: application/json');
-require_once '../config.php'; // Your database connection file
+declare(strict_types=1);
+require_once __DIR__ . '/config.php';
 
-// For now, hardcode the organizer_id to test (e.g., ID 1 is PRC Cavite). 
-// Later, replace this with $_SESSION['organizer_id'] from your login system.
-$organizer_id = 1; 
+header('Content-Type: application/json; charset=utf-8');
 
 try {
-    // 1. Fetch Organizer Details with their Account Email
-    $stmt = $pdo->prepare("
-        SELECT o.org_code, o.org_name, o.contact_person, o.contact_no, a.email 
-        FROM organizer o
-        JOIN account a ON o.account_id = a.account_id
-        WHERE o.organizer_id = ?
-    ");
-    $stmt->execute([$organizer_id]);
-    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+    $conn = getDbConnection();
+    
+    // Grab the organizer ID from the URL parameters
+    $organizerId = isset($_GET['organizer_id']) ? (int)$_GET['organizer_id'] : 1;
 
-    // 2. Count Total Drives Hosted by this Organizer
-    $driveStmt = $pdo->prepare("SELECT COUNT(*) as total_drives FROM drive WHERE organizer_id = ?");
-    $driveStmt->execute([$organizer_id]);
-    $drives = $driveStmt->fetch(PDO::FETCH_ASSOC);
+    // Fetch organizer details (Removed the blood_bank JOIN since o.bank_id doesn't exist)
+    $sql = "SELECT 
+                o.org_name, 
+                o.org_code, 
+                o.contact_person, 
+                o.contact_no, 
+                a.email
+            FROM organizer o
+            LEFT JOIN account a ON o.account_id = a.account_id
+            WHERE o.organizer_id = ?";
+            
+    $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        throw new Exception("SQL Error: " . $conn->error);
+    }
+    
+    $stmt->bind_param('i', $organizerId);
+    $stmt->execute();
+    $data = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
 
-    if ($profile) {
+    if ($data) {
         echo json_encode([
-            "success" => true,
-            "data" => [
-                "org_name" => $profile['org_name'],
-                "org_code" => $profile['org_code'],
-                "contact_person" => $profile['contact_person'],
-                "email" => $profile['email'],
-                "contact_no" => $profile['contact_no'],
-                "total_drives" => $drives['total_drives']
-            ]
+            'success' => true,
+            'data' => $data
         ]);
     } else {
-        echo json_encode(["success" => false, "error" => "Organizer not found."]);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Organizer profile not found.'
+        ]);
     }
-} catch (PDOException $e) {
-    echo json_encode(["success" => false, "error" => "Database error."]);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
-?>
