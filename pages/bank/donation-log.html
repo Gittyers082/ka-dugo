@@ -43,20 +43,22 @@
                             stroke-width="2">
                             <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                         </svg>
-                        <span class="quota-text">Daily Bank Quota: <strong>42 / 50 Units</strong> (84%)</span>
+                        <span class="quota-text">Daily Bank Quota: <strong id="log-quota-text">0 / 50 Units</strong>
+                            <span id="log-quota-pct">(0%)</span></span>
                     </div>
                     <div class="quota-divider"></div>
                     <div class="quota-target">
-                        <strong class="text-urgent">8 to</strong><br><span class="text-urgent">Goal</span>
+                        <strong class="text-urgent" id="log-quota-remaining">50 to</strong><br><span
+                            class="text-urgent">Goal</span>
                     </div>
                     <button type="button" class="btn-broadcast" id="broadcast-alert-btn">Broadcast Alert</button>
                 </div>
                 <div class="progress-track">
-                    <div class="progress-fill bg-maroon" style="width: 84%;"></div>
+                    <div class="progress-fill bg-maroon" id="log-quota-bar" style="width: 0%;"></div>
                 </div>
                 <div class="quota-card__bottom">
                     <span>Shift Target: 50 Units</span>
-                    <span class="text-success font-bold">On Track (Est. 16:30 Completion)</span>
+                    <span class="text-success font-bold" id="log-quota-status">Tracking...</span>
                 </div>
             </section>
 
