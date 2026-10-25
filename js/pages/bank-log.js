@@ -1,79 +1,9 @@
+import { getAllRecords } from '../db.js';
+
 const BLOOD_TYPES = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 
-const MOCK_DONATIONS = [
-  {
-    id: "d-1042",
-    donor_name: "Elena<br>Rostova",
-    blood_type: "O-",
-    component: "Whole Blood<br>(450 mL)",
-    units: 1,
-    station: "Bay 2",
-    collected_at: "Today, 11:20 AM",
-    collected_by: "Phlebotomist D. Clark (Cert #608)",
-    link_type: "Allocated Dept",
-    link_value: "Trauma ICU - Bay 4 (Stat Reserve)",
-    link_icon: "building",
-    drive: "Downtown Blood Drive #D-401",
-    notes: "Clean right antecubital puncture; donor well-tolerated 450 mL draw without vasovagal reaction or hematoma.",
-    status: "pending",
-    status_sub: "uuid: c7a2-41e9",
-    can_delete: true,
-  },
-  {
-    id: "d-1041",
-    donor_name: "Marcus<br>Vance",
-    blood_type: "O-",
-    component: "Packed Red Blood<br>Cells (PRBC)",
-    units: 1,
-    station: "Bay 1",
-    collected_at: "Today, 09:45 AM",
-    collected_by: "Nurse Sarah Jenkins (RN #4402)",
-    link_type: "Linked Request",
-    link_value: "REQ-104 (Emergency Dept Resus - Trauma Bay)",
-    link_icon: "asterisk",
-    notes: "Smooth draw via left median cubital vein; donor vitals stable post-donation (BP 118/74). Rapid dispatch requested.",
-    status: "synced",
-    status_sub: "10:02 AM",
-    can_delete: true,
-  },
-  {
-    id: "d-1040",
-    donor_name: "Sarah<br>Jenkins",
-    blood_type: "A+",
-    component: "Platelets<br>Apheresis (Trima Accel)",
-    units: 1,
-    station: "Apheresis Suite 1",
-    collected_at: "Yesterday, 16:15 PM",
-    collected_by: "Specialist M. Davies (CLS #119)",
-    link_type: "Target Ward",
-    link_value: "Hematology/Oncology Unit (Infusion 3)",
-    link_icon: "building",
-    notes: "Apheresis cycle runtime 68 min. Anticoagulant infusion tolerated; mild perioral paresthesia resolved with oral calcium tablet.",
-    status: "synced",
-    status_sub: "Oct 23, 16:30 PM",
-    can_delete: false,
-  },
-  {
-    id: "d-1039",
-    donor_name: "David<br>Kim",
-    blood_type: "B+",
-    component: "2x PRBC (Double<br>Red Alyx)",
-    units: 2,
-    station: "Apheresis Suite 2",
-    collected_at: "Oct 23, 14:10 PM",
-    collected_by: "Nurse Sarah Jenkins (RN #4402)",
-    link_type: "Target Ward",
-    link_value: "Surgical Ward 3B (Pre-op Crossmatch)",
-    link_icon: "building",
-    notes: "Saline compensation 500 mL infused. Pre-procedure Hgb 15.2 g/dL. No complaints, full recovery in observation lounge.",
-    status: "synced",
-    status_sub: "Verified",
-    can_delete: false,
-  },
-];
-
 const state = {
-  donations: [...MOCK_DONATIONS],
+  donations: [],
   query: "",
   activeType: "All Types",
   sort: "newest",
@@ -105,7 +35,6 @@ function createIcon(svgString) {
   return new DOMParser().parseFromString(svgString, "image/svg+xml").documentElement;
 }
 
-// Safely converts "<br>" strings in mock data into actual <br> elements
 function formatBr(text) {
   const frag = document.createDocumentFragment();
   const parts = (text || "").split("<br>");
@@ -119,7 +48,6 @@ function formatBr(text) {
 const ICONS = {
   clock: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
   building: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)" stroke-width="2"><path d="M3 21h18"></path><path d="M9 8h6"></path><path d="M12 5v6"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg>`,
-  asterisk: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--urgent)" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="19.07" y2="4.93"></line></svg>`,
   pin: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
   edit: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
   eye: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
@@ -196,7 +124,7 @@ async function handleEditSubmit(e) {
   closeEdit();
 }
 
-// ---- Details Flow (Completely rebuilt for strict DOM safety) ----
+// ---- Details Flow ----
 function openDetails(id) {
   const record = state.donations.find((d) => d.id === id);
   if (!record) return;
@@ -215,17 +143,12 @@ function openDetails(id) {
     grid.append(el("div", {}, el("strong", { text: record.link_type }), el("span", { text: record.link_value })));
   }
 
-  if (record.drive) {
-    grid.append(el("div", {}, el("strong", { text: "Drive" }), el("span", { text: record.drive })));
-  }
-
   grid.append(
     el("div", {}, el("strong", { text: "Clinical Observations" }), el("span", { text: record.notes || "None" })),
     el("div", {}, el("strong", { text: "Sync Status" }), el("span", { text: record.status === "pending" ? "Pending Sync" : "Synced" }))
   );
 
   content.append(grid);
-
   const dialog = document.getElementById("details-dialog");
   if (dialog) dialog.showModal();
 }
@@ -327,17 +250,8 @@ function buildCard(d) {
   if (d.link_type && d.link_value) {
     details.append(
       el("div", { class: "details-item" },
-        el("span", { class: "icon" }, createIcon(ICONS[d.link_icon] || ICONS.building)),
+        el("span", { class: "icon" }, createIcon(ICONS.building)),
         el("span", {}, el("span", { class: "label", text: `${d.link_type}: ` }), el("span", { class: "highlight", text: d.link_value }))
-      )
-    );
-  }
-
-  if (d.drive) {
-    details.append(
-      el("div", { class: "details-item" },
-        el("span", { class: "icon" }, createIcon(ICONS.pin)),
-        el("span", {}, el("span", { class: "label", text: "Drive: " }), el("span", { class: "highlight", style: "color: #3d3a3a;", text: d.drive }))
       )
     );
   }
@@ -385,6 +299,117 @@ function renderList() {
 }
 
 // ============================================================================
+// LIVE API + OFFLINE INDEXEDDB INTEGRATION
+// ============================================================================
+
+const BANK_ID = localStorage.getItem('kadugo_active_user') || 1;
+
+async function syncDonationLogWithBackend() {
+  const merged = [];
+  let todayTotal = 0;
+  const shiftGoal = 50;
+
+  // 1. Fetch Local IndexedDB (Pending Sync)
+  try {
+    const allRecords = await getAllRecords();
+    const pendingList = allRecords.filter(r => r.status === "Pending Sync");
+
+    pendingList.forEach((item) => {
+      const p = item.payload || {};
+      const units = Number(p.units || 1);
+
+      merged.push({
+        id: item.client_uuid,
+        donor_name: (p.donor_name || `Donor #${p.donor_id || 1}`).replace(" ", "<br>"),
+        blood_type: p.blood_type_code || "O+",
+        component: "Whole Blood<br>(450 mL)",
+        units: units,
+        station: "Local Queue",
+        collected_at: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        collected_by: "Current Staff",
+        link_type: "Offline Queue",
+        link_value: "Stored in Local Cache",
+        notes: p.notes || "Logged offline — awaiting network sync.",
+        status: "pending",
+        status_sub: `uuid: ${String(item.client_uuid).slice(0, 8)}`,
+        can_delete: true,
+      });
+    });
+  } catch (e) {
+    console.warn("Could not read IndexedDB pending donations:", e);
+  }
+
+  // 2. Fetch Live SQL Database
+  try {
+    const res = await fetch("../../api/donations.php");
+    const json = await res.json();
+
+    if (json && json.success && json.data && Array.isArray(json.data.donations)) {
+
+      // Filter specifically for this bank's logs
+      const bankDonations = json.data.donations.filter(d => parseInt(d.bank_id) === parseInt(BANK_ID));
+
+      // Date matcher for Daily Quota calculation
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      bankDonations.forEach((d) => {
+        const units = Number(d.units || 1);
+
+        // Add to quota if collected today
+        if (d.collected_at && d.collected_at.startsWith(todayStr)) {
+          todayTotal += units;
+        }
+
+        // Create Name Array for formatting First<br>Last
+        const nameArr = String(d.full_name || "Unknown Donor").split(" ");
+        const formattedName = nameArr.length > 1 ? `${nameArr[0]}<br>${nameArr.slice(1).join(" ")}` : nameArr[0];
+
+        merged.push({
+          id: `db-${d.donation_id}`,
+          donor_name: formattedName,
+          blood_type: d.blood_type_code || "O+",
+          component: `${d.component_name || "Whole Blood"}<br>(450 mL)`,
+          units: units,
+          station: d.bank_name || "Central Bank",
+          collected_at: d.collected_at,
+          collected_by: "System Record",
+          link_type: "Status",
+          link_value: String(d.status || "collected").toUpperCase(),
+          notes: "Verified database record.",
+          status: "synced",
+          status_sub: `uuid: ${String(d.client_uuid).slice(0, 8)}`,
+          can_delete: false,
+        });
+      });
+    }
+  } catch (e) {
+    console.warn("Using cached/mock donations while offline.");
+  }
+
+  // Inject Quota Math into Top Bar
+  const pct = Math.min(100, Math.round((todayTotal / shiftGoal) * 100));
+  const remaining = Math.max(0, shiftGoal - todayTotal);
+
+  const safeSet = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+
+  safeSet('log-quota-text', `${todayTotal} / ${shiftGoal} Units`);
+  safeSet('log-quota-pct', `(${pct}%)`);
+  safeSet('log-quota-remaining', `${remaining} to`);
+
+  if (pct >= 100) safeSet('log-quota-status', "Quota Complete!");
+
+  const bar = document.getElementById('log-quota-bar');
+  if (bar) bar.style.width = `${pct}%`;
+
+  // Inject Feed
+  state.donations = merged;
+  renderList();
+}
+
+// ============================================================================
 // EVENT LISTENERS & INIT
 // ============================================================================
 
@@ -407,7 +432,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const refreshBtn = document.getElementById("refresh-btn");
-  if (refreshBtn) refreshBtn.addEventListener("click", () => showToast("Refreshing logs from server..."));
+  if (refreshBtn) refreshBtn.addEventListener("click", () => {
+    showToast("Refreshing logs from server...");
+    syncDonationLogWithBackend();
+  });
 
   // Edit Modal
   const editForm = document.getElementById("edit-form");
@@ -433,144 +461,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial Render
   renderChips();
-  renderList();
+  syncDonationLogWithBackend();
+
+  // Custom event listener for IndexedDB background sync triggers
+  window.addEventListener("kadugo:synced", syncDonationLogWithBackend);
 });
 
-// ============================================================================
-// BROADCAST ALERT MODAL LOGIC (Secure DOM)
-// ============================================================================
-
+// Broadcast Modal logic (isolated to prevent errors)
 document.addEventListener("DOMContentLoaded", () => {
   const broadcastBtn = document.getElementById("broadcast-alert-btn");
   const broadcastDialog = document.getElementById("broadcast-dialog");
   const closeBroadcastX = document.getElementById("close-broadcast-x");
-  const dispatchBtn = document.getElementById("dispatch-alert-btn");
-
-  const bloodButtons = document.querySelectorAll("#broadcast-blood-grid .blood");
-  const radiusSlider = document.getElementById("broadcast-radius");
-  const radiusDisplay = document.getElementById("radius-display");
-  const reachDisplay = document.getElementById("reach-display");
-  const msgInput = document.getElementById("broadcast-msg");
-  const charCount = document.getElementById("char-count");
-  const previewBody = document.getElementById("preview-body");
-
   if (broadcastBtn && broadcastDialog) broadcastBtn.addEventListener("click", () => broadcastDialog.showModal());
   if (closeBroadcastX && broadcastDialog) closeBroadcastX.addEventListener("click", () => broadcastDialog.close());
-
-  bloodButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      bloodButtons.forEach((b) => b.classList.remove("selected"));
-      btn.classList.add("selected");
-      const type = btn.dataset.type;
-      const currentMsg = msgInput.value;
-      msgInput.value = currentMsg.replace(/\b(?:O|A|B|AB)[+-]\b/g, type);
-      updatePreview();
-    });
-  });
-
-  if (radiusSlider) {
-    radiusSlider.addEventListener("input", (e) => {
-      const val = e.target.value;
-      radiusDisplay.textContent = `${val} km`;
-      const estimatedDonors = { 5: 48, 10: 91, 15: 142, 20: 198, 25: 251, 30: 317 };
-      reachDisplay.textContent = `${estimatedDonors[val]} Donors`;
-      const footerSpan = document.querySelector(".notif-footer span");
-      if (footerSpan) footerSpan.textContent = `⌾ Within ${val}km Geofence`;
-    });
-  }
-
-  function updatePreview() {
-    const text = msgInput.value;
-    charCount.textContent = `${text.length} / 280`;
-    previewBody.textContent = text || "Your alert message will appear here.";
-  }
-
-  if (msgInput) msgInput.addEventListener("input", updatePreview);
-
-  if (dispatchBtn) {
-    dispatchBtn.addEventListener("click", () => {
-      const originalText = dispatchBtn.textContent;
-      dispatchBtn.disabled = true;
-      dispatchBtn.textContent = "Dispatching...";
-
-      setTimeout(() => {
-        broadcastDialog.close();
-        showToast(`Emergency alert dispatched to ${reachDisplay.textContent}`);
-        dispatchBtn.disabled = false;
-        dispatchBtn.textContent = "Confirm & Dispatch Alert";
-      }, 1200);
-    });
-  }
-});
-
-// ============================================================================
-// LIVE API + OFFLINE INDEXEDDB INTEGRATION
-// ============================================================================
-
-async function syncDonationLogWithBackend() {
-  const merged = [];
-
-  if (window.KadugoPWA && window.KadugoPWA.getPendingDonations) {
-    try {
-      const pendingList = await window.KadugoPWA.getPendingDonations();
-      pendingList.forEach((item) => {
-        const p = item.payload || {};
-        merged.push({
-          id: item.client_uuid,
-          donor_name: (p.donor_name || `Donor #${p.donor_id || 1}`).replace(" ", "<br>"),
-          blood_type: p.blood_type_code || "O+",
-          component: "Whole Blood<br>(450 mL)",
-          units: Number(p.units || 1),
-          station: "Mobile Bay",
-          collected_at: new Date(item.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          collected_by: "Juan Dela Cruz, RMT",
-          link_type: "Offline Queue",
-          link_value: "Stored in IndexedDB",
-          link_icon: "building",
-          notes: p.notes || "Logged offline — awaiting network sync.",
-          status: "pending",
-          status_sub: `uuid: ${String(item.client_uuid).slice(0, 8)}`,
-          can_delete: true,
-        });
-      });
-    } catch (e) {
-      console.warn("Could not read IndexedDB pending donations:", e);
-    }
-  }
-
-  try {
-    const res = await fetch("../../api/donations.php");
-    const json = await res.json();
-    if (json && json.success && json.data && Array.isArray(json.data.donations)) {
-      json.data.donations.forEach((d) => {
-        merged.push({
-          id: `db-${d.donation_id}`,
-          donor_name: String(d.full_name || "Donor").replace(" ", "<br>"),
-          blood_type: d.blood_type_code || "O+",
-          component: `${d.component_name || "Whole Blood"}<br>(450 mL)`,
-          units: Number(d.units || 1),
-          station: d.bank_name || "Central Bank",
-          collected_at: d.collected_at,
-          collected_by: "Juan Dela Cruz, RMT",
-          link_type: "Status",
-          link_value: String(d.status || "collected").toUpperCase(),
-          link_icon: "building",
-          notes: "Verified database record.",
-          status: "synced",
-          status_sub: `uuid: ${String(d.client_uuid).slice(0, 8)}`,
-          can_delete: false,
-        });
-      });
-    }
-  } catch (e) {
-    console.warn("Using cached/mock donations while offline.");
-  }
-
-  state.donations = [...merged, ...MOCK_DONATIONS];
-  renderList();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  syncDonationLogWithBackend();
-  window.addEventListener("kadugo:synced", syncDonationLogWithBackend);
 });
