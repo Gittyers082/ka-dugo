@@ -269,13 +269,15 @@
   shape-rendering: crispEdges;
 }
 
+/* Donor QR Dialog */
 .donor-dashboard dialog.donor-qr-dialog {
-  position: fixed !important;
+  position: fixed;
   inset: 0;
   margin: auto;
+  transform: none;
   width: min(90vw, 460px);
   height: auto;
-  max-height: min(90vh, 720px);
+  max-height: min(90dvh, 720px);
   overflow-y: auto;
   box-sizing: border-box;
   z-index: 9999;
