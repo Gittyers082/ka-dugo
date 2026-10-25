@@ -108,7 +108,7 @@
             try {
                 await api.request('cancel_booking', { registration_id: Number(btn.dataset.id) });
                 await load();
-                announce('Your booking was cancelled in MySQL.');
+                announce('Your booking was cancelled');
             }
             catch (e) {
                 announce(e.message, true);
@@ -142,7 +142,7 @@
                     openBooking = null;
                     await load();
                     setView('bookings');
-                    announce('Your booking was rescheduled in MySQL.');
+                    announce('Your booking was successfully rescheduled!');
                 }
                 catch (e) {
                     announce(e.message, true);

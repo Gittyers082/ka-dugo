@@ -12,6 +12,7 @@
             '.welcome-heading',
             `Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, ${app.first(name)} ♥`
         );
+
         setText('.donor-id', `ID: ${data.donor_id}`);
         const eligible = Boolean(data.eligibility?.is_eligible);
         setText('.status-label', eligible ? 'CLINICAL STATUS: ELIGIBLE' : 'CLINICAL STATUS: DEFERRED');
@@ -23,19 +24,24 @@
                 ? 'You meet the eligibility checks recorded in the system. Final screening is performed by the blood bank.'
                 : (data.eligibility?.reasons?.join(' ') || 'Please contact the blood bank for guidance.')
         );
+
         const details = document.querySelectorAll('.eligibility-details .detail-item');
+
         if (details[0]) {
             details[0].querySelector('strong').textContent = app.formatDate(data.last_donation_date);
             details[0].querySelector('.detail-note').textContent = data.last_donation_date ? 'From donor record' : 'No past donation';
         }
+
         if (details[1]) {
             details[1].querySelector('strong').textContent = `${Number(data.weight_kg).toFixed(1)} kg`;
             details[1].querySelector('.detail-note').textContent = 'Recorded weight';
         }
+
         if (details[2]) {
             details[2].querySelector('strong').textContent = `${data.eligibility?.age ?? '—'} years`;
             details[2].querySelector('.detail-note').textContent = 'Age from birthdate';
         }
+
         setText('.blood-type-summary strong', data.blood_type_code);
         setText('.blood-type-summary span', `Type ${data.blood_type_code}`);
         setText('.donation-counts > div:first-child strong', String(data.total_units));
