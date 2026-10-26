@@ -1,12 +1,7 @@
 import { syncPendingDonations } from './sync.js';
 import { getAllRecords } from './db.js';
 import { showNotification } from './notify.js';
-const getBaseUrl = () => {
-  const path = window.location.pathname;
-  return path.includes('/kadugo/') ? '/kadugo/' : '/';
-};
-
-const APP_BASE = getBaseUrl();
+const APP_BASE = new URL('../', import.meta.url).pathname;
 const ICON = APP_BASE + "assets/icons/crimson/192-crimson_icon.png";
 const SYNC_RETRY_MS = 30000;
 
@@ -144,4 +139,18 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {
   init();
+}
+function refreshTimeGreetings() {
+ document.querySelectorAll('[data-time-greeting]').forEach(el=>{const h=new Date().getHours();el.textContent=h<12?'Good morning':h<18?'Good afternoon':'Good evening';});
+}
+function initializeGreeting() {
+ if(!document.querySelector('.welcome-heading, .header-greeting')) {const heading=document.querySelector('.topbar .brand-copy, .topbar > div');if(heading&&!heading.querySelector('[data-time-greeting]')){const el=document.createElement('small');el.dataset.timeGreeting='';el.className='time-greeting';heading.append(el);}}
+ refreshTimeGreetings();setInterval(refreshTimeGreetings,30000);document.addEventListener('visibilitychange',refreshTimeGreetings);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeGreeting);else initializeGreeting();
+
+// Organizer headings use the signed-in profile instead of a sample organization.
+if(location.pathname.includes('/pages/organizer/')) {
+ fetch(new URL('api/profile.php',location.origin+APP_BASE),{credentials:'same-origin',cache:'no-store'})
+ .then(r=>r.json()).then(result=>{if(result.success){const heading=document.querySelector('.topbar p');if(heading)heading.textContent=result.data.org_name;}}).catch(()=>{});
 }

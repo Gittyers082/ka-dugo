@@ -1,140 +1,61 @@
-import { el } from '../ui/dom.js';
-import { showNotification } from '../notify.js';
-
-document.addEventListener("DOMContentLoaded", () => {
-    // --- State & DOM Mapping ---
-    const state = {
-        bloodType: "O-",
-        radius: "15",
-        donors: 142
-    };
-
-    const bloodBtns = document.querySelectorAll(".blood-grid .blood");
-    const radiusSlider = document.querySelector(".radius-input");
-    const radiusTag = document.querySelector(".radius-card .tag");
-    const reachDisplay = document.querySelector(".reach strong");
-    const msgInput = document.querySelector("textarea");
-    const charCount = document.querySelector(".counter");
-    const previewBody = document.querySelector(".alert-preview p");
-    const dispatchBtn = document.querySelector(".dispatch");
-    const dialog = document.querySelector(".confirm-dialog");
-    const confirmBtn = document.querySelector(".approve-dialog");
-    const cancelBtns = document.querySelectorAll(".close-dialog, .cancel-dialog");
-    const toast = document.querySelector(".toast");
-
-    // --- Dynamic Donor Estimation ---
-    function updateReach() {
-        const baseDonors = { "5": 48, "10": 91, "15": 142, "20": 198, "25": 251, "30": 317 };
-        const multiplier = (state.bloodType === "O-") ? 1.5 : 1.0;
-
-        state.donors = Math.floor(baseDonors[state.radius] * multiplier);
-        if (reachDisplay) reachDisplay.textContent = `${state.donors} Donors`;
+document.addEventListener('DOMContentLoaded', () => {
+    const $=s=>document.querySelector(s);
+    const bloodIds={'A+':1,'A-':2,'B+':3,'B-':4,'AB+':5,'AB-':6,'O+':7,'O-':8};
+    const state={bloodType:'O-',radius:15,donors:0};
+    const message=$('#alert-message'), dialog=$('.confirm-dialog'), dispatch=$('.dispatch');
+    let reachSequence=0, orgName='the community blood donation program', saving=false;
+    const toast=(text,error=false)=>{const el=$('.toast');el.textContent=text;el.classList.toggle('error',error);el.classList.add('show');setTimeout(()=>el.classList.remove('show'),5000);};
+    async function json(url,options={}) {
+        const res=await fetch(url,{credentials:'same-origin',cache:'no-store',...options});
+        const data=await res.json();if(!res.ok||!data.success)throw new Error(data.message||'Unable to contact the server.');return data.data;
     }
-
-    // --- Event Listeners ---
-
-    // 1. Blood Type Selection
-    bloodBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            bloodBtns.forEach(b => b.classList.remove("selected"));
-            btn.classList.add("selected");
-            state.bloodType = btn.getAttribute("data-type");
-
-            const notice = document.querySelector(".notice strong");
-            if (notice) notice.textContent = `${state.bloodType}-Negative`;
-
-            updateReach();
-        });
+    function updateMessage(){ $('.counter').textContent=`${message.value.length} / 280`;$('.alert-preview p').textContent=message.value||'Your alert message will appear here.';$('#message-status').textContent=message.value.trim()?'Message ready':'Enter a message'; }
+    function reset(){message.value=`URGENT: ${state.bloodType} donors are needed. Eligible donors can open Ka-dugo to view available community blood drives and reserve a slot.`;updateMessage();}
+    async function updateReach(){
+        const sequence=++reachSequence;dispatch.disabled=true;state.donors=0;
+        $('#reach-count').textContent='Checking…';$('#reach-context').textContent='Loading eligible donors from the database.';
+        $('.radius-card .tag').textContent=`${state.radius} km radius`;
+        $('.radius-input').previousElementSibling.style.left=`${(state.radius-5)/25*100}%`;
+        document.querySelectorAll('.range-labels span').forEach(el=>el.classList.toggle('active',parseInt(el.querySelector('b').textContent)===state.radius));
+        try {
+            const data=await json(`../../api/alerts.php?action=reach&blood_type_id=${bloodIds[state.bloodType]}&radius_km=${state.radius}`);
+            if(sequence!==reachSequence)return;
+            state.donors=Number(data.count);$('#reach-count').textContent=`${state.donors} eligible donor${state.donors===1?'':'s'}`;
+            $('#reach-context').textContent=`Within ${state.radius} km of ${data.center_name}. ${data.missing_location} eligible donor(s) excluded because their location is missing.`;
+            $('#radius-context').textContent=`Distance is measured from ${data.center_name}, your linked blood bank.`;
+            dispatch.disabled=saving||state.donors===0;
+        }catch(error){if(sequence!==reachSequence)return;$('#reach-count').textContent='Reach unavailable';$('#reach-context').textContent=error.message;}
+    }
+    document.querySelectorAll('.blood-grid .blood').forEach(button=>button.addEventListener('click',()=>{
+        document.querySelectorAll('.blood-grid .blood').forEach(el=>{el.classList.remove('selected');el.setAttribute('aria-pressed','false');});
+        button.classList.add('selected');button.setAttribute('aria-pressed','true');state.bloodType=button.dataset.type;
+        $('.notice strong').textContent=`${state.bloodType} donors`;updateReach();
+    }));
+    $('.radius-input').addEventListener('input',event=>{state.radius=Number(event.target.value);updateReach();});
+    message.addEventListener('input',updateMessage);
+    $('#alert-form').addEventListener('submit',event=>event.preventDefault());
+    $('#reset-protocol').addEventListener('click',()=>{reset();toast('Protocol template restored.');});
+    document.querySelectorAll('.close-dialog,.cancel-dialog').forEach(button=>button.addEventListener('click',()=>dialog.close()));
+    dispatch.addEventListener('click',()=>{
+        if(!message.value.trim())return toast('Enter an alert message.',true);
+        if(!$('.delivery-option input[value="push"]').checked)return toast('Select in-app delivery.',true);
+        if(!state.donors)return toast('No eligible donors match this selection.',true);
+        dialog.showModal();
     });
-
-    // 2. Radius Slider
-    if (radiusSlider) {
-        const updateSliderVisual = (val) => {
-            const min = radiusSlider.min || 5;
-            const max = radiusSlider.max || 30;
-            const percent = ((val - min) / (max - min)) * 100;
-
-            // Target the <i> element and update its 'left' position to move the red dot
-            const thumb = radiusSlider.previousElementSibling;
-            if (thumb && thumb.tagName.toLowerCase() === 'i') {
-                thumb.style.left = `${percent}%`;
-            }
-        };
-
-        radiusSlider.addEventListener("input", (e) => {
-            state.radius = e.target.value;
-            if (radiusTag) radiusTag.textContent = `${state.radius} km Radius`;
-
-            const labels = document.querySelectorAll(".range-labels span");
-            labels.forEach(label => label.classList.remove("active"));
-
-            if (state.radius === "5" && labels[0]) labels[0].classList.add("active");
-            if (state.radius === "15" && labels[1]) labels[1].classList.add("active");
-            if (state.radius === "30" && labels[2]) labels[2].classList.add("active");
-
-            updateSliderVisual(state.radius);
-            updateReach();
-        });
-
-        // Initialize the slider visual on page load
-        updateSliderVisual(radiusSlider.value);
+    async function save(status){
+        if(saving)return;
+        if(!message.value.trim())return toast('Enter an alert message.',true);
+        if(!$('.delivery-option input[value="push"]').checked)return toast('Select in-app delivery.',true);
+        saving=true;dispatch.disabled=true;$('#save-draft').disabled=true;$('.approve-dialog').disabled=true;
+        try{
+            const data=await json('../../api/alerts.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sender_type:'organizer',blood_type_id:bloodIds[state.bloodType],level:2,message:message.value.trim(),status,channel:'push',radius_km:state.radius})});
+            dialog.close();toast(status==='draft'?'Draft saved.':`Published to ${data.recipients_notified} donor in-app inbox(es).`);
+        }catch(error){toast(error.message,true);}
+        finally{saving=false;$('#save-draft').disabled=false;$('.approve-dialog').disabled=false;await updateReach();}
     }
-
-    // 3. Message Editor Sync (No innerHTML)
-    if (msgInput) {
-        msgInput.addEventListener("input", () => {
-            const text = msgInput.value;
-            if (charCount) charCount.textContent = `${text.length} / 280`;
-            if (previewBody) previewBody.textContent = text || "Your alert message will appear here.";
-        });
-    }
-
-    // 4. Dispatch Flow
-    if (dispatchBtn && dialog) {
-        dispatchBtn.addEventListener("click", () => dialog.showModal());
-    }
-
-    cancelBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            if (dialog) dialog.close();
-        });
-    });
-
-    if (confirmBtn) {
-        confirmBtn.addEventListener("click", () => {
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = "Dispatching...";
-
-            // Simulate dispatch
-            setTimeout(() => {
-                if (dialog) dialog.close();
-                showNotification("Alert Broadcasted", `Emergency notice dispatched to ${state.donors} donors.`, "/kadugo/assets/icons/crimson/192-crimson_icon.png");
-
-                if (toast) {
-                    toast.textContent = "Broadcast successful.";
-                    toast.classList.add("show");
-                    setTimeout(() => toast.classList.remove("show"), 3000);
-                }
-
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = "Dispatch now";
-            }, 1200);
-        });
-    }
-
-    // 5. Delivery Options Toggle (Custom Checkboxes)
-    const deliveryCheckboxes = document.querySelectorAll(".delivery-option input[type='checkbox']");
-    deliveryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", (e) => {
-            const optionCard = e.target.closest(".delivery-option");
-            if (e.target.checked) {
-                optionCard.classList.remove("off");
-            } else {
-                optionCard.classList.add("off");
-            }
-        });
-    });
-
-    // Initialize
-    updateReach();
+    $('.approve-dialog').addEventListener('click',()=>save('active'));
+    $('#save-draft').addEventListener('click',()=>save('draft'));
+    $('.refresh').addEventListener('click',updateReach);
+    json('../../api/profile.php').then(data=>{orgName=data.org_name;$('.context h2').textContent=orgName;$('.context mark').textContent=`Node #${data.org_code}`;$('.preview-top small').textContent=orgName;}).catch(error=>toast(error.message,true));
+    reset();updateReach();
 });

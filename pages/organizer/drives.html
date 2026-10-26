@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drive Scheduler | Ka-dugo</title>
     <link rel="stylesheet" href="../../css/tokens.css">
     <link rel="stylesheet" href="../../css/base.css">
-    <link rel="stylesheet" href="../../css/organizer.css">
+    <link rel="stylesheet" href="../../css/organizer.css?v=9">
     <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
 </head>
 <body>
@@ -17,37 +17,37 @@
                 <h1>Ka-dugo Organizer</h1>
                 <p>Philippine Red Cross Cavite Chapter</p>
             </div>
-            <button class="sync" id="reload" title="Refresh drives"> </button>
+            <button class="sync" id="reload" title="Refresh drives" aria-label="Refresh drives">↻</button>
         </header>
         <section class="content">
             <header class="page-title">
                 <div>
                     <h2>Drive Scheduler</h2>
-                    <p>Linked to Organizer UID: <b>org_98024_rc</b></p>
+                    <p>Manage your organization’s blood donation drives</p>
                 </div>
-                <span class="gps">  GPS Live</span>
+                <span class="gps">Location optional</span>
             </header>
             <section class="stats">
                 <article><small>ACTIVE<br>DRIVES</small><strong id="active-count"> </strong><span>Scheduled / ongoing</span></article>
                 <article><small>REGISTRATIONS</small><strong id="registration-count"> </strong><span>Across all drives</span></article>
-                <article><small>TELEMETRY</small><b class="locked">  Locked</b><span>  4m Precision</span></article>
+                <article><small>TELEMETRY</small><b class="locked">On request</b><span>Use location button</span></article>
             </section>
             <div class="tabs">
-                <button class="active" type="button">Schedule New Drive</button>
+                    <button class="active" id="schedule-tab" type="button">Schedule New Drive</button>
                 <button type="button" id="view-drives">My Scheduled Drives (<span id="drive-total">0</span>)</button>
             </div>
             <section class="drive-card" id="scheduler">
                 <div class="card-heading">
-                    <h2><span> </span>Drive Entry<br>Specification</h2><b>Status:<br>Scheduled</b>
+                    <h2><span> </span>Drive details</h2><b>Status:<br>Scheduled</b>
                 </div>
                 <hr>
                 <form id="drive-form">
-                    <label>DRIVE TITLE<input id="title" required value="City Hall Rotunda Emergency Drive" maxlength="150"></label>
-                    <label>VENUE &amp; FACILITY NAME<input id="venue" required value="Civic Center Plaza, 450 Grand Ave" maxlength="255"></label>
-                    <div class="field-label">GPS COORDINATES &amp; GEOFENCE <span>High Accuracy</span></div>
+                    <label>DRIVE TITLE<input id="title" required placeholder="Name of your blood donation drive" maxlength="150"></label>
+                    <label>VENUE &amp; FACILITY NAME<input id="venue" required placeholder="Venue and complete address" maxlength="255"></label>
+                    <div class="field-label">CURRENT LOCATION REFERENCE <span id="gps-status">Use your location</span></div>
                     <div class="grid two">
-                        <label>LATITUDE<input id="latitude" value="14.2816" readonly></label>
-                        <label>LONGITUDE<input id="longitude" value="120.8682" readonly></label>
+                        <label>LATITUDE<input id="latitude" placeholder="Not captured" readonly></label>
+                        <label>LONGITUDE<input id="longitude" placeholder="Not captured" readonly></label>
                     </div>
                     <button type="button" class="location" id="location">  &nbsp; Use Current GPS Location</button>
                     <label>DRIVE DATE<input id="drive-date" type="date" required></label>
@@ -63,8 +63,8 @@
                         </select>
                     </label>
                     <div class="capacity">
-                        <div><b><span id="slots-value">60</span> Slots Total</b><small>30-minute operational intervals<br>(4 donors/interval)</small></div>
-                        <div><button type="button" id="minus"> </button><button type="button" id="plus">+</button></div>
+                        <div><b><span id="slots-value">60</span> Slots Total</b><small>30-minute operational intervals<br>(capacity distributed across slots)</small></div>
+                        <div><button type="button" id="minus" aria-label="Decrease capacity">−</button><button type="button" id="plus" aria-label="Increase capacity">+</button></div>
                     </div>
                     <button class="publish" type="submit">  &nbsp; Publish &amp; Open Donor Registration</button>
                     <p class="form-note">Creates a scheduled drive and opens its registration slots.</p>
@@ -83,11 +83,24 @@
                 <span> </span>
                 <div>
                     <h2>Cancellation Notice Protocol</h2>
-                    <p>Cancelling a drive notifies all registered donors and releases their booking slots for other local drives.</p>
+                    <p>Cancelling a drive removes it from available booking choices. Existing registration history is retained.</p>
                 </div>
             </section>
         </section>
-        <nav class="bottom-nav">
+        <dialog class="slot-dialog" id="slot-dialog" aria-labelledby="slot-dialog-title">
+            <form method="dialog" class="slot-dialog__panel">
+                <header class="slot-dialog__header">
+                    <div><p class="eyebrow">DRIVE CAPACITY</p><h2 id="slot-dialog-title">Manage registration slots</h2><p id="slot-dialog-subtitle">Loading drive details...</p></div>
+                    <button class="slot-close" value="cancel" aria-label="Close slot manager">×</button>
+                </header>
+                <div id="slot-list" class="slot-list" aria-live="polite"></div>
+                <div class="slot-dialog__actions">
+                    <button type="button" class="slot-secondary" id="add-slot">Add time slot</button>
+                    <button type="button" class="publish" id="save-slots">Save slot changes</button>
+                </div>
+            </form>
+        </dialog>
+        <nav class="bottom-nav" aria-label="Organizer navigation">
             <a href="organizer.dash.html">
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24">
@@ -96,7 +109,7 @@
                     </svg>
                 </span>Home
             </a>
-            <a class="active" href="drives.html">
+            <a class="active" href="drives.html" aria-current="page">
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24">
                         <path d="M5 17h14l-1.5-7H6.5z" />

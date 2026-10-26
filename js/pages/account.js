@@ -8,10 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 sessionStorage.clear();
 
-                const currentPath = window.location.pathname;
-                const basePath = currentPath.includes('/kadugo/') ? '/kadugo/' : '/';
-
-                window.location.href = basePath + "index.html";
+                window.location.href = new URL('../../index.html', import.meta.url).href;
             });
         });
     }

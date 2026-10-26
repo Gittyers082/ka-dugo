@@ -4,7 +4,7 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v5";
+const VERSION = "v9";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
@@ -20,6 +20,7 @@ const STATIC_ASSETS = [
   "css/styles.css",
   "css/base.css",
   "css/tokens.css",
+  "css/organizer.css?v=9",
   "css/bank_css/bank-requests.css",
   "css/bank_css/bank-dashboard.css",
   "js/app.js",
@@ -29,6 +30,9 @@ const STATIC_ASSETS = [
   "js/ui/dom.js",
   "js/login.js",
   "js/pages/account.js",
+  "js/pages/organizer-account.js",
+  "js/pages/organizer-alerts.js",
+  "js/pages/organizer-scheduler.js",
   "js/pages/bank-dashboard.js",
   "js/pages/bank-log.js",
   "js/pages/bank-requests.js",
@@ -41,6 +45,9 @@ const STATIC_ASSETS = [
   "pages/bank/active_requests.html",
   "pages/donor/donor-dashboard.html",
   "pages/organizer/drives.html",
+  "pages/organizer/organizer.dash.html",
+  "pages/organizer/organizer.account.html",
+  "pages/organizer/organizerholder.html",
 ].map(abs);
 
 /* ---------- INSTALL: pre-cache the app shell ---------- */
@@ -88,7 +95,7 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (url.pathname.includes("/api/")) {
-    event.respondWith(networkFirstApi(event));
+    event.respondWith(fetch(req).catch(() => new Response(JSON.stringify({success:false,message:'Connect to the local server to load current data.'}),{status:503,headers:{'Content-Type':'application/json'}})));
     return;
   }
   event.respondWith(staticStrategy(event));

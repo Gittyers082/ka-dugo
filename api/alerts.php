@@ -7,6 +7,33 @@ $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
 
+
+function organizerReach(mysqli $conn, int $organizerId, int $bloodTypeId, int $radius): array {
+    $stmt=$conn->prepare('SELECT name,latitude,longitude FROM blood_bank WHERE organizer_id=? ORDER BY bank_id LIMIT 1');
+    $stmt->bind_param('i',$organizerId);$stmt->execute();$center=$stmt->get_result()->fetch_assoc();
+    if(!$center) sendJson(false,'No linked blood bank location is available for this organizer.',null,422);
+    $stmt=$conn->prepare('SELECT d.* FROM donor d JOIN account a ON a.account_id=d.account_id WHERE a.is_active=1 AND d.blood_type_id=?');
+    $stmt->bind_param('i',$bloodTypeId);$stmt->execute();$donors=$stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $def=$conn->prepare('SELECT reason,ends_on FROM donor_deferral WHERE donor_id=? AND (ends_on IS NULL OR ends_on>=CURRENT_DATE)');
+    $ids=[];$missing=0;
+    foreach($donors as $donor){
+        $id=(int)$donor['donor_id'];$def->bind_param('i',$id);$def->execute();
+        if(!evaluateDonorEligibility($donor,$def->get_result()->fetch_all(MYSQLI_ASSOC))['is_eligible'])continue;
+        if($donor['latitude']===null || $donor['longitude']===null){$missing++;continue;}
+        $lat1=deg2rad((float)$center['latitude']);$lat2=deg2rad((float)$donor['latitude']);
+        $a=sin(($lat2-$lat1)/2)**2+cos($lat1)*cos($lat2)*sin(deg2rad((float)$donor['longitude']-(float)$center['longitude'])/2)**2;
+        $distance=6371*2*asin(sqrt(min(1,max(0,$a))));
+        if($distance<=$radius)$ids[]=$id;
+    }
+    return ['ids'=>$ids,'count'=>count($ids),'missing_location'=>$missing,'center_name'=>$center['name'],'radius_km'=>$radius];
+}
+if($method==='GET' && ($input['action'] ?? '')==='reach'){
+    $org=signedInOrganizer();$bt=validateIntRange($input['blood_type_id'] ?? null,1,8,'blood type');
+    $radius=validateIntRange($input['radius_km'] ?? null,5,30,'radius');
+    $reach=organizerReach($conn,$org,$bt,$radius);unset($reach['ids']);
+    header('Cache-Control: no-store');sendJson(true,'Live reach loaded.',$reach);
+}
+
 /**
  * Helper to match and enqueue eligible donors into `alert_recipient`
  * when an alert is dispatched (`status = 'active'`).
@@ -207,6 +234,17 @@ if ($method === 'GET') {
     $message = substr(sanitizeString($input['message']), 0, 280);
     $status = validateEnum(sanitizeString($input['status'] ?? 'active'), ['draft', 'active', 'completed', 'cancelled'], 'status');
     $channel = validateEnum(sanitizeString($input['channel'] ?? 'push'), ['push', 'sms', 'email'], 'channel');
+    $organizerMatch=null;
+    if($senderType==='organizer') {
+        $organizerId=signedInOrganizer();
+        if($channel!=='push')sendJson(false,'SMS delivery is unavailable. Select in-app delivery.',null,422);
+        $radius=validateIntRange($input['radius_km'] ?? null,5,30,'radius');
+        if($radius%5!==0)sendJson(false,'Choose a radius in 5 km steps.',null,422);
+        $message=sanitizeString($input['message']);
+        if(!$message || mb_strlen($message)>280)sendJson(false,'Enter a message of 1–280 characters.',null,422);
+        $organizerMatch=organizerReach($conn,$organizerId,$bloodTypeId,$radius);
+        if($status==='active' && !$organizerMatch['count'])sendJson(false,'No eligible donors match this selection. Change the targeting or save a draft.',null,422);
+    }
     $sentAt = ($status === 'active') ? date('Y-m-d H:i:s') : null;
 
     $conn->begin_transaction();
@@ -228,7 +266,7 @@ if ($method === 'GET') {
         $stmt->close();
 
         $recipientsAdded = 0;
-        if ($status === 'active') {
+        if ($status === 'active' && $senderType !== 'organizer') {
             $recipientsAdded = dispatchAlertRecipients(
                 $conn,
                 $alertId,
@@ -240,8 +278,12 @@ if ($method === 'GET') {
             );
         }
 
+        if($status==='active' && $senderType==='organizer') {
+            $delivery=$conn->prepare("INSERT INTO alert_recipient (alert_id,donor_id,is_read,channel,delivery_status) VALUES (?,?,0,'push','sent')");
+            foreach($organizerMatch['ids'] as $recipientId){$delivery->bind_param('ii',$alertId,$recipientId);if(!$delivery->execute())throw new Exception('Unable to deliver an in-app alert.');$recipientsAdded++;}
+        }
         $conn->commit();
-        sendJson(true, 'Alert created and dispatched.', [
+        sendJson(true, $status==='draft' ? 'Draft saved.' : 'Alert published to in-app inboxes.' , [
             'alert_id' => $alertId,
             'status' => $status,
             'sent_at' => $sentAt,
