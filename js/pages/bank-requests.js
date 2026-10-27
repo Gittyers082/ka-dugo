@@ -14,16 +14,22 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => toast.classList.remove("show"), 3000);
     }
 
-    const refreshBtn = document.getElementById("refresh-btn");
-    if (refreshBtn) refreshBtn.addEventListener("click", () => showToast("Syncing network status..."));
-
-    const state = {
-        bloodType: "O-",
-        component: "Packed RBC (PRBC)",
-        units: 10,
-        radius: 15,
-        donors: 142
-    };
+    const refreshBtn = document.querySelector(".refresh");
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+            const icon = refreshBtn.querySelector("svg");
+            if (icon) {
+                icon.style.transition = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+                icon.style.transform = "rotate(360deg)";
+                setTimeout(() => {
+                    icon.style.transition = "none";
+                    icon.style.transform = "rotate(0deg)";
+                }, 1000);
+            }
+            showToast("Resetting requests...");
+            setTimeout(() => window.location.reload(), 600);
+        });
+    }
 
     const previewBlood = document.getElementById("preview-blood");
     const previewUnits = document.getElementById("preview-units");

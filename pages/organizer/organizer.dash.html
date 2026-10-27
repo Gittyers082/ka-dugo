@@ -23,7 +23,6 @@
             <img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
             <div class="brand-copy">
                 <h1>Organizer Dashboard</h1>
-                <p>SLU AWS Learning Club</p>
             </div>
 
             <button class="refresh" id="refreshBtn" aria-label="Refresh Data">
@@ -194,7 +193,7 @@
             dateElement.textContent = new Date().toLocaleDateString('en-US', options);
         }
 
-        const escapeText = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const escapeText = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         const ORGANIZER_ID = localStorage.getItem('kadugo_active_user') || 1;
 
         async function loadDashboardData() {
