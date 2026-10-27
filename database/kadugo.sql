@@ -18,6 +18,8 @@
 --
 -- Table structure for table `account`
 --
+CREATE DATABASE IF NOT EXISTS kadugo_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE kadugo_db;
 
 DROP TABLE IF EXISTS `account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
