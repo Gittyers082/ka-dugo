@@ -205,7 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Greeting & ID Pill
     const greetingH1 = document.querySelector(".header-greeting h1");
     if (greetingH1) {
-      greetingH1.innerHTML = `Good morning, ${firstName} <span class="greeting-heart">♥</span>`;
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+      greetingH1.innerHTML = `${greeting}, ${firstName} <span class="greeting-heart">♥</span>`;
     }
     const idPill = document.querySelector(".donor-id");
     if (idPill) {

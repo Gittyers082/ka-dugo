@@ -4,14 +4,14 @@
     const app = window.KaDonor;
     const qrDialog = $('#donor-qr-dialog');
     let previousFocus = null;
+    let greetingName='';
+    function refreshGreeting(){if(!greetingName)return;const h=new Date().getHours();setText('.welcome-heading',`Good ${h<12?'morning':h<18?'afternoon':'evening'}, ${greetingName} ♥`);}
+    setInterval(refreshGreeting,30000);document.addEventListener('visibilitychange',refreshGreeting);
     function setText(selector, text) { const element = $(selector); if (element)
         element.textContent = text; }
     function renderProfile(data) {
         const name = String(data.full_name);
-        setText(
-            '.welcome-heading',
-            `Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, ${app.first(name)} ♥`
-        );
+        greetingName=app.first(name); refreshGreeting();
 
         setText('.donor-id', `ID: ${data.donor_id}`);
         const eligible = Boolean(data.eligibility?.is_eligible);
