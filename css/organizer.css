@@ -969,6 +969,12 @@ textarea {
 /* Ka-dugo shared brand overrides */
 body{font-family:var(--font-body),Arial,sans-serif}.brand-copy h1,.drive-app .topbar h1,.card-heading h2,.page-title h2,.scheduled-heading h2,.warning h2{font-family:var(--font-heading),sans-serif}.brand-logo{width:62px;height:62px;object-fit:contain;flex:0 0 auto}.preview-logo{width:42px;height:42px;object-fit:contain;background:#fff;padding:5px}.drive-app .brand-logo{width:52px;height:52px}@media(max-width:560px){.brand-logo{width:40px;height:40px}.drive-app .brand-logo{width:38px;height:38px}.preview-logo{width:31px;height:31px;padding:4px}}
 
+/* Shared Bank/Donor typography: Unbounded headings and Hanken Grotesk UI text. */
+body :is(.app-shell,.dashboard-app,.drive-app),
+body :is(.app-shell,.dashboard-app,.drive-app) :is(button,input,select,textarea){font-family:var(--font-body),sans-serif}
+body :is(.app-shell,.dashboard-app,.drive-app) :is(h1,h2,h3,.t-heading,.card-heading h2,.page-title h2,.scheduled-heading h2,.warning h2,.slot-dialog__header h2){font-family:var(--font-heading),sans-serif}
+.reach small{display:block;margin-top:6px;color:var(--muted);font-size:12px;font-weight:600;line-height:1.35}
+
 .bottom-nav .nav-icon{display:grid;place-items:center;width:22px;height:22px}.bottom-nav .nav-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
 /* Desktop organizer workspace */

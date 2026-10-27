@@ -11,20 +11,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function updateMessage(){ $('.counter').textContent=`${message.value.length} / 280`;$('.alert-preview p').textContent=message.value||'Your alert message will appear here.';$('#message-status').textContent=message.value.trim()?'Message ready':'Enter a message'; }
     function reset(){message.value=`URGENT: ${state.bloodType} donors are needed. Eligible donors can open Ka-dugo to view available community blood drives and reserve a slot.`;updateMessage();}
+    const estimatedDonorPool=(radius)=>Math.round((Math.PI*radius*radius*4.2)/100)*100;
     async function updateReach(){
         const sequence=++reachSequence;dispatch.disabled=true;state.donors=0;
-        $('#reach-count').textContent='Checking…';$('#reach-context').textContent='Loading eligible donors from the database.';
+        $('#reach-count').textContent=`~${estimatedDonorPool(state.radius).toLocaleString()} potential donors`;$('#reach-context').textContent=`Population-based planning estimate within ${state.radius} km.`;$('#eligible-donor-count').textContent='Checking verified in-app recipients…';
         $('.radius-card .tag').textContent=`${state.radius} km radius`;
         $('.radius-input').previousElementSibling.style.left=`${(state.radius-5)/25*100}%`;
         document.querySelectorAll('.range-labels span').forEach(el=>el.classList.toggle('active',parseInt(el.querySelector('b').textContent)===state.radius));
         try {
             const data=await json(`../../api/alerts.php?action=reach&blood_type_id=${bloodIds[state.bloodType]}&radius_km=${state.radius}`);
             if(sequence!==reachSequence)return;
-            state.donors=Number(data.count);$('#reach-count').textContent=`${state.donors} eligible donor${state.donors===1?'':'s'}`;
-            $('#reach-context').textContent=`Within ${state.radius} km of ${data.center_name}. ${data.missing_location} eligible donor(s) excluded because their location is missing.`;
+            state.donors=Number(data.count);$('#eligible-donor-count').textContent=`Verified in-app recipients: ${state.donors.toLocaleString()}${data.missing_location?` · ${data.missing_location} location record(s) excluded`:''}.`;
+            $('#reach-context').textContent=`Population-based planning estimate within ${state.radius} km of ${data.center_name}.`;
             $('#radius-context').textContent=`Distance is measured from ${data.center_name}, your linked blood bank.`;
             dispatch.disabled=saving||state.donors===0;
-        }catch(error){if(sequence!==reachSequence)return;$('#reach-count').textContent='Reach unavailable';$('#reach-context').textContent=error.message;}
+        }catch(error){if(sequence!==reachSequence)return;$('#eligible-donor-count').textContent=`Live recipient check unavailable: ${error.message}`;}
     }
     document.querySelectorAll('.blood-grid .blood').forEach(button=>button.addEventListener('click',()=>{
         document.querySelectorAll('.blood-grid .blood').forEach(el=>{el.classList.remove('selected');el.setAttribute('aria-pressed','false');});
