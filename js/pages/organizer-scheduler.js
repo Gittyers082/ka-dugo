@@ -5,11 +5,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const slotsValue = document.getElementById('slots-value');
     const dialog = document.getElementById('slot-dialog');
     const slotList = document.getElementById('slot-list');
+    const bloodTypeOptions = document.getElementById('blood-type-options');
+    const bloodTypeStatus = document.getElementById('target-types-status');
+    const selectAllTypes = document.getElementById('select-all-types');
+    const clearTypes = document.getElementById('clear-types');
+    const publishButton = form.querySelector('.publish');
     let selectedDrive = null;
+    let bloodTypesReady = false;
 
     const setSlotTotal = (value) => { slotsValue.textContent = Math.max(4, Math.min(2000, Number(value) || 4)); };
     const formatDate = (value) => new Date(`${value}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
+
+    function selectedBloodTypes() {
+        return [...bloodTypeOptions.querySelectorAll('input[name="blood_type_ids"]:checked')]
+            .map((input) => Number(input.value));
+    }
+
+    function updateBloodTypeSelection() {
+        const selected = selectedBloodTypes();
+        const total = bloodTypeOptions.querySelectorAll('input[name="blood_type_ids"]').length;
+        bloodTypeOptions.querySelectorAll('.blood-type-choice').forEach((label) => {
+            label.classList.toggle('is-selected', label.querySelector('input').checked);
+        });
+        bloodTypeStatus.classList.toggle('is-error', bloodTypesReady && selected.length === 0);
+        bloodTypeStatus.textContent = selected.length === 0
+            ? 'Select at least one blood type to publish.'
+            : selected.length === total
+                ? `All ${total} blood types selected — this drive accepts everyone.`
+                : `${selected.length} of ${total} blood types selected.`;
+    }
+
+    async function loadBloodTypes() {
+        publishButton.disabled = true;
+        selectAllTypes.disabled = true;
+        clearTypes.disabled = true;
+        try {
+            const response = await fetch('../../api/drives.php?lookup=blood_types', {
+                credentials: 'same-origin',
+                cache: 'no-store'
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.message || 'Unable to load blood types.');
+            const types = result.data?.blood_types || [];
+            if (!types.length) throw new Error('No blood types are configured in the database.');
+            bloodTypeOptions.innerHTML = types.map((type) =>
+                `<label class="blood-type-choice"><input type="checkbox" name="blood_type_ids" value="${Number(type.blood_type_id)}"><span>${escapeHtml(type.code)}</span></label>`
+            ).join('');
+            bloodTypeOptions.addEventListener('change', updateBloodTypeSelection);
+            bloodTypesReady = true;
+            publishButton.disabled = false;
+            selectAllTypes.disabled = false;
+            clearTypes.disabled = false;
+            updateBloodTypeSelection();
+        } catch (error) {
+            console.error('Blood type fetch failed:', error);
+            bloodTypeOptions.innerHTML = '<p class="blood-types-loading">Blood types could not be loaded. Refresh the page to try again.</p>';
+            bloodTypeStatus.classList.add('is-error');
+            bloodTypeStatus.textContent = error.message;
+        }
+    }
+
+    selectAllTypes.addEventListener('click', () => {
+        bloodTypeOptions.querySelectorAll('input[name="blood_type_ids"]').forEach((input) => { input.checked = true; });
+        updateBloodTypeSelection();
+    });
+    clearTypes.addEventListener('click', () => {
+        bloodTypeOptions.querySelectorAll('input[name="blood_type_ids"]').forEach((input) => { input.checked = false; });
+        updateBloodTypeSelection();
+    });
 
     const today=new Date();
     document.getElementById('drive-date').min = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
@@ -53,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const capacity = Number(drive.slots_total) || 1;
             const registered = Number(drive.registered_count) || 0;
             const progress = Math.min(100, Math.round((registered / capacity) * 100));
-            return `<article class="drive-item"><div class="top"><span class="status ${drive.status === 'cancelled' ? 'cancelled' : ''}">${escapeHtml(drive.status).toUpperCase()}</span><small>${escapeHtml(drive.ref_code)}</small></div><h3>${escapeHtml(drive.title)}</h3><div class="meta"><span>📅 ${formatDate(drive.drive_date)}</span><span>📍 ${escapeHtml(drive.venue)}</span><span>⏱ ${String(drive.start_time).slice(0, 5)} - ${String(drive.end_time).slice(0, 5)}</span></div><div class="progress-label"><span>${registered} donor${registered === 1 ? '' : 's'} registered</span><span>${capacity} total capacity</span></div><div class="progress"><i style="width:${progress}%"></i></div><div class="drive-actions"><button type="button" class="manage-slots" ${['scheduled','ongoing'].includes(drive.status) ? '' : 'disabled'} data-id="${drive.drive_id}">Manage slots</button>${['scheduled','ongoing'].includes(drive.status) ? `<button type="button" class="cancel" data-id="${drive.drive_id}">Cancel drive</button>` : ''}</div></article>`;
+            return `<article class="drive-item"><div class="top"><span class="status ${drive.status === 'cancelled' ? 'cancelled' : ''}">${escapeHtml(drive.status).toUpperCase()}</span><small>${escapeHtml(drive.ref_code)}</small></div><h3>${escapeHtml(drive.title)}</h3><div class="meta"><span>📅 ${formatDate(drive.drive_date)}</span><span>📍 ${escapeHtml(drive.venue)}</span><span>⏱ ${String(drive.start_time).slice(0, 5)} - ${String(drive.end_time).slice(0, 5)}</span></div><p class="target-summary">Target blood types: ${Array.isArray(drive.target_blood_types) && drive.target_blood_types.length ? drive.target_blood_types.map((type) => escapeHtml(type.code)).join(', ') : 'All blood types (no restriction)'}</p><div class="progress-label"><span>${registered} donor${registered === 1 ? '' : 's'} registered</span><span>${capacity} total capacity</span></div><div class="progress"><i style="width:${progress}%"></i></div><div class="drive-actions"><button type="button" class="manage-slots" ${['scheduled','ongoing'].includes(drive.status) ? '' : 'disabled'} data-id="${drive.drive_id}">Manage slots</button>${['scheduled','ongoing'].includes(drive.status) ? `<button type="button" class="cancel" data-id="${drive.drive_id}">Cancel drive</button>` : ''}</div></article>`;
         }).join('');
         list.querySelectorAll('.manage-slots').forEach((button) => button.addEventListener('click', () => openSlotManager(drives.find((drive) => Number(drive.drive_id) === Number(button.dataset.id)))));
         list.querySelectorAll('.cancel').forEach((button) => button.addEventListener('click', () => cancelDrive(button.dataset.id)));
@@ -97,16 +161,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        if(!form.reportValidity())return;
+        if (!form.reportValidity()) return;
+        if (!bloodTypesReady) return alert('Blood types are still loading. Refresh if they do not appear.');
+        const bloodTypeIds = selectedBloodTypes();
+        if (!bloodTypeIds.length) {
+            bloodTypeStatus.classList.add('is-error');
+            bloodTypeStatus.textContent = 'Choose at least one blood type before publishing.';
+            bloodTypeOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
         if(document.getElementById('end-time').value<=document.getElementById('start-time').value){alert('End time must be after start time.');return;}
         const submit = form.querySelector('.publish');
-        const payload = { organizer_id: organizerId, title: document.getElementById('title').value.trim(), venue: document.getElementById('venue').value.trim(), drive_date: document.getElementById('drive-date').value, start_time: document.getElementById('start-time').value, end_time: document.getElementById('end-time').value, category: document.getElementById('category').value, slots_total: Number(slotsValue.textContent) };
+        const payload = { organizer_id: organizerId, title: document.getElementById('title').value.trim(), venue: document.getElementById('venue').value.trim(), drive_date: document.getElementById('drive-date').value, start_time: document.getElementById('start-time').value, end_time: document.getElementById('end-time').value, category: document.getElementById('category').value, slots_total: Number(slotsValue.textContent), blood_type_ids: bloodTypeIds };
         submit.disabled = true; submit.textContent = 'Publishing...';
         try {
             const response = await fetch('../../api/drives.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || 'Unable to publish drive.');
-            form.reset(); setSlotTotal(60); await loadDrives(); document.getElementById('scheduled').scrollIntoView({ behavior: 'smooth' });
+            form.reset(); updateBloodTypeSelection(); setSlotTotal(60); await loadDrives(); document.getElementById('scheduled').scrollIntoView({ behavior: 'smooth' });
         } catch (error) { alert(error.message); } finally { submit.disabled = false; submit.innerHTML = 'Publish &amp; Open Donor Registration'; }
     });
     async function cancelDrive(driveId) {
@@ -116,5 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!response.ok || !result.success) return alert(result.message || 'Unable to cancel drive.');
         loadDrives();
     }
+    loadBloodTypes();
     loadDrives();
 });
