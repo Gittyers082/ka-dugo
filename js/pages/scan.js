@@ -192,10 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const idInput = document.querySelector(".manual-entry input");
   const lookupBtn = document.querySelector(".manual-entry .btn-secondary");
 
-  if (idInput && idInput.value === "BLD-88291") {
-    idInput.value = "DNR-QR-99238471209384";
-  }
-
   // Inject <video> element inside .scanner-viewport
   let videoEl = null;
   if (viewport) {
@@ -209,26 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
       promptText.textContent = "TAP VIEWPORT TO START CAMERA";
     }
 
-    // Add Quick-Scan Demo Bar right below viewport for testing/defense
-    const quickBar = document.createElement("div");
-    quickBar.className = "quick-scan-bar";
-    quickBar.innerHTML = `
-      <button type="button" class="quick-scan-chip" data-qr="DNR-QR-99238471209384">
-        📷 Scan QR: Miguel (O+ Eligible)
-      </button>
-      <button type="button" class="quick-scan-chip" data-qr="DNR-QR-11223344556677">
-        📷 Scan QR: Ana (A+ Deferred)
-      </button>
-    `;
-    viewport.insertAdjacentElement("afterend", quickBar);
-
-    quickBar.querySelectorAll(".quick-scan-chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        const qr = chip.getAttribute("data-qr");
-        handleDetectedCode(qr);
-      });
-    });
-
     viewport.addEventListener("click", () => {
       if (isScanning) {
         stopCamera();
@@ -237,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
   async function startCamera() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       showToast(
