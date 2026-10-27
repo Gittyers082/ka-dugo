@@ -7,6 +7,17 @@ $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
 requireRole(['bank', 'phlebotomist', 'admin', 'organizer']);
+// Organizers only work with their own drives, and only clinical staff may override eligibility.
+$sessionOrganizerId = $_SESSION['role'] === 'organizer' ? signedInOrganizer() : null;
+if ($sessionOrganizerId !== null) unset($input['force_override']);
+
+function requireOwnDrive(mysqli $conn, ?int $organizerId, int $driveId): void {
+    if ($organizerId === null) return;
+    $own = $conn->prepare('SELECT 1 FROM drive WHERE drive_id = ? AND organizer_id = ?');
+    $own->bind_param('ii', $driveId, $organizerId);
+    $own->execute();
+    if (!$own->get_result()->fetch_assoc()) sendJson(false, 'Drive not found for this organizer.', null, 404);
+}
 
 /**
  * Helper to fetch a donor record and evaluate eligibility via evaluateDonorEligibility()
@@ -64,6 +75,12 @@ if ($method === 'GET') {
             WHERE 1=1";
     $params = [];
     $types = "";
+
+    if ($sessionOrganizerId !== null) {
+        $sql .= " AND d.organizer_id = ?";
+        $types .= "i";
+        $params[] = $sessionOrganizerId;
+    }
 
     if ($registrationId > 0) {
         $sql .= " AND dr.registration_id = ?";
@@ -141,6 +158,7 @@ if ($method === 'GET') {
     $componentId = isset($input['component_id']) && $input['component_id'] !== ''
         ? validateIntRange($input['component_id'], 1, 4, 'component_id')
         : 1; // Default: 1 (Whole Blood)
+    requireOwnDrive($conn, $sessionOrganizerId, $driveId);
 
     // 1. Verify donor exists and evaluate eligibility before booking
     $donor = checkDonorEligibilityById($conn, $donorId);
@@ -274,6 +292,7 @@ if ($method === 'GET') {
         sendJson(false, 'No matching registration found.', null, 404);
     }
 
+    requireOwnDrive($conn, $sessionOrganizerId, (int)$regRow['drive_id']);
     $registrationId = (int)$regRow['registration_id'];
     $donorId = (int)$regRow['donor_id'];
 

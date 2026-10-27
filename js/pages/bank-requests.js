@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             footerType.textContent = type;
 
             showToast(`${type} set as target blood type`);
+            updateReach();
         });
     });
 
@@ -177,15 +178,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const radius = parseInt(btn.getAttribute("data-radius"));
             state.radius = radius;
-            const simulatedDonors = { 5: 48, 15: 142, 25: 298 };
-            state.donors = simulatedDonors[radius];
-
             previewRadius.textContent = radius;
-            previewDonors.textContent = state.donors;
-            reachCountLabel.textContent = `${state.donors} Donors`;
-            footerDonors.textContent = state.donors;
+            updateReach();
         });
     });
+
+    // Live count of eligible donors of the chosen type within the radius of this bank.
+    async function updateReach() {
+        const setCount = (text) => {
+            previewDonors.textContent = text;
+            reachCountLabel.textContent = `${text} Donors`;
+            footerDonors.textContent = text;
+        };
+        try {
+            const res = await fetch(`../../api/alerts.php?action=reach&blood_type_id=${BLOOD_TYPE_IDS[state.bloodType]}&radius_km=${state.radius}`, { credentials: "same-origin", cache: "no-store" });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message);
+            state.donors = json.data.count;
+            setCount(state.donors);
+        } catch (err) {
+            setCount("—");
+        }
+    }
+    updateReach();
 
     const dispatchBtn = document.getElementById("dispatch-btn");
     if (dispatchBtn) {
@@ -221,6 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     request_id: request.request_id,
                     blood_type_id: request.blood_type_id,
                     level,
+                    radius_km: state.radius,
                     message: `${urgency.toUpperCase()}: ${state.units} unit(s) of ${state.bloodType} ${state.component} needed at ${ward}.${note ? " " + note : ""}`,
                     status: "active",
                 });

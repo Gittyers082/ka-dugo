@@ -19,6 +19,9 @@ if ($sessionBankId !== null) {
         $own->execute();
         if (!$own->get_result()->fetch_assoc()) sendJson(false, 'Blood request not found for this bank.', null, 404);
     }
+} elseif ($method === 'POST' && empty($input['bank_id'])) {
+    // shortcut: admin has no linked bank, so default to the first one; add a bank picker when there are several banks
+    $input['bank_id'] = (int)($conn->query('SELECT MIN(bank_id) AS id FROM blood_bank')->fetch_assoc()['id'] ?? 0);
 }
 
 if ($method === 'GET') {

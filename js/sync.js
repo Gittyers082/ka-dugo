@@ -1,10 +1,8 @@
 import { getAllRecords, putRecord, deleteRecord } from './db.js';
 import { showNotification } from './notify.js';
 
-const getBaseUrl = () => {
-    const path = window.location.pathname;
-    return path.includes('/kadugo/') ? '/kadugo/' : '/';
-};
+// App root from this file's location (js/..), so it works whatever the project folder is called.
+const getBaseUrl = () => new URL('../', import.meta.url).pathname;
 
 const DONATIONS_API = getBaseUrl() + "api/donations.php";
 export let isSyncing = false;
@@ -43,6 +41,9 @@ export async function syncPendingDonations() {
                 if (res.ok) {
                     await deleteRecord(record.client_uuid);
                     synced++;
+                } else if (res.status === 401) {
+                    // Signed out: keep the record pending and retry after the next login.
+                    break;
                 } else if (res.status >= 400 && res.status < 500) {
                     const err = await safeJson(res);
                     await putRecord(
@@ -60,7 +61,7 @@ export async function syncPendingDonations() {
             }
         }
 
-        const iconPath = getBaseUrl() + "assets/icons/icon-192.png";
+        const iconPath = getBaseUrl() + "assets/icons/crimson/192-crimson_icon.png";
 
         if (synced > 0) {
             showNotification(

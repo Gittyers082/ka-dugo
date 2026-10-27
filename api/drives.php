@@ -406,6 +406,26 @@ if ($method === 'GET') {
         }
     }
 
+    // Time edits must stay valid against each other and against the drive's existing slots.
+    $newStart = trim((string)($input['start_time'] ?? ''));
+    $newEnd = trim((string)($input['end_time'] ?? ''));
+    if ($newStart !== '' || $newEnd !== '') {
+        $timeRe = '/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/';
+        foreach ([$newStart, $newEnd] as $t) {
+            if ($t !== '' && !preg_match($timeRe, $t)) sendJson(false, 'Times must use HH:MM or HH:MM:SS format.', null, 422);
+        }
+        $cur = $conn->prepare('SELECT start_time, end_time, (SELECT MIN(slot_time) FROM drive_slot WHERE drive_id = d.drive_id) AS first_slot, (SELECT MAX(slot_time) FROM drive_slot WHERE drive_id = d.drive_id) AS last_slot FROM drive d WHERE drive_id = ?');
+        $cur->bind_param('i', $driveId);
+        $cur->execute();
+        $row = $cur->get_result()->fetch_assoc();
+        $start = $newStart !== '' ? (strlen($newStart) === 5 ? "$newStart:00" : $newStart) : $row['start_time'];
+        $end = $newEnd !== '' ? (strlen($newEnd) === 5 ? "$newEnd:00" : $newEnd) : $row['end_time'];
+        if ($end <= $start) sendJson(false, 'End time must be after the start time.', null, 422);
+        if ($row['first_slot'] !== null && ($row['first_slot'] < $start || $row['last_slot'] >= $end)) {
+            sendJson(false, 'Existing time slots fall outside the new drive hours. Adjust the slots first.', null, 422);
+        }
+    }
+
     $fields = [];
     $params = [];
     $types = "";

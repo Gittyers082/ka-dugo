@@ -8,10 +8,14 @@ $input = getRequestData();
 $method = getRequestMethod($input);
 
 
+// Eligible donors of a blood type within $radius km of a blood bank. Organizers use their first linked bank as the center.
 function organizerReach(mysqli $conn, int $organizerId, int $bloodTypeId, int $radius): array {
-    $stmt=$conn->prepare('SELECT name,latitude,longitude FROM blood_bank WHERE organizer_id=? ORDER BY bank_id LIMIT 1');
-    $stmt->bind_param('i',$organizerId);$stmt->execute();$center=$stmt->get_result()->fetch_assoc();
-    if(!$center) sendJson(false,'No linked blood bank location is available for this organizer.',null,422);
+    return bankReach($conn, 'SELECT name,latitude,longitude FROM blood_bank WHERE organizer_id=? ORDER BY bank_id LIMIT 1', $organizerId, $bloodTypeId, $radius);
+}
+function bankReach(mysqli $conn, string $centerSql, int $centerKey, int $bloodTypeId, int $radius): array {
+    $stmt=$conn->prepare($centerSql);
+    $stmt->bind_param('i',$centerKey);$stmt->execute();$center=$stmt->get_result()->fetch_assoc();
+    if(!$center) sendJson(false,'No linked blood bank location is available for this account.',null,422);
     $stmt=$conn->prepare('SELECT d.* FROM donor d JOIN account a ON a.account_id=d.account_id WHERE a.is_active=1 AND d.blood_type_id=?');
     $stmt->bind_param('i',$bloodTypeId);$stmt->execute();$donors=$stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $def=$conn->prepare('SELECT reason,ends_on FROM donor_deferral WHERE donor_id=? AND (ends_on IS NULL OR ends_on>=CURRENT_DATE)');
@@ -27,15 +31,36 @@ function organizerReach(mysqli $conn, int $organizerId, int $bloodTypeId, int $r
     }
     return ['ids'=>$ids,'count'=>count($ids),'missing_location'=>$missing,'center_name'=>$center['name'],'radius_km'=>$radius];
 }
+// The bank whose location centers a bank alert: the session's bank, else (admin) the bank_id sent.
+function alertBankId(array $input): int {
+    return signedInBankId() ?? (int)($input['bank_id'] ?? 0);
+}
+
 if($method==='GET' && ($input['action'] ?? '')==='reach'){
-    $org=signedInOrganizer();$bt=validateIntRange($input['blood_type_id'] ?? null,1,8,'blood type');
+    requireRole(['bank','admin','organizer']);
+    $bt=validateIntRange($input['blood_type_id'] ?? null,1,8,'blood type');
     $radius=validateIntRange($input['radius_km'] ?? null,5,30,'radius');
-    $reach=organizerReach($conn,$org,$bt,$radius);unset($reach['ids']);
+    $reach=$_SESSION['role']==='organizer'
+        ? organizerReach($conn,signedInOrganizer(),$bt,$radius)
+        : bankReach($conn,'SELECT name,latitude,longitude FROM blood_bank WHERE bank_id=?',alertBankId($input),$bt,$radius);
+    unset($reach['ids']);
     header('Cache-Control: no-store');sendJson(true,'Live reach loaded.',$reach);
 }
 
-// Organizer sends are checked in the POST branch; everything else needs staff, and organizers only touch their own alerts.
-if ($method === 'GET') requireRole(['bank', 'admin', 'organizer']);
+// Organizer sends are checked in the POST branch; everything else needs staff, and organizers only see and touch their own alerts.
+if ($method === 'GET') {
+    requireRole(['bank', 'admin', 'organizer']);
+    if ($_SESSION['role'] === 'organizer') {
+        $input['organizer_id'] = signedInOrganizer();
+        if (!empty($input['alert_id'])) {
+            $ownAlertId = (int)$input['alert_id'];
+            $own = $conn->prepare('SELECT 1 FROM alert WHERE alert_id = ? AND organizer_id = ?');
+            $own->bind_param('ii', $ownAlertId, $input['organizer_id']);
+            $own->execute();
+            if (!$own->get_result()->fetch_assoc()) sendJson(false, 'Alert not found for this organizer.', null, 404);
+        }
+    }
+}
 if ($method === 'PUT' || $method === 'DELETE') {
     requireRole(['bank', 'admin', 'organizer']);
     if ($_SESSION['role'] === 'organizer') {
@@ -260,6 +285,13 @@ if ($method === 'GET') {
         $organizerMatch=organizerReach($conn,$organizerId,$bloodTypeId,$radius);
         if($status==='active' && !$organizerMatch['count'])sendJson(false,'No eligible donors match this selection. Change the targeting or save a draft.',null,422);
     }
+    if($senderType==='bank') {
+        $bankId=alertBankId($input) ?: null;
+        if(isset($input['radius_km']) && $input['radius_km']!=='') {
+            $radius=validateIntRange($input['radius_km'],5,30,'radius');
+            $organizerMatch=bankReach($conn,'SELECT name,latitude,longitude FROM blood_bank WHERE bank_id=?',(int)$bankId,$bloodTypeId,$radius);
+        }
+    }
     $sentAt = ($status === 'active') ? date('Y-m-d H:i:s') : null;
 
     $conn->begin_transaction();
@@ -281,7 +313,8 @@ if ($method === 'GET') {
         $stmt->close();
 
         $recipientsAdded = 0;
-        if ($status === 'active' && $senderType !== 'organizer') {
+        // Radius-targeted sends ($organizerMatch set) deliver to the matched donors; others go to every eligible donor of the type.
+        if ($status === 'active' && $organizerMatch === null) {
             $recipientsAdded = dispatchAlertRecipients(
                 $conn,
                 $alertId,
@@ -293,7 +326,7 @@ if ($method === 'GET') {
             );
         }
 
-        if($status==='active' && $senderType==='organizer') {
+        if($status==='active' && $organizerMatch !== null) {
             $delivery=$conn->prepare("INSERT INTO alert_recipient (alert_id,donor_id,is_read,channel,delivery_status) VALUES (?,?,0,'push','sent')");
             foreach($organizerMatch['ids'] as $recipientId){$delivery->bind_param('ii',$alertId,$recipientId);if(!$delivery->execute())throw new Exception('Unable to deliver an in-app alert.');$recipientsAdded++;}
         }
@@ -378,6 +411,27 @@ if ($method === 'GET') {
         sendJson(false, 'No valid fields provided for update.', null, 422);
     }
 
+    // Resolve targeting before changing anything, so a rejected publish leaves the draft untouched.
+    $channel = validateEnum(sanitizeString($input['channel'] ?? 'push'), ['push', 'sms', 'email'], 'channel');
+    $reachIds = null;
+    if ($newStatus === 'active') {
+        $stmtAl = $conn->prepare("SELECT sender_type, organizer_id, bank_id, blood_type_id FROM alert WHERE alert_id = ?");
+        $stmtAl->bind_param('i', $alertId);
+        $stmtAl->execute();
+        $al = $stmtAl->get_result()->fetch_assoc();
+        $stmtAl->close();
+        if (!$al) sendJson(false, 'Alert not found.', null, 404);
+        if (isset($input['radius_km']) && $input['radius_km'] !== '') {
+            $radius = validateIntRange($input['radius_km'], 5, 30, 'radius');
+            $match = $al['sender_type'] === 'organizer'
+                ? organizerReach($conn, (int)$al['organizer_id'], (int)$al['blood_type_id'], $radius)
+                : bankReach($conn, 'SELECT name,latitude,longitude FROM blood_bank WHERE bank_id=?', (int)$al['bank_id'], (int)$al['blood_type_id'], $radius);
+            $reachIds = $match['ids'];
+        } elseif ($al['sender_type'] === 'organizer') {
+            sendJson(false, 'Choose a radius (radius_km) to publish this organizer draft.', null, 422);
+        }
+    }
+
     $types .= "i";
     $params[] = $alertId;
 
@@ -389,7 +443,15 @@ if ($method === 'GET') {
 
         // If transitioning a draft alert to active, dispatch recipients now
         $recipientsAdded = 0;
-        if ($newStatus === 'active') {
+        if ($reachIds !== null) {
+            $delivery = $conn->prepare("INSERT IGNORE INTO alert_recipient (alert_id, donor_id, is_read, channel, delivery_status) VALUES (?, ?, 0, ?, 'sent')");
+            foreach ($reachIds as $recipientId) {
+                $delivery->bind_param('iis', $alertId, $recipientId, $channel);
+                $delivery->execute();
+                $recipientsAdded += $delivery->affected_rows;
+            }
+            $delivery->close();
+        } elseif ($newStatus === 'active') {
             $stmtAl = $conn->prepare("SELECT blood_type_id, level FROM alert WHERE alert_id = ?");
             $stmtAl->bind_param('i', $alertId);
             $stmtAl->execute();
@@ -402,7 +464,7 @@ if ($method === 'GET') {
                     $alertId,
                     (int)$alRow['blood_type_id'],
                     (int)$alRow['level'],
-                    sanitizeString($input['channel'] ?? 'push'),
+                    $channel,
                     !empty($input['broadcast_all_types']),
                     !empty($input['include_deferred'])
                 );

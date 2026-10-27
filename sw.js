@@ -4,7 +4,7 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v10";
+const VERSION = "v11";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
@@ -161,8 +161,9 @@ async function staticStrategy(event) {
   if (res) return res;
 
   //offline.html reroute
+  // Redirect (not serve in place) so offline.html's relative asset paths resolve from the app root.
   if (req.mode === "navigate") {
-    return (await cache.match(OFFLINE_URL)) || Response.error();
+    return (await cache.match(OFFLINE_URL)) ? Response.redirect(OFFLINE_URL, 302) : Response.error();
   }
 
   return Response.error();
