@@ -8,6 +8,19 @@ $input = getRequestData();
 $method = getRequestMethod($input);
 requireRole($method === 'GET' ? ['bank', 'phlebotomist', 'admin', 'organizer'] : ['bank', 'admin']);
 
+// Bank staff only see and manage their own bank's requests; the session decides, not the browser.
+$sessionBankId = signedInBankId();
+if ($sessionBankId !== null) {
+    $input['bank_id'] = $sessionBankId;
+    if ($method === 'PUT' || $method === 'DELETE') {
+        $ownRequestId = (int)($input['request_id'] ?? 0);
+        $own = $conn->prepare('SELECT 1 FROM blood_request WHERE request_id = ? AND bank_id = ?');
+        $own->bind_param('ii', $ownRequestId, $sessionBankId);
+        $own->execute();
+        if (!$own->get_result()->fetch_assoc()) sendJson(false, 'Blood request not found for this bank.', null, 404);
+    }
+}
+
 if ($method === 'GET') {
     $requestId = isset($input['request_id']) ? (int)$input['request_id'] : 0;
 

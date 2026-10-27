@@ -51,6 +51,22 @@ function requireRole(array $roles): int {
     return (int)$_SESSION['account_id'];
 }
 
+// Bank and phlebotomist accounts belong to one blood bank; returns null for other roles.
+function signedInBankId(): ?int {
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    $sql = match ($_SESSION['role'] ?? '') {
+        'bank' => 'SELECT bank_id FROM blood_bank WHERE account_id=? LIMIT 1',
+        'phlebotomist' => 'SELECT bank_id FROM phlebotomist WHERE account_id=? LIMIT 1',
+        default => null,
+    };
+    if ($sql === null) return null;
+    $accountId=(int)($_SESSION['account_id'] ?? 0);
+    $stmt=getDbConnection()->prepare($sql);
+    $stmt->bind_param('i',$accountId); $stmt->execute(); $row=$stmt->get_result()->fetch_assoc(); $stmt->close();
+    if (!$row) sendJson(false, 'No blood bank is linked to this account.', null, 404);
+    return (int)$row['bank_id'];
+}
+
 // Resolve the organizer record from the signed-in account, not a localStorage account ID.
 function signedInOrganizer(bool $required = true): ?int {
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();

@@ -53,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Fetch Open Requests
-            const reqRes = await fetch(`../../api/request.php?bank_id=${BANK_ID}&status=open`);
+            // The server picks the bank from the session; BANK_ID here is an account ID.
+            const reqRes = await fetch('../../api/request.php?status=open');
             if (reqRes.ok) {
                 const reqData = await reqRes.json();
 
