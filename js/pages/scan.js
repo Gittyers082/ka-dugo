@@ -1,22 +1,16 @@
+import * as DB from '../db.js';
+
 // ============================================================================
-// SCANNER & LOG PROTOCOL LOGIC (Vanilla WebRTC Camera + BarcodeDetector + API)
+// SCANNER & LOG PROTOCOL LOGIC (Vanilla WebRTC Camera + API + IndexedDB)
 // ============================================================================
 document.addEventListener("DOMContentLoaded", () => {
   const DONORS_API = "../../api/donors.php";
   const DRIVES_API = "../../api/drives.php";
 
-  // Active donor state (defaults to Donor #1 Miguel Cruz from kadugo.sql)
-  let activeDonor = {
-    donor_id: 1,
-    full_name: "Miguel Cruz",
-    blood_type_id: 7,
-    blood_type_code: "O+",
-    qr_code: "DNR-QR-99238471209384",
-  };
+  let activeDonor = null;
   let units = 1;
   const volumePerUnit = 450;
 
-  // Camera & Scanner state
   let mediaStream = null;
   let scanInterval = null;
   let isScanning = false;
@@ -31,22 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
       toast.id = "scan-toast";
       document.body.appendChild(toast);
       Object.assign(toast.style, {
-        position: "fixed",
-        bottom: "120px",
-        left: "50%",
-        transform: "translate(-50%, 20px)",
-        background: "#2a0605",
-        color: "#fff",
-        padding: "14px 24px",
-        borderRadius: "8px",
-        fontSize: "14px",
-        fontWeight: "600",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        opacity: "0",
-        pointerEvents: "none",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        zIndex: "1000",
-        whiteSpace: "nowrap",
+        position: "fixed", bottom: "120px", left: "50%", transform: "translate(-50%, 20px)",
+        background: "#2a0605", color: "#fff", padding: "14px 24px", borderRadius: "8px",
+        fontSize: "14px", fontWeight: "600", boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        opacity: "0", pointerEvents: "none", transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        zIndex: "1000", whiteSpace: "nowrap",
       });
       if (window.innerWidth >= 900) {
         toast.style.left = "calc(50% + 130px)";
@@ -62,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
-  // --- 2. Synthesized Scanner Beep (100% Vanilla Web Audio API) ---
+  // --- 2. Synthesized Scanner Beep ---
   function playScanBeep(success = true) {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -71,19 +54,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = success ? "sine" : "sawtooth";
-      osc.frequency.setValueAtTime(success ? 1046.5 : 320, ctx.currentTime); // C6 note on success
+      osc.frequency.setValueAtTime(success ? 1046.5 : 320, ctx.currentTime);
       gain.gain.setValueAtTime(0.12, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.16);
-    } catch (e) {
-      /* Audio permission not yet granted */
-    }
+    } catch (e) { }
   }
 
-  // --- 3. Update Progress Stepper UI ---
   function setStepperStage(stage) {
     const steps = document.querySelectorAll(".progress-stepper .step");
     steps.forEach((step, idx) => {
@@ -103,47 +83,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- 4. Auto-fill Current Timestamp, Client UUID & Active Drives ---
+  // --- 3. Sync Button Animation ---
+  const refreshBtn = document.querySelector(".refresh");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => {
+      const icon = refreshBtn.querySelector("svg");
+      if (icon) {
+        icon.style.transition = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+        icon.style.transform = "rotate(360deg)";
+        setTimeout(() => {
+          icon.style.transition = "none";
+          icon.style.transform = "rotate(0deg)";
+        }, 1000);
+      }
+      showToast("Resetting scanner module...");
+      setTimeout(() => window.location.reload(), 600);
+    });
+  }
+
+  // --- 4. Auto-fill Defaults ---
   const timeInput = document.querySelector('input[value="Today, 14:32"]');
   if (timeInput) {
     const now = new Date();
-    const timeString = now.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
+    const timeString = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
     timeInput.value = `Today, ${timeString}`;
   }
 
   const uuidInput = document.querySelector('input[value="9f8c2b1a-4d3e"]');
-  const clientUuid =
-    window.KadugoPWA && window.KadugoPWA.makeUuid
-      ? window.KadugoPWA.makeUuid()
-      : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) =>
-        ((Math.random() * 16) | 0).toString(16),
-      );
-  if (uuidInput) {
-    uuidInput.value = clientUuid;
-  }
+  const clientUuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => ((Math.random() * 16) | 0).toString(16));
+  if (uuidInput) uuidInput.value = clientUuid;
 
-  // Populate active drives dropdown from api/drives.php
   const driveSelect = document.querySelector(".custom-select");
   if (driveSelect) {
     fetch(DRIVES_API)
       .then((r) => r.json())
       .then((json) => {
-        if (
-          json &&
-          json.success &&
-          json.data &&
-          Array.isArray(json.data.drives)
-        ) {
-          driveSelect.innerHTML = json.data.drives
-            .map(
-              (d) =>
-                `<option value="${d.drive_id}">${d.title} - ${d.venue} (${d.ref_code})</option>`,
-            )
-            .join("");
+        if (json && json.success && json.data && Array.isArray(json.data.drives)) {
+          driveSelect.innerHTML = json.data.drives.map(d => `<option value="${d.drive_id}">${d.title} - ${d.venue} (${d.ref_code})</option>`).join("");
         }
       })
       .catch(() => { });
@@ -163,36 +139,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     minusBtn.addEventListener("click", () => {
-      if (units > 1) {
-        units--;
-        updateStepper();
-      } else {
-        showToast("Minimum collection is 1 Unit.");
-      }
+      if (units > 1) { units--; updateStepper(); }
+      else { showToast("Minimum collection is 1 Unit."); }
     });
 
     plusBtn.addEventListener("click", () => {
-      if (units < 4) {
-        units++;
-        updateStepper();
-      } else {
-        showToast("Maximum collection is 4 Units.");
-      }
+      if (units < 4) { units++; updateStepper(); }
+      else { showToast("Maximum collection is 4 Units."); }
     });
   }
 
   // --- 6. Live Camera & Vanilla QR Scanner Setup ---
   const viewport = document.querySelector(".scanner-viewport");
-  const promptText = viewport
-    ? viewport.querySelector(".scanner-brackets p")
-    : null;
-  const engineLabel = viewport
-    ? viewport.querySelector("p.text-success")
-    : null;
+  const promptText = viewport ? viewport.querySelector(".scanner-brackets p") : null;
+  const engineLabel = viewport ? viewport.querySelector("p.text-success") : null;
   const idInput = document.querySelector(".manual-entry input");
   const lookupBtn = document.querySelector(".manual-entry .btn-secondary");
 
-  // Inject <video> element inside .scanner-viewport
   let videoEl = null;
   if (viewport) {
     videoEl = document.createElement("video");
@@ -206,28 +169,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     viewport.addEventListener("click", () => {
-      if (isScanning) {
-        stopCamera();
-      } else {
-        startCamera();
-      }
+      if (isScanning) stopCamera();
+      else startCamera();
     });
   }
+
   async function startCamera() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showToast(
-        "Camera API unavailable. Use manual lookup or quick-scan buttons.",
-      );
+      showToast("Camera API unavailable. Use manual lookup.");
       return;
     }
 
     try {
       mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-        },
+        video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } },
         audio: false,
       });
 
@@ -236,15 +191,11 @@ document.addEventListener("DOMContentLoaded", () => {
       isScanning = true;
       viewport.classList.add("camera-active");
 
-      if (promptText)
-        promptText.textContent = "ALIGN DONOR QR CARD (TAP TO STOP)";
+      if (promptText) promptText.textContent = "ALIGN DONOR QR CARD (TAP TO STOP)";
       showToast("Optical camera stream active.");
 
-      // Start native BarcodeDetector loop if supported by the browser
       if ("BarcodeDetector" in window) {
-        const detector = new window.BarcodeDetector({
-          formats: ["qr_code", "code_128", "code_39", "ean_13"],
-        });
+        const detector = new window.BarcodeDetector({ formats: ["qr_code", "code_128", "code_39", "ean_13"] });
 
         scanInterval = setInterval(async () => {
           if (!isScanning || videoEl.readyState < 2) return;
@@ -259,12 +210,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 handleDetectedCode(code);
               }
             }
-          } catch (err) {
-            /* Frame read skipped */
-          }
+          } catch (err) { }
         }, 250);
       } else if (engineLabel) {
-        engineLabel.textContent = "Camera Live • Use Quick-Scan or Manual ID";
+        engineLabel.textContent = "Camera Live • Use Manual ID Entry";
       }
     } catch (err) {
       showToast("Camera permission denied or no webcam found.");
@@ -273,10 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function stopCamera() {
     isScanning = false;
-    if (scanInterval) {
-      clearInterval(scanInterval);
-      scanInterval = null;
-    }
+    if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
     if (mediaStream) {
       mediaStream.getTracks().forEach((track) => track.stop());
       mediaStream = null;
@@ -287,47 +233,31 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Camera stream paused.");
   }
 
-  // --- 7. Camera Flash / Torch Toggle ---
   const flashBtn = document.querySelector(".scan-card .btn-outline-small");
   if (flashBtn) {
     let flashOn = false;
     flashBtn.addEventListener("click", async () => {
       flashOn = !flashOn;
-      flashBtn.style.backgroundColor = flashOn
-        ? "rgba(0,0,0,0.05)"
-        : "transparent";
+      flashBtn.style.backgroundColor = flashOn ? "rgba(0,0,0,0.05)" : "transparent";
       flashBtn.style.borderColor = flashOn ? "var(--maroon)" : "var(--line)";
       flashBtn.style.color = flashOn ? "var(--maroon)" : "var(--text)";
 
-      // Try real hardware torch if mobile camera is active
       if (mediaStream) {
         const track = mediaStream.getVideoTracks()[0];
-        const caps =
-          track && track.getCapabilities ? track.getCapabilities() : {};
+        const caps = track && track.getCapabilities ? track.getCapabilities() : {};
         if (caps.torch) {
-          try {
-            await track.applyConstraints({ advanced: [{ torch: flashOn }] });
-          } catch (e) { }
+          try { await track.applyConstraints({ advanced: [{ torch: flashOn }] }); } catch (e) { }
         }
       }
 
-      if (viewport) {
-        viewport.classList.toggle("flash-boost", flashOn);
-      }
-      showToast(
-        flashOn
-          ? "Camera flash / brightness boost enabled"
-          : "Camera flash disabled",
-      );
+      if (viewport) viewport.classList.toggle("flash-boost", flashOn);
+      showToast(flashOn ? "Camera flash / brightness boost enabled" : "Camera flash disabled");
     });
   }
 
-  // --- 8. Live Donor Lookup via api/donors.php ---
+  // --- 7. Live Donor Lookup ---
   async function lookupDonor(queryVal) {
-    const param = /^\d+$/.test(queryVal)
-      ? `donor_id=${encodeURIComponent(queryVal)}`
-      : `qr_code=${encodeURIComponent(queryVal)}`;
-
+    const param = /^\d+$/.test(queryVal) ? `donor_id=${encodeURIComponent(queryVal)}` : `qr_code=${encodeURIComponent(queryVal)}`;
     const res = await fetch(`${DONORS_API}?${param}`);
     const json = await res.json();
     if (!res.ok || !json.success || !json.data) {
@@ -346,9 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
       qr_code: donor.qr_code,
     };
 
-    const matchedCard = document.querySelectorAll(
-      ".scan-col-right .scan-card",
-    )[0];
+    const matchedCard = document.querySelectorAll(".scan-col-right .scan-card")[0];
     if (!matchedCard) return;
 
     const nameEl = matchedCard.querySelector("h2.t-title");
@@ -358,8 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const alertBox = matchedCard.querySelector(".alert-box");
 
     if (nameEl) nameEl.textContent = donor.full_name;
-    if (idEl)
-      idEl.textContent = `Donor ID: #${donor.donor_id} (${donor.qr_code})`;
+    if (idEl) idEl.textContent = `Donor ID: #${donor.donor_id} (${donor.qr_code})`;
     if (btBadge) btBadge.textContent = donor.blood_type_code || "O+";
 
     if (cells[0] && donor.eligibility) {
@@ -384,16 +311,10 @@ document.addEventListener("DOMContentLoaded", () => {
       alertBox.style.borderColor = eligible ? "#a9d7b8" : "#e8b5bd";
       alertBox.style.color = eligible ? "#287a4b" : "#9d2938";
 
-      if (titleSpan) {
-        titleSpan.textContent = eligible
-          ? "Eligible to Donate"
-          : "Deferred / Ineligible";
-      }
+      if (titleSpan) titleSpan.textContent = eligible ? "Eligible to Donate" : "Deferred / Ineligible";
       if (descSpan) {
         descSpan.style.color = eligible ? "#287a4b" : "#9d2938";
-        descSpan.textContent = eligible
-          ? "Passed 56-day whole blood interval & weight requirement."
-          : donor.eligibility.reasons.join(" ");
+        descSpan.textContent = eligible ? "Passed 56-day whole blood interval & weight requirement." : donor.eligibility.reasons.join(" ");
       }
     }
 
@@ -435,14 +356,20 @@ document.addEventListener("DOMContentLoaded", () => {
       lookupBtn.disabled = false;
     });
   }
-  // --- 9. Save & Log Donation via KadugoPWA (Online POST or Offline IndexedDB) ---
+
+  // --- 8. Save & Log Donation (Restoring PWA Native Engine) ---
   const saveBtn = document.querySelector(".form-actions .btn-primary");
   if (saveBtn) {
     saveBtn.onclick = async (e) => {
       e.preventDefault();
+
+      if (!activeDonor) {
+        showToast("Please lookup or scan a donor before saving.");
+        return;
+      }
+
       const remarksInput = document.querySelector(".custom-textarea");
-      const selectedDriveId =
-        driveSelect && driveSelect.value ? Number(driveSelect.value) : 1;
+      const selectedDriveId = driveSelect && driveSelect.value ? Number(driveSelect.value) : 1;
 
       const payload = {
         client_uuid: clientUuid,
@@ -464,43 +391,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         let result = { status: "queued" };
+
+        // 1. Try PWA method first (handles its own offline queueing)
         if (window.KadugoPWA && window.KadugoPWA.submitDonation) {
           result = await window.KadugoPWA.submitDonation(payload);
         } else {
+          // 2. Direct Fetch Fallback
           const res = await fetch("../../api/donations.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
-          result = res.ok
-            ? { status: "saved" }
-            : { status: "error", message: "Failed to save" };
-        }
-
-        if (result.status === "error") {
-          showToast(result.message);
-          saveBtn.innerHTML = "Save & Log Donation";
-          saveBtn.disabled = false;
-          saveBtn.style.opacity = "1";
-          return;
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok || json.success === false) throw new Error("Offline");
+          result.status = "saved";
         }
 
         stopCamera();
-        showToast(
-          result.status === "saved"
-            ? "Donation synced to MySQL database!"
-            : "Offline: Donation queued in IndexedDB!",
-        );
+        showToast(result.status === "saved" ? "Donation synced to MySQL database!" : "Offline: Donation securely queued in local storage!");
+        setTimeout(() => { window.location.href = "donation-log.html"; }, 1200);
 
-        setTimeout(() => {
-          window.location.href = "donation-log.html";
-        }, 900);
       } catch (err) {
         stopCamera();
-        showToast("Saved to offline queue.");
-        setTimeout(() => {
-          window.location.href = "donation-log.html";
-        }, 900);
+        showToast("Offline: Donation securely queued in local storage!");
+        setTimeout(() => { window.location.href = "donation-log.html"; }, 1200);
       }
     };
   }

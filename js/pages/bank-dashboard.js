@@ -157,15 +157,39 @@ document.addEventListener("DOMContentLoaded", () => {
     if (refreshBtn) {
         refreshBtn.addEventListener("click", () => {
             const icon = refreshBtn.querySelector("svg");
-            icon.style.transition = "transform 0.5s ease";
-            icon.style.transform = "rotate(360deg)";
+            if (icon) {
+                icon.style.transition = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+                icon.style.transform = "rotate(360deg)";
+                setTimeout(() => {
+                    icon.style.transition = "none";
+                    icon.style.transform = "rotate(0deg)";
+                }, 1000);
+            }
 
-            loadBankDashboard();
+            // Dynamic toast creation for the dashboard
+            let toast = document.getElementById("toast");
+            if (!toast) {
+                toast = document.createElement("div");
+                toast.id = "toast";
+                Object.assign(toast.style, {
+                    position: "fixed", bottom: "120px", left: "50%", transform: "translate(-50%, 20px)",
+                    background: "var(--text)", color: "var(--surface)", padding: "13px 18px",
+                    borderRadius: "5px", fontSize: "14px", fontWeight: "600", zIndex: "1000",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)", opacity: "0", pointerEvents: "none", whiteSpace: "nowrap"
+                });
+                document.body.appendChild(toast);
+            }
+
+            toast.textContent = "Syncing dashboard metrics...";
+            toast.style.opacity = "1";
+            toast.style.transform = "translate(-50%, 0)";
 
             setTimeout(() => {
-                icon.style.transition = "none";
-                icon.style.transform = "rotate(0deg)";
-            }, 1000);
+                toast.style.opacity = "0";
+                toast.style.transform = "translate(-50%, 20px)";
+            }, 3000);
+
+            loadBankDashboard();
         });
     }
 

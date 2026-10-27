@@ -12,7 +12,7 @@ const state = {
 };
 
 // ============================================================================
-// SAFE DOM HELPERS (Zero innerHTML)
+// SAFE DOM HELPERS (Zero innerHTML for strict security)
 // ============================================================================
 
 function el(tag, props = {}, ...children) {
@@ -302,15 +302,34 @@ function renderList() {
 // LIVE API + OFFLINE INDEXEDDB INTEGRATION
 // ============================================================================
 
-const BANK_ID = localStorage.getItem('kadugo_active_user') || 1;
+// 1. Fetch Local IndexedDB (Pending Sync) via PWA Engine
+try {
+  if (window.KadugoPWA && window.KadugoPWA.getPendingDonations) {
+    const pendingList = await window.KadugoPWA.getPendingDonations();
 
-async function syncDonationLogWithBackend() {
-  const merged = [];
-  let todayTotal = 0;
-  const shiftGoal = 50;
+    pendingList.forEach((item) => {
+      const p = item.payload || {};
+      const units = Number(p.units || 1);
 
-  // 1. Fetch Local IndexedDB (Pending Sync)
-  try {
+      merged.push({
+        id: item.client_uuid,
+        donor_name: (p.donor_name || `Donor #${p.donor_id || 1}`).replace(" ", "<br>"),
+        blood_type: p.blood_type_code || "O+",
+        component: "Whole Blood<br>(450 mL)",
+        units: units,
+        station: "Local Queue",
+        collected_at: new Date(item.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        collected_by: "Current Staff",
+        link_type: "Offline Queue",
+        link_value: "Stored in Local Cache",
+        notes: p.notes || "Logged offline — awaiting network sync.",
+        status: "pending",
+        status_sub: `uuid: ${String(item.client_uuid).slice(0, 8)}`,
+        can_delete: true,
+      });
+    });
+  } else {
+    // Raw DB fallback if PWA engine is unreachable
     const allRecords = await getAllRecords();
     const pendingList = allRecords.filter(r => r.status === "Pending Sync");
 
@@ -335,78 +354,9 @@ async function syncDonationLogWithBackend() {
         can_delete: true,
       });
     });
-  } catch (e) {
-    console.warn("Could not read IndexedDB pending donations:", e);
   }
-
-  // 2. Fetch Live SQL Database
-  try {
-    const res = await fetch("../../api/donations.php");
-    const json = await res.json();
-
-    if (json && json.success && json.data && Array.isArray(json.data.donations)) {
-
-      // Filter specifically for this bank's logs
-      const bankDonations = json.data.donations.filter(d => parseInt(d.bank_id) === parseInt(BANK_ID));
-
-      // Date matcher for Daily Quota calculation
-      const todayStr = new Date().toISOString().split('T')[0];
-
-      bankDonations.forEach((d) => {
-        const units = Number(d.units || 1);
-
-        // Add to quota if collected today
-        if (d.collected_at && d.collected_at.startsWith(todayStr)) {
-          todayTotal += units;
-        }
-
-        // Create Name Array for formatting First<br>Last
-        const nameArr = String(d.full_name || "Unknown Donor").split(" ");
-        const formattedName = nameArr.length > 1 ? `${nameArr[0]}<br>${nameArr.slice(1).join(" ")}` : nameArr[0];
-
-        merged.push({
-          id: `db-${d.donation_id}`,
-          donor_name: formattedName,
-          blood_type: d.blood_type_code || "O+",
-          component: `${d.component_name || "Whole Blood"}<br>(450 mL)`,
-          units: units,
-          station: d.bank_name || "Central Bank",
-          collected_at: d.collected_at,
-          collected_by: "System Record",
-          link_type: "Status",
-          link_value: String(d.status || "collected").toUpperCase(),
-          notes: "Verified database record.",
-          status: "synced",
-          status_sub: `uuid: ${String(d.client_uuid).slice(0, 8)}`,
-          can_delete: false,
-        });
-      });
-    }
-  } catch (e) {
-    console.warn("Using cached/mock donations while offline.");
-  }
-
-  // Inject Quota Math into Top Bar
-  const pct = Math.min(100, Math.round((todayTotal / shiftGoal) * 100));
-  const remaining = Math.max(0, shiftGoal - todayTotal);
-
-  const safeSet = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  };
-
-  safeSet('log-quota-text', `${todayTotal} / ${shiftGoal} Units`);
-  safeSet('log-quota-pct', `(${pct}%)`);
-  safeSet('log-quota-remaining', `${remaining} to`);
-
-  if (pct >= 100) safeSet('log-quota-status', "Quota Complete!");
-
-  const bar = document.getElementById('log-quota-bar');
-  if (bar) bar.style.width = `${pct}%`;
-
-  // Inject Feed
-  state.donations = merged;
-  renderList();
+} catch (e) {
+  console.warn("Could not read IndexedDB pending donations:", e);
 }
 
 // ============================================================================
@@ -431,11 +381,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  const refreshBtn = document.getElementById("refresh-btn");
-  if (refreshBtn) refreshBtn.addEventListener("click", () => {
-    showToast("Refreshing logs from server...");
-    syncDonationLogWithBackend();
-  });
+  const refreshBtn = document.querySelector(".refresh");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => {
+      const icon = refreshBtn.querySelector("svg");
+      if (icon) {
+        icon.style.transition = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+        icon.style.transform = "rotate(360deg)";
+        setTimeout(() => {
+          icon.style.transition = "none";
+          icon.style.transform = "rotate(0deg)";
+        }, 1000);
+      }
+      showToast("Syncing logs securely...");
+      syncDonationLogWithBackend();
+    });
+  }
 
   // Edit Modal
   const editForm = document.getElementById("edit-form");
@@ -467,11 +428,76 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("kadugo:synced", syncDonationLogWithBackend);
 });
 
-// Broadcast Modal logic (isolated to prevent errors)
+// ============================================================================
+// BROADCAST ALERT MODAL LOGIC 
+// ============================================================================
 document.addEventListener("DOMContentLoaded", () => {
   const broadcastBtn = document.getElementById("broadcast-alert-btn");
   const broadcastDialog = document.getElementById("broadcast-dialog");
   const closeBroadcastX = document.getElementById("close-broadcast-x");
+  const dispatchBtn = document.getElementById("dispatch-alert-btn");
+
+  const bloodButtons = document.querySelectorAll("#broadcast-blood-grid .blood");
+  const radiusSlider = document.getElementById("broadcast-radius");
+  const radiusDisplay = document.getElementById("radius-display");
+  const reachDisplay = document.getElementById("reach-display");
+  const msgInput = document.getElementById("broadcast-msg");
+  const charCount = document.getElementById("char-count");
+  const previewBody = document.getElementById("preview-body");
+
+  // Open & Close
   if (broadcastBtn && broadcastDialog) broadcastBtn.addEventListener("click", () => broadcastDialog.showModal());
   if (closeBroadcastX && broadcastDialog) closeBroadcastX.addEventListener("click", () => broadcastDialog.close());
+
+  // Blood Type Selection
+  bloodButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      bloodButtons.forEach((b) => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      const type = btn.dataset.type;
+
+      // Auto-update message with selected blood type
+      const currentMsg = msgInput.value;
+      msgInput.value = currentMsg.replace(/\b(?:O|A|B|AB)[+-]\b/g, type);
+      updatePreview();
+    });
+  });
+
+  // Geofence Radius Slider
+  if (radiusSlider) {
+    radiusSlider.addEventListener("input", (e) => {
+      const val = e.target.value;
+      radiusDisplay.textContent = `${val} km`;
+
+      const estimatedDonors = { 5: 48, 10: 91, 15: 142, 20: 198, 25: 251, 30: 317 };
+      reachDisplay.textContent = `${estimatedDonors[val]} Donors`;
+
+      const footerSpan = document.querySelector(".notif-footer span");
+      if (footerSpan) footerSpan.textContent = `⌾ Within ${val}km Geofence`;
+    });
+  }
+
+  // Live Message Editor
+  function updatePreview() {
+    const text = msgInput.value;
+    charCount.textContent = `${text.length} / 280`;
+    previewBody.textContent = text || "Your alert message will appear here.";
+  }
+  if (msgInput) msgInput.addEventListener("input", updatePreview);
+
+  // Dispatch Action
+  if (dispatchBtn) {
+    dispatchBtn.addEventListener("click", () => {
+      const originalText = dispatchBtn.textContent;
+      dispatchBtn.disabled = true;
+      dispatchBtn.textContent = "Dispatching...";
+
+      setTimeout(() => {
+        broadcastDialog.close();
+        showToast(`Emergency alert dispatched to ${reachDisplay.textContent}`);
+        dispatchBtn.disabled = false;
+        dispatchBtn.textContent = "Confirm & Dispatch Alert";
+      }, 1200);
+    });
+  }
 });
