@@ -108,37 +108,10 @@
                             <span class="filter-caption">FILTER:</span>
                             <button aria-pressed="true" class="type-filter active" data-type="all" type="button">All records</button>
                             <button aria-pressed="false" class="type-filter" data-type="system" type="button">System records</button>
-                            <button aria-pressed="false" class="type-filter" data-type="manual" type="button">Self-reported</button>
                         </div>
                     </section>
                 </div>
-                <section aria-label="Add self-reported donation" class="historical-section">
-                    <button aria-controls="historical-form" aria-expanded="false" class="historical-toggle" id="historical-toggle" type="button">
-                        <span class="history-icon">+</span>
-                        <span class="historical-copy"><strong>Add Historical / Self-Reported Donation</strong><small>Records are submitted as pending verification</small></span>
-                        <span class="add-label">Add record</span>
-                        <span class="chevron">⌄</span>
-                    </button>
-                    <form class="historical-form" hidden="" id="historical-form">
-                        <p>The database stores your donation date, blood type, and units. Self-reported records are not automatically verified.</p>
-                        <div class="form-row">
-                            <label>
-                                Donation date
-                                <input name="donated_on" required="" type="date"/>
-                            </label>
-                            <label>
-                                Blood type
-                                <input name="blood_type_display" readonly="" type="text"/>
-                            </label>
-                            <label>
-                                Units donated
-                                <input max="10" min="0.01" name="units" required="" step="0.01" type="number" value="1"/>
-                            </label>
-                        </div>
-                        <button id="save-history-local" type="submit">Save Donation</button>
-                        <p aria-live="polite" class="history-save-status" id="history-save-status" role="status"></p>
-                    </form>
-                </section>
+                <!-- changes: Removed donor self-add donation form. -->
                 <section aria-labelledby="logs-title" class="logs-section">
                     <div class="logs-heading">
                         <div>
@@ -151,7 +124,7 @@
                 </section>
             </main>
         </div>
-        <script defer="" src="../../js/donor_js/donor-common.js?db-1"></script>
+        <script defer="" src="../../js/donor_js/donor-common.js?go-drives-2"></script>
         <script defer="" src="../../js/donor_js/my-donations.js?db-1"></script>
     </body>
 </html>

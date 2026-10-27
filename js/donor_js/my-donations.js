@@ -2,8 +2,7 @@
 (async () => {
     const api = window.KaDonor, $ = selector => document.querySelector(selector);
     const grid = $('#logs-grid');
-    const form = $('#historical-form');
-    const status = $('#history-save-status');
+    // changes: Donation history is display-only; bank records are loaded from MySQL.
     let records = [];
     let selectedYear = 'all', selectedSource = 'all';
     const selected = selector => $(selector);
@@ -55,16 +54,10 @@
         $('#history-last-date').textContent = records.length ? api.formatDate(records[0].donated_on) : 'None yet';
         $('#history-blood-pill').textContent = `Blood type: ${me.blood_type_code}`;
         $('#history-eligibility').textContent = me.eligibility?.is_eligible ? 'Eligible' : 'Deferred';
-        form.querySelector('[name="blood_type_display"]').value = me.blood_type_code;
         $('#donor-page-status').hidden = true;
         updateYearFilters();
         applyFilters();
     }
-    $('#historical-toggle')?.addEventListener('click', () => {
-        const expanded = $('#historical-toggle').getAttribute('aria-expanded') !== 'true';
-        $('#historical-toggle').setAttribute('aria-expanded', String(expanded));
-        form.hidden = !expanded;
-    });
     document.querySelectorAll('.type-filter').forEach(button => button.addEventListener('click', () => {
         selectedSource = button.dataset.type;
         document.querySelectorAll('.type-filter').forEach(b => {
@@ -73,25 +66,6 @@
         });
         applyFilters();
     }));
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const button = $('#save-history-local');
-        button.disabled = true;
-        status.textContent = 'Saving...';
-        try {
-            await api.request('add_history', { donated_on: form.elements.donated_on.value, units: Number(form.elements.units.value) });
-            form.elements.donated_on.value = '';
-            form.elements.units.value = '1';
-            await load();
-            status.textContent = 'Self-reported donation saved to the database. Verification is pending.';
-        }
-        catch (error) {
-            status.textContent = error.message;
-        }
-        finally {
-            button.disabled = false;
-        }
-    });
     try {
         await load();
     }

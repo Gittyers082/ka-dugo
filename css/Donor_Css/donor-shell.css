@@ -231,7 +231,7 @@
 }
 
 /* Bank-Style Card Surfaces */
-:is(.drives-page, .donations-page) :is(.filter-panel, .filter-card, .drive-card, .historical-toggle, .log-card, .bookings-view, .booked-card, .protocol-card) {
+:is(.drives-page, .donations-page) :is(.filter-panel, .filter-card, .drive-card, .log-card, .bookings-view, .booked-card, .protocol-card) {
   background: #f2eeea;
   border-color: rgba(92, 62, 56, 0.18);
   box-shadow: 0 3px 12px rgba(42, 6, 5, 0.065);
@@ -311,10 +311,7 @@
   line-height: 1.3;
 }
 
-.donations-page .historical-toggle {
-  padding: 19px 22px;
-}
-
+/* changes: Historical self-add panel removed. */
 .donations-page .log-footer {
   overflow-wrap: anywhere;
 }

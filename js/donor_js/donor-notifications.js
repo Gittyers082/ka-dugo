@@ -1,12 +1,28 @@
-/* DONOR NOTIFICATIONS - LIVE MYSQL ALERT RECIPIENTS */
-(async () => {
-    const api = window.KaDonor, $ = selector => document.querySelector(selector);
+/* DONOR NOTIFICATIONS - DATABASE ALERTS AND LIVE REQUESTS */
+(() => {
+    const api = window.KaDonor;
+    const $ = selector => document.querySelector(selector);
     const list = $('#donor-notification-list');
     const overlay = $('#notice-overlay');
-    const all = $('#show-all-alerts'), unread = $('#show-unread-alerts');
-    let alerts = [], filter = 'all', previousFocus = null;
+    const all = $('#show-all-alerts');
+    const unread = $('#show-unread-alerts');
+    let notices = [];
+    let donorId = 0;
+    let filter = 'all';
+    let previousFocus = null;
+    let activeNotice = null;
+    let loading = false;
+
+    function feedback(message) {
+        const target = $('#notification-feedback');
+        if (target) {
+            target.hidden = !message;
+            target.textContent = message || '';
+        }
+    }
+
     function render() {
-        const unreadCount = alerts.filter(a => !Number(a.is_read)).length;
+        const unreadCount = notices.filter(notice => !notice.is_read).length;
         $('#unread-summary').textContent = `${unreadCount} unread`;
         $('#unread-tab-count').textContent = String(unreadCount);
         $('#mark-all-alerts-read').disabled = unreadCount === 0;
@@ -14,86 +30,134 @@
         unread.classList.toggle('active', filter === 'unread');
         all.setAttribute('aria-selected', String(filter === 'all'));
         unread.setAttribute('aria-selected', String(filter === 'unread'));
-        const visible = alerts.filter(a => filter === 'all' || !Number(a.is_read));
-        list.innerHTML = visible.map(a => {
-            const sender = a.sender_name || 'Ka-dugo';
-            const title = a.drive_id ? 'Blood drive update' : a.request_id ? 'Blood request' : 'Blood donation alert';
-            const type = a.sender_type === 'organizer' ? 'ORGANIZER ALERT' : a.sender_type === 'bank' ? 'BLOOD BANK ALERT' : 'SYSTEM ALERT';
-            return `<article class="notification-card ${Number(a.is_read) ? '' : 'unread'}" data-alert-id="${Number(a.alert_id)}">` +
-                `<div class="notice-indicator" aria-hidden="true">` +
-                `</div><div class="notice-content">` +
-                `<div class="notice-meta">` +
-                `<span class="notice-kind">${type}` +
-                `</span><time>${api.safe(a.sent_at || 'Date unavailable')}` +
-                `</time></div><h2>${api.safe(title)}` +
-                `</h2><p class="notice-sender">${api.safe(sender)} · ${api.safe(a.blood_type_code)}` +
-                `</p><p class="notice-excerpt">${api.safe(a.message)}` +
-                `</p><button type="button" class="notice-open" data-id="${Number(a.alert_id)}">${Number(a.is_read) ? 'View' : 'Read'} notification →` +
-                `</button></div></article>`;
-        }).join('');
-        $('#notifications-empty').hidden = visible.length !== 0;
-        $('#notification-load-status')?.remove();
-        list.querySelectorAll('.notice-open').forEach(button => button.addEventListener('click', () => openNotice(Number(button.dataset.id))));
+
+        const visible = notices.filter(n => filter === 'all' || !n.is_read);
+        list.innerHTML = visible.map(n => `<article class="notification-card ${n.is_read ? '' : 'unread'}">
+            <div class="notice-indicator" aria-hidden="true"></div>
+            <div class="notice-content">
+                <div class="notice-meta">
+                    <span class="notice-kind">${api.safe(n.type_label)}</span>
+                    <time>${api.safe(n.date_label)}: ${api.safe(n.date_text || 'Not provided')}</time>
+                </div>
+                <h2>${api.safe(n.title)}</h2>
+                <p class="notice-sender">${api.safe(n.sender)}</p>
+                ${n.detail ? `<p class="notice-sender">${api.safe(n.detail)}</p>` : ''}
+                <p class="notice-excerpt">${api.safe(n.message)}</p>
+                <button type="button" class="notice-open" data-key="${api.safe(n.key)}">
+                    ${n.is_read ? 'View' : 'Read'} notification →
+                </button>
+            </div>
+        </article>`).join('');
+
+        const empty = $('#notifications-empty');
+        empty.hidden = visible.length !== 0;
+        empty.querySelector('p').textContent = filter === 'unread'
+            ? 'No unread notifications.'
+            : 'No notifications yet. New matching requests and blood drives will appear here.';
+        $('#empty-show-all').hidden = filter === 'all';
     }
-    async function openNotice(id) {
-        const item = alerts.find(a => Number(a.alert_id) === id);
-        if (!item)
-            return;
+
+    async function openNotice(key) {
+        const item = notices.find(n => n.key === key);
+        if (!item) return;
+        activeNotice = item;
+        $('#notice-go').hidden = !item.link || !['drive', 'alert'].includes(item.kind);
         previousFocus = document.activeElement;
-        $('#notice-detail-kind').textContent = item.sender_type === 'bank'
-            ? 'BLOOD BANK ALERT'
-            : item.sender_type === 'organizer' ? 'ORGANIZER ALERT' : 'SYSTEM ALERT';
-        $('#notice-detail-title').textContent = item.drive_id
-            ? 'Blood drive update'
-            : item.request_id ? 'Blood request' : 'Blood donation alert';
-        $('#notice-detail-sender').textContent = `${item.sender_name} · ${item.blood_type_code}`;
+        $('#notice-detail-kind').textContent = item.type_label;
+        $('#notice-detail-title').textContent = item.title;
+        $('#notice-detail-sender').textContent = item.sender;
         $('#notice-detail-message').textContent = item.message;
         overlay.hidden = false;
         document.body.classList.add('qr-is-open');
         $('#notice-close').focus();
-        if (!Number(item.is_read)) {
+
+        if (!item.is_read) {
             try {
-                await api.request('read_alert', { alert_id: id });
-                item.is_read = 1;
+                if (item.kind === 'alert') {
+                    await api.request('read_alert', { alert_id: item.id });
+                } else {
+                    api.markLocalNoticesRead(donorId, [item.key]);
+                }
+                item.is_read = true;
                 render();
-            }
-            catch (error) {
-                console.error('Could not mark notification read:', error.message);
+                feedback('');
+            } catch (error) {
+                feedback(`Could not mark notification as read: ${error.message}`);
             }
         }
     }
+
     function closeNotice() {
-        if (overlay.hidden)
-            return;
+        if (overlay.hidden) return;
         overlay.hidden = true;
         document.body.classList.remove('qr-is-open');
         (previousFocus?.isConnected ? previousFocus : all).focus();
     }
+
+    async function refresh() {
+        if (loading) return;
+        loading = true;
+        $('#refresh-notifications').disabled = true;
+        try {
+            const response = await api.loadNotices();
+            notices = response.items;
+            donorId = response.donorId;
+            render();
+            feedback('');
+        } catch (error) {
+            // Preserve already displayed notifications if a later refresh fails.
+            if (!notices.length) {
+                list.innerHTML = '';
+                $('#notifications-empty').hidden = true;
+            }
+            feedback(`Could not load notifications: ${error.message}`);
+        } finally {
+            loading = false;
+            $('#refresh-notifications').disabled = false;
+        }
+    }
+
+    list.addEventListener('click', event => {
+        const button = event.target.closest('.notice-open');
+        if (button) openNotice(button.dataset.key);
+    });
     all.addEventListener('click', () => { filter = 'all'; render(); });
     unread.addEventListener('click', () => { filter = 'unread'; render(); });
-    $('#empty-show-all')?.addEventListener('click', () => { filter = 'all'; render(); });
+    $('#empty-show-all').addEventListener('click', () => { filter = 'all'; render(); });
     $('#notice-close').addEventListener('click', closeNotice);
     $('#notice-done').addEventListener('click', closeNotice);
-    overlay.addEventListener('click', event => { if (event.target === overlay)
-        closeNotice(); });
-    document.addEventListener('keydown', event => { if (event.key === 'Escape')
-        closeNotice(); });
+    // Go is only for a real upcoming drive listed in Drives & Booking.
+    $('#notice-go').addEventListener('click', () => {
+        if (activeNotice?.link && ['drive', 'alert'].includes(activeNotice.kind)) {
+            window.location.assign(activeNotice.link);
+        }
+    });
+    $('#refresh-notifications').addEventListener('click', refresh);
+    overlay.addEventListener('click', event => {
+        if (event.target === overlay) closeNotice();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeNotice();
+    });
     $('#mark-all-alerts-read').addEventListener('click', async () => {
         try {
             await api.request('read_all', {});
-            alerts.forEach(a => a.is_read = 1);
+            api.markLocalNoticesRead(donorId, notices.filter(n => n.kind !== 'alert').map(n => n.key));
+            notices.forEach(item => { item.is_read = true; });
             render();
-        }
-        catch (error) {
-            api.displayError(error.message, list);
+            feedback('');
+        } catch (error) {
+            feedback(`Could not mark notifications as read: ${error.message}`);
         }
     });
-    try {
-        const response = await api.request('notifications');
-        alerts = response.alerts || [];
-        render();
-    }
-    catch (error) {
-        api.displayError(error.message, list);
-    }
+
+    window.addEventListener('pageshow', event => { if (event.persisted) refresh(); });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refresh();
+    });
+    window.addEventListener('storage', event => {
+        if (event.key?.includes(':live-notices-read')) refresh();
+    });
+    setInterval(() => { if (!document.hidden) refresh(); }, 60000);
+    refresh();
 })();
