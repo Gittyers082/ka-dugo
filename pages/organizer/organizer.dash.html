@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Dashboard | Ka-dugo</title>
+
+    <!-- External CSS Links -->
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="../../css/organizer.css?v=10">
+    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+</head>
+
+<body>
+
+    <main class="app-shell">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+            <div class="brand-copy">
+                <h1>Organizer Dashboard</h1>
+            </div>
+
+            <button class="refresh" id="refreshBtn" aria-label="Refresh Data">
+                <svg class="refresh-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                    <path d="M16 21v-5h5"></path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Page Content -->
+        <section class="page-content">
+
+            <!-- Left Column -->
+            <div>
+                <h2 class="t-heading" id="currentDate"
+                    style="margin: 0 0 24px 0; color: var(--oxblood); font-weight: 700;">Loading Date...</h2>
+
+                <!-- Primary Stat Card -->
+                <article class="card"
+                    style="background: var(--wine); border: none; border-radius: 12px; padding: 24px;">
+                    <div class="heading-row" style="align-items: flex-start;">
+                        <div>
+                            <p
+                                style="font-size: 11px; font-weight: 700; color: #d6b8bc; margin: 0 0 8px 0; letter-spacing: 0.5px; text-transform: uppercase;">
+                                Active Drives</p>
+                            <!-- Added ID here for DB Fetch -->
+                            <h3 id="dash-active-drives"
+                                style="font-size: 42px; margin: 0; font-family: var(--font-heading); font-weight: 700; color: #fff; line-height: 1;">
+                                ...</h3>
+                        </div>
+                        <div
+                            style="background: #fff; color: var(--wine); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <p style="margin: 20px 0 0 0; font-size: 14px; color: #d6b8bc;">Your organization’s drives</p>
+                </article>
+
+                <!-- Secondary Stats Row -->
+                <div class="grid two" style="margin-bottom: 24px;">
+                    <article class="card" style="margin-bottom: 0; border-radius: 12px; padding: 20px;">
+                        <p
+                            style="font-size: 11px; font-weight: 700; color: var(--muted); margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Total Donors Registered</p>
+                        <!-- Added ID here for DB Fetch -->
+                        <h3 id="dash-total-donors"
+                            style="font-size: 32px; margin: 0 0 8px 0; font-family: var(--font-heading); font-weight: 700; color: var(--oxblood); line-height: 1;">
+                            ...</h3>
+                        <p style="font-size: 12px; color: var(--green); font-weight: 700; margin: 0;">Live Updates
+                            Active</p>
+                    </article>
+
+                    <article class="card"
+                        style="margin-bottom: 0; border-radius: 12px; padding: 20px; background: var(--warm); border-color: transparent;">
+                        <p
+                            style="font-size: 11px; font-weight: 700; color: var(--wine); margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Pending Sync</p>
+                        <!-- Added ID here for DB Fetch -->
+                        <h3 id="dash-pending-sync"
+                            style="font-size: 32px; margin: 0 0 8px 0; font-family: var(--font-heading); font-weight: 700; color: var(--wine); line-height: 1;">
+                            ...</h3>
+                        <p style="font-size: 12px; color: var(--muted); margin: 0;">Local Queue</p>
+                    </article>
+                </div>
+
+                <!-- Quick Action Button -->
+                <button class="dispatch" onclick="window.location.href='drives.html'"
+                    style="margin-top: 0; height: 56px; border-radius: 99px; font-size: 15px; font-family: var(--font-body); display: flex; justify-content: center; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Schedule New Blood Drive
+                </button>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <div style="margin-bottom: 16px;">
+                    <h2 class="t-heading"
+                        style="margin: 0 0 4px 0; color: var(--oxblood); font-size: 22px; font-weight: 700;">Managed
+                        Drives</h2>
+                    <p style="color: var(--muted); font-size: 13px; margin: 0;">Currently active or upcoming</p>
+                </div>
+
+                <!-- Empty container for JS to inject real drives -->
+                <div id="dashboard-drives-list">
+                    <p style="color: var(--muted); font-size: 13px;">Loading scheduled drives...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav" aria-label="Organizer navigation">
+            <a href="organizer.dash.html" class="active" aria-current="page">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <path d="M9 22v-8h6v8" />
+                    </svg>
+                </span>Home
+            </a>
+            <a href="drives.html">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M5 17h14l-1.5-7H6.5z" />
+                        <path d="M3 17h18v3H3z" />
+                        <circle cx="7" cy="20" r="1.8" />
+                        <circle cx="17" cy="20" r="1.8" />
+                        <path d="M8 10h8" />
+                    </svg>
+                </span>Drives
+            </a>
+            <a href="organizerholder.html">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 3 2.8 20h18.4z" />
+                        <path d="M12 9v5" />
+                        <path d="M12 17h.01" />
+                    </svg>
+                </span>Alerts
+            </a>
+            <a href="organizer.account.html">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 21c.8-4 3.5-6 8-6s7.2 2 8 6" />
+                    </svg>
+                </span>Account
+            </a>
+            <a href="../../index.html" id="logout-btn" class="logout-link">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </span>Logout
+            </a>
+        </nav>
+    </main>
+
+    <div class="toast" id="toastNotif" role="status" aria-live="polite">Dashboard metrics successfully synced.</div>
+
+    <!-- 1. Global PWA Bootloader -->
+    <script type="module" src="../../js/app.js"></script>
+
+    <!-- 2. Dashboard Logic (No DOMContentLoaded wrapper needed for modules) -->
+    <script type="module">
+        import { getAllRecords } from '../../js/db.js';
+
+        // Set dynamic date immediately
+        const dateElement = document.getElementById('currentDate');
+        if (dateElement) {
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            dateElement.textContent = new Date().toLocaleDateString('en-US', options);
+        }
+
+        const escapeText = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const ORGANIZER_ID = localStorage.getItem('kadugo_active_user') || 1;
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(`../../api/drives.php?organizer_id=${ORGANIZER_ID}`);
+                const result = await response.json();
+
+                let activeDrives = 0;
+                let totalDonors = 0;
+                const container = document.getElementById('dashboard-drives-list');
+
+                if (result.success && result.data.drives && result.data.drives.length > 0) {
+                    const drives = result.data.drives;
+                    if (container) container.innerHTML = '';
+
+                    let renderedCount = 0;
+                    drives.forEach(drive => {
+                        if (drive.status === 'scheduled' || drive.status === 'ongoing') {
+                            activeDrives++;
+                        }
+                        totalDonors += parseInt(drive.registered_count || 0);
+
+                        if (renderedCount < 3 && container) {
+                            const registered = drive.registered_count || 0;
+                            const capacity = drive.slots_total || 1;
+                            const progressPct = Math.min(100, Math.round((registered / capacity) * 100));
+
+                            const isScheduled = drive.status === 'scheduled';
+                            const badgeColor = isScheduled ? '#8e7314' : '#2e8551';
+                            const badgeBg = isScheduled ? '#fdf2cd' : '#e2f3e8';
+
+                            container.innerHTML += `
+                                <article class="card" style="border-radius: 12px; padding: 24px; margin-bottom: 16px; background: #fffcf9;">
+                                    <div class="heading-row" style="margin-bottom: 16px;">
+                                        <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px;">${drive.status.toUpperCase()}</span>
+                                        <span style="font-size: 11px; color: var(--muted); font-weight: 700;">REF: ${escapeText(drive.ref_code)}</span>
+                                    </div>
+                                    <h3 style="font-size: 20px; font-family: var(--font-heading); color: var(--oxblood); margin: 0 0 6px 0; font-weight: 700;">${escapeText(drive.title)}</h3>
+                                    <p style="color: var(--muted); font-size: 13px; display: flex; align-items: center; gap: 8px; margin: 0 0 16px 0;">
+                                        📍 ${escapeText(drive.venue)}
+                                    </p>
+                                    <div style="width: 100%; height: 8px; background: #e5ddd5; border-radius: 4px; margin-bottom: 12px; overflow: hidden;">
+                                        <div style="width: ${progressPct}%; height: 100%; background: var(--wine); border-radius: 4px;"></div>
+                                    </div>
+                                    <div class="heading-row" style="font-size: 12px; font-weight: 700; color: var(--oxblood);">
+                                        <span>${capacity} Slots Total</span>
+                                        <span>${registered} Donors Reg.</span>
+                                    </div>
+                                </article>
+                            `;
+                            renderedCount++;
+                        }
+                    });
+                } else {
+                    if (container) container.innerHTML = '<p style="color: var(--muted); font-size: 13px;">No scheduled drives found.</p>';
+                }
+
+                const activeDrivesEl = document.getElementById('dash-active-drives');
+                const totalDonorsEl = document.getElementById('dash-total-donors');
+                if (activeDrivesEl) activeDrivesEl.textContent = activeDrives;
+                if (totalDonorsEl) totalDonorsEl.textContent = totalDonors;
+
+                try {
+                    const allRecords = await getAllRecords();
+                    const pendingCount = allRecords.filter(r => r.status === "Pending Sync").length;
+                    const pendingSyncEl = document.getElementById('dash-pending-sync');
+                    if (pendingSyncEl) pendingSyncEl.textContent = pendingCount;
+                } catch (dbErr) {
+                    const pendingSyncEl = document.getElementById('dash-pending-sync');
+                    if (pendingSyncEl) pendingSyncEl.textContent = "0";
+                }
+
+            } catch (error) {
+                console.error("Error loading dashboard data:", error);
+            }
+        }
+
+        // Execute immediately
+        loadDashboardData();
+
+        // Refresh Button Logic
+        const refreshBtn = document.getElementById('refreshBtn');
+        const refreshIcon = refreshBtn ? refreshBtn.querySelector('svg') : null;
+        const toast = document.getElementById('toastNotif');
+        let isAnimating = false;
+
+        if (refreshBtn && refreshIcon && toast) {
+            refreshBtn.addEventListener('click', () => {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                loadDashboardData();
+
+                refreshIcon.style.transition = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+                refreshIcon.style.transform = "rotate(360deg)";
+                toast.classList.add('show');
+
+                setTimeout(() => {
+                    refreshIcon.style.transition = "none";
+                    refreshIcon.style.transform = "rotate(0deg)";
+                    toast.classList.remove('show');
+                    isAnimating = false;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>

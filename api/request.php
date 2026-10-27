@@ -6,6 +6,7 @@ require_once __DIR__ . '/validation.php';
 $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
+requireRole($method === 'GET' ? ['bank', 'phlebotomist', 'admin', 'organizer'] : ['bank', 'admin']);
 
 if ($method === 'GET') {
     $requestId = isset($input['request_id']) ? (int)$input['request_id'] : 0;

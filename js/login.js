@@ -38,11 +38,13 @@ form?.addEventListener("submit", async (e) => {
         });
         const json = await res.json();
         if (json.ok) {
+            localStorage.setItem('kadugo_active_user', json.data.account_id);
+
             window.location.href = json.data.redirect;
         } else {
-            showError(json.error || "Couldn't sign you in. Try again.");
+            showError(json.error || json.message || "Couldn't sign you in. Try again.");
         }
-    } catch {
+    } catch (error) {
         console.error("Login Error:", error);
         showError("Couldn't reach the server. Check your connection and try again.");
     } finally {

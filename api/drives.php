@@ -3,9 +3,44 @@
 declare(strict_types=1);
 require_once __DIR__ . '/validation.php';
 
+
+function validateDriveSlots(mixed $slots,string $start,string $end): array {
+    if(!is_array($slots) || !$slots || count($slots)>48) throw new InvalidArgumentException('Use 1–48 slots.');
+    $times=[]; $ids=[]; $total=0;
+    if(strlen($start)===5) $start.=':00'; if(strlen($end)===5) $end.=':00';
+    foreach($slots as &$slot) {
+        if(!is_array($slot)) throw new InvalidArgumentException('Invalid slot row.');
+        $time=trim((string)($slot['slot_time'] ?? ''));
+        if(!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/',$time)) throw new InvalidArgumentException('Enter a valid slot time.');
+        if(strlen($time)===5) $time.=':00';
+        if($time<$start || $time>=$end) throw new InvalidArgumentException('Slot times must be within drive hours, before closing.');
+        if(in_array($time,$times,true)) throw new InvalidArgumentException('Slot times must be unique.');
+        $cap=filter_var($slot['capacity'] ?? null,FILTER_VALIDATE_INT);
+        if($cap===false || $cap<1 || $cap>200) throw new InvalidArgumentException('Slot capacity must be 1–200 whole donors.');
+        $id=(int)($slot['slot_id'] ?? 0);
+        if($id && in_array($id,$ids,true)) throw new InvalidArgumentException('A slot was submitted twice.');
+        $times[]=$time; $ids[]=$id; $total+=$cap;
+        $slot=['slot_id'=>$id,'slot_time'=>$time,'capacity'=>$cap];
+    }
+    if($total>2000) throw new InvalidArgumentException('Total capacity cannot exceed 2000.');
+    return $slots;
+}
+
 $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
+$sessionOrganizer=signedInOrganizer(false);
+if($sessionOrganizer) $input['organizer_id']=$sessionOrganizer;
+if($method !== 'GET') {
+    $input['organizer_id']=signedInOrganizer();
+    if($method !== 'POST') {
+        $ownId=(int)($input['drive_id'] ?? 0);
+        $own=$conn->prepare('SELECT drive_id FROM drive WHERE drive_id=? AND organizer_id=?');
+        $own->bind_param('ii',$ownId,$input['organizer_id']); $own->execute();
+        if(!$own->get_result()->fetch_assoc()) sendJson(false,'Drive not found for this organizer.',null,404);
+    }
+}
+header('Cache-Control: no-store');
 
 if ($method === 'GET') {
     $driveId = isset($input['drive_id']) ? (int)$input['drive_id'] : 0;
@@ -24,7 +59,7 @@ if ($method === 'GET') {
         $drive = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if (!$drive) {
+        if (!$drive || ($sessionOrganizer && (int)$drive['organizer_id'] !== $sessionOrganizer)) {
             sendJson(false, 'Blood drive not found.', null, 404);
         }
 
@@ -175,8 +210,18 @@ if ($method === 'GET') {
     $status = validateEnum($input['status'] ?? 'scheduled', ['scheduled', 'ongoing', 'completed', 'cancelled'], 'status');
     $refCode = !empty($input['ref_code'])
         ? sanitizeString($input['ref_code'])
-        : 'DRV-' . date('Y') . '-' . strtoupper(substr(uniqid(), -4));
+        : 'DRV-' . strtoupper(bin2hex(random_bytes(6)));
 
+    if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/',$startTime) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/',$endTime) || strtotime($endTime)<=strtotime($startTime)) sendJson(false,'End time must be after a valid start time.',null,422);
+    if(strtotime("$driveDate $startTime")<=time()) sendJson(false,'Choose a future drive date and time.',null,422);
+    if(!$title || !$venue || mb_strlen($title)>150 || mb_strlen($venue)>255) sendJson(false,'Enter a title (up to 150 characters) and venue (up to 255).',null,422);
+    $times=[];
+    for($t=strtotime($startTime);$t<strtotime($endTime);$t+=1800) $times[]=date('H:i:s',$t);
+    $count=min(count($times),$slotsTotal); $generated=[];
+    for($i=0;$i<$count;$i++) $generated[]=['slot_time'=>$times[$i],'capacity'=>intdiv($slotsTotal,$count)+($i<$slotsTotal%$count?1:0)];
+    try { $input['slots']=validateDriveSlots($input['slots'] ?? $generated,$startTime,$endTime); }
+    catch(Throwable $e) { sendJson(false,$e->getMessage(),null,422); }
+    if(array_sum(array_column($input['slots'],'capacity'))!==$slotsTotal) sendJson(false,'Slot capacities must equal the drive total.',null,422);
     $conn->begin_transaction();
     try {
         $stmt = $conn->prepare(
@@ -249,7 +294,7 @@ if ($method === 'GET') {
             'ref_code' => $refCode,
             'slots_created' => $slotsCreated
         ], 201);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $conn->rollback();
         sendJson(false, $e->getMessage(), null, 400);
     }
@@ -257,6 +302,109 @@ if ($method === 'GET') {
 } elseif ($method === 'PUT') {
     requireFields($input, ['drive_id']);
     $driveId = (int)$input['drive_id'];
+
+    // Organizer slot manager: update existing slots, add new ones, and remove only unbooked slots.
+    if (isset($input['slots']) && is_array($input['slots'])) {
+        if (count($input['slots']) === 0 || count($input['slots']) > 48) {
+            sendJson(false, 'A drive must have between 1 and 48 time slots.', null, 422);
+        }
+
+        $conn->begin_transaction();
+        try {
+            $lock=$conn->prepare('SELECT start_time,end_time,status FROM drive WHERE drive_id=? FOR UPDATE');
+            $lock->bind_param('i',$driveId); $lock->execute(); $drive=$lock->get_result()->fetch_assoc();
+            if(!in_array($drive['status'],['scheduled','ongoing'],true)) throw new Exception('Only scheduled or ongoing drives can be edited.');
+            $input['slots']=validateDriveSlots($input['slots'],$drive['start_time'],$drive['end_time']);
+            $lock=$conn->prepare('SELECT slot_id FROM drive_slot WHERE drive_id=? FOR UPDATE');
+            $lock->bind_param('i',$driveId); $lock->execute(); $lock->get_result()->fetch_all();
+            $existingStmt = $conn->prepare(
+                "SELECT ds.slot_id, ds.slot_time,
+                        COUNT(CASE WHEN dr.status IN ('booked', 'checked_in', 'completed') THEN 1 END) AS booked_count
+                 FROM drive_slot ds
+                 LEFT JOIN drive_registration dr ON dr.slot_id = ds.slot_id
+                 WHERE ds.drive_id = ?
+                 GROUP BY ds.slot_id, ds.slot_time"
+            );
+            $existingStmt->bind_param('i', $driveId);
+            $existingStmt->execute();
+            $existingRows = $existingStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $existingStmt->close();
+            $existing = []; $oldTimes=[];
+            foreach ($existingRows as $row) {
+                $existing[(int)$row['slot_id']] = (int)$row['booked_count'];
+                $oldTimes[(int)$row['slot_id']]=$row['slot_time'];
+            }
+
+            $updateSlot = $conn->prepare('UPDATE drive_slot SET slot_time = ?, capacity = ? WHERE slot_id = ? AND drive_id = ?');
+            $insertSlot = $conn->prepare('INSERT INTO drive_slot (drive_id, slot_time, capacity) VALUES (?, ?, ?)');
+            $seenIds = [];
+            $totalCapacity = 0;
+
+            foreach ($input['slots'] as $slot) {
+                $slotTime = sanitizeString($slot['slot_time'] ?? '');
+                if (!preg_match('/^(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d)?$/', $slotTime)) {
+                    throw new Exception('Each slot time must use HH:MM or HH:MM:SS format.');
+                }
+                if (strlen($slotTime) === 5) {
+                    $slotTime .= ':00';
+                }
+                $capacity = validateIntRange($slot['capacity'] ?? null, 1, 200, 'slot capacity');
+                $slotId = isset($slot['slot_id']) ? (int)$slot['slot_id'] : 0;
+                $totalCapacity += $capacity;
+
+                if ($slotId > 0) {
+                    if (!array_key_exists($slotId, $existing) || in_array($slotId, $seenIds, true)) {
+                        throw new Exception('One or more slot records do not belong to this drive.');
+                    }
+                    if ($capacity < $existing[$slotId]) {
+                        throw new Exception('A slot capacity cannot be lower than its current booked donor count.');
+                    }
+                    if ($existing[$slotId]>0 && $slotTime!==$oldTimes[$slotId]) throw new Exception('The time of a booked slot cannot be changed.');
+                    $updateSlot->bind_param('siii', $slotTime, $capacity, $slotId, $driveId);
+                    if (!$updateSlot->execute()) {
+                        throw new Exception('Unable to update a drive slot.');
+                    }
+                    $seenIds[] = $slotId;
+                } else {
+                    $insertSlot->bind_param('isi', $driveId, $slotTime, $capacity);
+                    if (!$insertSlot->execute()) {
+                        throw new Exception('Unable to add a drive slot.');
+                    }
+                }
+            }
+            if ($totalCapacity > 2000) {
+                throw new Exception('The total drive capacity cannot exceed 2000 donors.');
+            }
+            $updateSlot->close();
+            $insertSlot->close();
+
+            $deleteSlot = $conn->prepare('DELETE FROM drive_slot WHERE slot_id = ? AND drive_id = ?');
+            foreach ($existing as $slotId => $bookedCount) {
+                if (!in_array($slotId, $seenIds, true)) {
+                    if ($bookedCount > 0) {
+                        throw new Exception('Booked slots cannot be removed.');
+                    }
+                    $deleteSlot->bind_param('ii', $slotId, $driveId);
+                    if (!$deleteSlot->execute()) {
+                        throw new Exception('Unable to remove a drive slot.');
+                    }
+                }
+            }
+            $deleteSlot->close();
+
+            $driveUpdate = $conn->prepare('UPDATE drive SET slots_total = ? WHERE drive_id = ?');
+            $driveUpdate->bind_param('ii', $totalCapacity, $driveId);
+            if (!$driveUpdate->execute()) {
+                throw new Exception('Unable to update the drive capacity.');
+            }
+            $driveUpdate->close();
+            $conn->commit();
+            sendJson(true, 'Drive slots updated.', ['drive_id' => $driveId, 'slots_total' => $totalCapacity]);
+        } catch (Throwable $e) {
+            $conn->rollback();
+            sendJson(false, $e->getMessage(), null, 422);
+        }
+    }
 
     $fields = [];
     $params = [];

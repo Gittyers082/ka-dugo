@@ -1,0 +1,260 @@
+/* DONOR PROFILE */
+
+/* Page Layout */
+.donor-profile-page .profile-content {
+  max-width: 1460px;
+  padding-top: 34px;
+}
+
+.donor-profile-page .profile-back {
+  display: inline-block;
+  margin-bottom: 13px;
+  color: var(--maroon);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.donor-profile-page .profile-back:hover { text-decoration: underline; }
+
+.donor-profile-page .profile-page-heading { margin-bottom: 24px; }
+.donor-profile-page .profile-page-heading h1 {
+  margin: 0 0 7px;
+  color: var(--oxblood);
+  font: 700 clamp(24px, 3vw, 34px)/1.2 var(--font-heading);
+}
+.donor-profile-page .profile-page-heading p {
+  color: #745f59;
+  font-size: 16px;
+}
+
+/* Profile Cards */
+.donor-profile-page .profile-card {
+  min-width: 0;
+  padding: 27px 29px;
+  border: 1px solid #dcd0ca;
+  border-radius: 18px;
+  background: #f2eeea;
+  box-shadow: 0 3px 12px rgba(42, 6, 5, 0.055);
+}
+
+.donor-profile-page .profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 24px;
+}
+
+.donor-profile-page .profile-avatar {
+  display: block;
+  flex: 0 0 92px;
+  width: 92px;
+  height: 92px;
+  border: 2px solid #d0b3ad;
+  border-radius: 50%;
+  background: #fffaf7;
+  object-fit: cover;
+}
+
+.donor-profile-page .profile-identity { flex: 1; min-width: 0; }
+.donor-profile-page .profile-identity h2 {
+  margin: 0 0 6px;
+  color: var(--oxblood);
+  font: 700 clamp(20px, 2vw, 27px)/1.3 var(--font-heading);
+}
+.donor-profile-page .profile-muted {
+  color: #76615b;
+  font-size: 15px;
+}
+
+.donor-profile-page .profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 13px;
+}
+.donor-profile-page .profile-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border: 1px solid #d7c3bc;
+  border-radius: 100px;
+  background: #eae1dd;
+  color: var(--oxblood);
+  font-size: 13px;
+  font-weight: 700;
+}
+.donor-profile-page .profile-blood-tag { color: var(--maroon); background: #f5e9e5; }
+.donor-profile-page .profile-qr-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 12px 15px;
+  border: 1px solid #caa6a0;
+  border-radius: 10px;
+  color: var(--maroon);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.donor-profile-page .profile-qr-link:hover { background: #e9dfda; }
+
+/* Information Sections */
+.donor-profile-page .profile-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.donor-profile-page .profile-main-column,
+.donor-profile-page .profile-side-column {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.donor-profile-page .profile-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 19px;
+}
+.donor-profile-page .profile-section-heading h2,
+.donor-profile-page .profile-account-actions h2 {
+  margin: 0;
+  color: var(--oxblood);
+  font: 700 clamp(17px, 1.8vw, 21px)/1.4 var(--font-heading);
+}
+.donor-profile-page .profile-text-link {
+  color: var(--maroon);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.donor-profile-page .profile-text-link:hover { text-decoration: underline; }
+.donor-profile-page .profile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 22px;
+  margin: 0;
+}
+.donor-profile-page .profile-fields-single { grid-template-columns: 1fr; }
+.donor-profile-page .profile-field {
+  min-width: 0;
+  padding: 17px 0;
+  border-bottom: 1px solid #ded2cc;
+}
+.donor-profile-page .profile-field:nth-last-child(-n+2) { border-bottom-color: transparent; }
+.donor-profile-page .profile-fields-single .profile-field:nth-last-child(2) { border-bottom-color: #ded2cc; }
+.donor-profile-page .profile-field dt {
+  margin-bottom: 7px;
+  color: #896f67;
+  font-size: 13px;
+  font-weight: 700;
+}
+.donor-profile-page .profile-field dd {
+  margin: 0;
+  color: var(--oxblood);
+  font-size: 17px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.donor-profile-page .profile-field dd.profile-unset,
+.donor-profile-page .profile-secondary {
+  color: #806d67;
+  font-size: 14px;
+  font-weight: 500;
+}
+.donor-profile-page .profile-account-actions p {
+  margin: 12px 0 19px;
+  color: #79625c;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.donor-profile-page .profile-logout {
+  padding: 13px 24px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--maroon);
+  color: #fff;
+  font: 700 15px var(--font-body);
+  cursor: pointer;
+}
+.donor-profile-page .profile-logout:hover { filter: brightness(0.92); }
+
+/* Logout Confirmation */
+.donor-profile-page dialog.profile-logout-dialog {
+  position: fixed;
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  display: none;
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  height: fit-content;
+  margin: 0;
+  padding: 35px;
+  border: 1px solid #e2d4ce;
+  border-radius: 18px;
+  background: #f2eeea;
+  color: var(--oxblood);
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
+}
+.donor-profile-page dialog.profile-logout-dialog[open] { display: block; }
+.donor-profile-page dialog.profile-logout-dialog::backdrop { background: rgba(20, 12, 12, 0.68); }
+.donor-profile-page .profile-logout-dialog h2 {
+  margin: 0 0 13px;
+  font: 700 21px/1.4 var(--font-heading);
+}
+.donor-profile-page .profile-logout-dialog p {
+  color: #705b55;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.donor-profile-page .profile-logout-dialog .logout-status {
+  margin-top: 12px;
+  color: var(--maroon);
+  font-weight: 700;
+}
+.donor-profile-page .profile-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 27px;
+}
+.donor-profile-page .profile-dialog-actions button {
+  padding: 12px 19px;
+  border-radius: 9px;
+  font: 700 14px var(--font-body);
+  cursor: pointer;
+}
+.donor-profile-page .profile-dialog-cancel {
+  border: 1px solid #d8c7bf;
+  background: transparent;
+  color: var(--oxblood);
+}
+.donor-profile-page .profile-dialog-confirm {
+  border: 1px solid var(--maroon);
+  background: var(--maroon);
+  color: white;
+}
+
+@media (max-width: 1050px) {
+  .donor-profile-page .profile-columns { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .donor-profile-page .profile-content { padding: 24px 16px 120px; }
+  .donor-profile-page .profile-card { padding: 21px 19px; }
+  .donor-profile-page .profile-hero { flex-wrap: wrap; gap: 15px; }
+  .donor-profile-page .profile-avatar { flex-basis: 72px; width: 72px; height: 72px; }
+  .donor-profile-page .profile-qr-link { width: 100%; justify-content: center; }
+  .donor-profile-page .profile-fields { grid-template-columns: 1fr; }
+  .donor-profile-page .profile-field:nth-last-child(2) { border-bottom-color: #ded2cc; }
+  .donor-profile-page .profile-identity h2 { font-size: 19px; }
+}

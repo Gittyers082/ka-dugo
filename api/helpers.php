@@ -41,3 +41,26 @@ function getRequestMethod(array $requestData = []): string {
 
     return $method;
 }
+
+// Require a signed-in account with one of the given roles; returns its account_id.
+function requireRole(array $roles): int {
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    if (empty($_SESSION['account_id']) || !in_array($_SESSION['role'] ?? '', $roles, true)) {
+        sendJson(false, 'You are not allowed to do this. Please sign in with the right account.', null, 401);
+    }
+    return (int)$_SESSION['account_id'];
+}
+
+// Resolve the organizer record from the signed-in account, not a localStorage account ID.
+function signedInOrganizer(bool $required = true): ?int {
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    if (($_SESSION['role'] ?? '') !== 'organizer' || empty($_SESSION['account_id'])) {
+        if ($required) sendJson(false, 'Please sign in with an organizer account.', null, 401);
+        return null;
+    }
+    $accountId=(int)$_SESSION['account_id'];
+    $stmt=getDbConnection()->prepare('SELECT o.organizer_id FROM organizer o JOIN account a ON a.account_id=o.account_id WHERE o.account_id=? AND a.is_active=1');
+    $stmt->bind_param('i',$accountId); $stmt->execute(); $row=$stmt->get_result()->fetch_assoc(); $stmt->close();
+    if (!$row) sendJson(false, 'Organizer profile not found for this account.', null, 404);
+    return (int)$row['organizer_id'];
+}

@@ -4,28 +4,37 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <title>Drives &amp; Booking - Ka-dugo</title>
-
     <link href="../../assets/icons/kadugo-ico.ico" rel="icon" />
     <link href="../../css/tokens.css" rel="stylesheet" />
     <link href="../../css/base.css" rel="stylesheet" />
     <link href="../../css/styles.css" rel="stylesheet" />
-    <link href="../../css/Donor_Css/drives-booking.css" rel="stylesheet" />
+    <link
+      href="../../css/Donor_Css/drives-booking.css?go-drives-2"
+      rel="stylesheet"
+    />
+    <link href="../../css/Donor_Css/donor-shell.css" rel="stylesheet" />
+    <link
+      href="../../css/Donor_Css/donor-data.css?requests-1"
+      rel="stylesheet"
+    />
   </head>
-
   <body class="dashboard-layout drives-page">
     <!-- Sidebar Navigation -->
     <aside aria-label="Donor navigation" class="sidebar">
+      <div aria-label="Ka-dugo Donor" class="sidebar-brand">
+        <span>KA-DUGO</span>
+        <span>DONOR</span>
+      </div>
       <nav aria-label="Main menu" class="nav-menu">
         <a class="nav-item t-button" href="donor-dashboard.html">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
+          <svg aria-hidden="true" viewbox="0 0 24 24">
             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
           <span>Dashboard</span>
         </a>
-
         <a class="nav-item t-button" href="my-donations.html">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
+          <svg aria-hidden="true" viewbox="0 0 24 24">
             <path
               d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
             ></path>
@@ -35,26 +44,24 @@
           </svg>
           <span>My Donations</span>
         </a>
-
         <a
           aria-current="page"
           class="nav-item active t-button"
           href="drives-booking.html"
         >
-          <svg aria-hidden="true" viewBox="0 0 24 24">
+          <svg aria-hidden="true" viewbox="0 0 24 24">
             <rect height="16" rx="2" width="18" x="3" y="5"></rect>
             <path d="M7 3v5M17 3v5M3 10h18"></path>
           </svg>
           <span>Drives &amp; Booking</span>
         </a>
       </nav>
-
       <div class="nav-profile">
         <a
-          aria-label="Open donor account (not connected)"
+          aria-label="Open donor profile"
           class="profile-image-link"
-          href="#"
-          title="Account page coming soon"
+          href="profile.html"
+          title="View profile"
         >
           <img
             alt="Donor profile picture"
@@ -64,418 +71,133 @@
         </a>
       </div>
     </aside>
-
-    <!-- Main Content Area -->
-    <main class="dashboard-content">
-      <!-- Page Header -->
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">DONOR PORTAL / DRIVES</p>
-          <h1>
-            Drives &amp; Booking
-            <span class="live-badge">
-              <span class="live-dot"></span>
-              LIVE INVENTORY
-            </span>
-          </h1>
-          <p class="page-subtitle">
-            Find certified blood drives and secure collection slots.
-          </p>
+    <!-- Workspace -->
+    <div class="dashboard-workspace">
+      <!-- Top Header -->
+      <header class="topbar">
+        <img
+          alt="Ka-dugo logo"
+          class="brand-logo"
+          src="../../assets/icons/crimson/crimson-logo.svg"
+        />
+        <div class="brand-copy">
+          <h2>Drives &amp; Booking</h2>
+          <p>Ka-dugo Donor Portal</p>
         </div>
-        <div class="header-actions">
-          <span class="header-date">Thursday, October 24</span>
-          <button
-            aria-label="Notifications (preview only)"
-            class="notification-button"
-            title="Notifications (preview only)"
-            type="button"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24">
-              <path
-                d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9M10 21h4"
-              ></path>
-            </svg>
-            <span class="notification-dot"></span>
-          </button>
-          <span class="donor-id">ID: DN-99410</span>
-
-          <!-- Logo placeholder -->
-          <div aria-hidden="true" class="kadugo-logo-placeholder"></div>
-        </div>
-      </header>
-
-      <!-- Search and Drive Filters -->
-      <section aria-label="Find blood drives" class="filter-panel">
-        <div aria-label="Drive views" class="view-switch" role="tablist">
-          <button
-            aria-controls="upcoming-view"
-            aria-selected="true"
-            class="switch-tab selected"
-            id="tab-upcoming"
-            role="tab"
-            type="button"
-          >
-            Upcoming Drives <span>(12)</span>
-          </button>
-          <button
-            aria-controls="bookings-view"
-            aria-selected="false"
-            class="switch-tab"
-            id="tab-bookings"
-            role="tab"
-            type="button"
-          >
-            My Bookings <span>(1)</span>
-          </button>
-        </div>
-        <label class="search-input">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <circle cx="10.8" cy="10.8" r="6.8"></circle>
-            <path d="m16 16 5 5"></path>
-          </svg>
-          <input
-            aria-label="Search sample drives"
-            id="drive-search"
-            placeholder="Search venue, organizer, zip code..."
-            type="search"
-          />
-        </label>
-        <div
-          aria-label="Distance and date filters"
-          class="quick-filters"
-          role="group"
+        <!-- Refresh Control -->
+        <button
+          aria-label="Refresh this page"
+          class="refresh-button"
+          title="Refresh"
+          type="button"
         >
-          <button class="filter-chip selected" data-filter="5" type="button">
-            ⌖ Within 5 km
-          </button>
-          <button class="filter-chip" data-filter="15" type="button">
-            Within 15 km
-          </button>
-          <button class="filter-chip" data-filter="weekend" type="button">
-            This Weekend
-          </button>
-          <button class="filter-chip" data-filter="week" type="button">
-            This Week
-          </button>
-        </div>
-      </section>
-
-      <!-- Upcoming Drives -->
-      <div
-        aria-labelledby="tab-upcoming"
-        class="upcoming-view"
-        id="upcoming-view"
-        role="tabpanel"
-      >
-        <div class="clearance-notice">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="M12 2 4 5v6c0 5 3.4 8.9 8 11 4.6-2.1 8-6 8-11V5z"></path>
-            <path d="m8 12 3 3 5-6"></path>
+          <svg
+            aria-hidden="true"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.2"
+            viewbox="0 0 24 24"
+            width="24"
+          >
+            <path d="M3 11a9 9 0 0 1 15.4-6.4L21 7"></path>
+            <path d="M21 3v4h-4"></path>
+            <path d="M21 13a9 9 0 0 1-15.4 6.4L3 17"></path>
+            <path d="M3 21v-4h4"></path>
           </svg>
-          <div>
-            <strong>Medically Cleared for All Dates</strong>
-            <p>
-              Your statutory 56-day whole-blood interval was met on Oct 24. No
-              deferred travel records found.
+        </button>
+      </header>
+      <!-- Main Content Area -->
+      <main class="dashboard-content">
+        <div
+          aria-live="polite"
+          class="donor-data-status"
+          id="donor-page-status"
+          role="status"
+        >
+          Loading available blood drives...
+        </div>
+        <div class="booking-page-controls">
+          <div
+            aria-label="Drive and booking tabs"
+            class="view-switch"
+            role="group"
+          >
+            <button
+              aria-pressed="false"
+              class="switch-tab"
+              id="tab-requests"
+              type="button"
+            >
+              Matching Bank Requests
+            </button>
+            <button
+              aria-pressed="true"
+              class="switch-tab selected"
+              id="tab-upcoming"
+              type="button"
+            >
+              Upcoming Drives
+            </button>
+            <button
+              aria-pressed="false"
+              class="switch-tab"
+              id="tab-bookings"
+              type="button"
+            >
+              My Bookings
+            </button>
+          </div>
+        </div>
+        <section
+          aria-label="Matching blood bank requests"
+          class="drives-dynamic-section"
+          hidden
+          id="requests-view"
+        >
+          <div class="logs-heading">
+            <h2>Matching Blood Bank Requests</h2>
+            <p class="request-help">
+              These requests match your blood type. They are not scheduled blood
+              drives, so there are no booking slots. Contact the blood bank to
+              confirm how to help.
             </p>
           </div>
-          <span class="clearance-status">Eligible to book</span>
-        </div>
-        <div class="drives-grid">
-          <!-- Priority Blood Drive -->
-          <section aria-labelledby="priority-label" class="priority-section">
-            <div class="section-heading">
-              <h2 id="priority-label">PRIORITY BLOOD DRIVE</h2>
-              <span class="critical-demand">
-                <span>●</span> CRITICAL DEMAND
-              </span>
-            </div>
-
-            <article
-              class="feature-drive drive-card"
-              data-distance="2.3"
-              data-drive-search="city hall emergency blood drive metro red cross civic health org rotunda 450 civic center plaza"
-            >
-              <div class="feature-stripe"></div>
-              <div class="feature-inner">
-                <div class="feature-title-row">
-                  <div class="feature-title">
-                    <span class="ref-tag">REF #SJD-441</span>
-                    <h3>City Hall Emergency Blood Drive</h3>
-                    <p>Organized by Metro Red Cross &amp; Civic Health Org</p>
-                  </div>
-                  <div class="date-tile">
-                    <span>NOV</span>
-                    <strong>02</strong>
-                    <span>SAT</span>
-                  </div>
-                </div>
-                <div class="event-meta">
-                  <p>
-                    <svg aria-hidden="true" viewBox="0 0 24 24">
-                      <path
-                        d="M12 22s7-6.8 7-13A7 7 0 0 0 5 9c0 6.2 7 13 7 13z"
-                      ></path>
-                      <circle cx="12" cy="9" r="2"></circle>
-                    </svg>
-                    <span>City Hall Rotunda, 450 Civic Center Plaza</span>
-                    <b>2.3 km</b>
-                  </p>
-                  <p>
-                    <svg aria-hidden="true" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="9"></circle>
-                      <path d="M12 7v5l3 2"></path>
-                    </svg>
-                    <span>Saturday · 09:00 AM – 04:00 PM</span>
-                  </p>
-                </div>
-                <div class="telemetry">
-                  <div class="telemetry-line">
-                    <strong>CAPACITY TELEMETRY</strong>
-                    <strong>18 of 60 Slots Open</strong>
-                  </div>
-                  <div class="capacity-track">
-                    <div class="capacity-fill" style="width: 70%"></div>
-                  </div>
-                  <p>High volume expected between 11:00 AM – 01:00 PM.</p>
-                </div>
-                <div class="slot-heading">
-                  <strong>Select Whole-Blood Slot:</strong>
-                  <span>30-min staggered arrival</span>
-                </div>
-                <div
-                  aria-label="Available appointment times"
-                  class="slot-grid"
-                  role="group"
-                >
-                  <button
-                    class="slot-button"
-                    data-time="09:30 AM"
-                    type="button"
-                  >
-                    09:30 AM
-                  </button>
-                  <button
-                    aria-pressed="true"
-                    class="slot-button chosen"
-                    data-time="10:00 AM"
-                    type="button"
-                  >
-                    10:00 AM
-                  </button>
-                  <button
-                    class="slot-button"
-                    data-time="10:30 AM"
-                    type="button"
-                  >
-                    10:30 AM
-                  </button>
-                  <button
-                    class="slot-button"
-                    data-time="11:15 AM"
-                    type="button"
-                  >
-                    11:15 AM
-                  </button>
-                  <button
-                    class="slot-button"
-                    data-time="01:30 PM"
-                    type="button"
-                  >
-                    01:30 PM
-                  </button>
-                  <button
-                    class="slot-button"
-                    data-time="02:00 PM"
-                    disabled=""
-                    type="button"
-                  >
-                    02:00 PM
-                  </button>
-                </div>
-                <button class="book-button" id="book-slot" type="button">
-                  <svg aria-hidden="true" viewBox="0 0 24 24">
-                    <path
-                      d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5ZM3 21c0-4.5 3.3-7 9-7m6 2v6m-3-3h6"
-                    ></path>
-                  </svg>
-                  <span>Book Time Slot (10:00 AM)</span>
-                  <span aria-hidden="true">→</span>
-                </button>
-              </div>
-            </article>
-          </section>
-
-          <!-- Recommended Blood Drives -->
-          <section
-            aria-labelledby="recommendations-label"
-            class="recommendations-section"
-          >
-            <div class="section-heading">
-              <h2 id="recommendations-label">OTHER RECOMMENDED DRIVES</h2>
-              <span class="recommendations-caption">Filtered by distance</span>
-            </div>
-            <div class="recommended-stack">
-              <article
-                class="recommend-card drive-card"
-                data-distance="4.8"
-                data-drive-search="st jude hospital mobile bus drive medical district plaza east bay"
-              >
-                <div class="recommend-top">
-                  <span class="need-tag">URGENT TYPE NEED</span>
-                  <span class="distance-label">4.8 km</span>
-                </div>
-                <h3>St. Jude Hospital Mobile Bus Drive</h3>
-                <p class="recommend-location">
-                  Medical District Plaza (East Bay)
-                </p>
-                <p class="scarcity">
-                  ♧ Critical short-supply: O− and B+ donors needed urgently
-                </p>
-                <div class="recommend-meta">
-                  <span>▣ Wed, Nov 6 · 11:00 AM – 05:00 PM</span>
-                  <strong>8 slots left</strong>
-                </div>
-                <button class="secondary-action" type="button">
-                  Select Slot &amp; Register <span>→</span>
-                </button>
-              </article>
-              <article
-                class="recommend-card drive-card"
-                data-distance="7.1"
-                data-drive-search="university campus fall blood drive student union atrium hall b"
-              >
-                <div class="recommend-top">
-                  <span class="community-tag">COMMUNITY DRIVE</span>
-                  <span class="distance-label">7.1 km</span>
-                </div>
-                <h3>University Campus Fall Blood Drive</h3>
-                <p class="recommend-location">Student Union Atrium · Hall B</p>
-                <div class="recommend-meta">
-                  <span>▣ Fri, Nov 15 · 10:00 AM – 06:00 PM</span>
-                  <strong class="healthy-stock">35 slots left</strong>
-                </div>
-                <button class="secondary-action neutral" type="button">
-                  View Details <span>↗</span>
-                </button>
-              </article>
-              <aside class="protocol-card">
-                <div class="protocol-heading">
-                  <svg aria-hidden="true" viewBox="0 0 24 24">
-                    <path
-                      d="M12 2 4 5v6c0 5 3.4 8.9 8 11 4.6-2.1 8-6 8-11V5z"
-                    ></path>
-                    <path d="M9 12h6M12 9v6"></path>
-                  </svg>
-                  <strong>CLINICAL BOOKING PROTOCOL</strong>
-                </div>
-                <p>
-                  One active registration per drive allowed. Cancellation is
-                  permitted up to 2 hours prior without donor standing penalty.
-                  Please hydrate 24h in advance.
-                </p>
-              </aside>
-            </div>
-          </section>
-        </div>
-        <p class="preview-disclaimer">
-          Concept preview · Drive names, distances, inventory and times are
-          sample data
-        </p>
-      </div>
-
-      <!-- My Bookings -->
-      <section
-        aria-labelledby="tab-bookings"
-        class="bookings-view"
-        hidden=""
-        id="bookings-view"
-        role="tabpanel"
-      >
-        <div class="bookings-intro">
-          <span class="status-badge">● Slot Confirmed</span>
-          <h2>Your upcoming booking</h2>
-          <p>
-            Sample booking from the donor dashboard. No backend is connected.
+          <div class="donor-drive-list" id="request-list"></div>
+          <p class="empty-drive-results" hidden id="request-empty">
+            No matching open bank requests at the moment.
           </p>
-        </div>
-
-        <article class="booked-card">
-          <div class="date-tile">
-            <span>NOV</span>
-            <strong>02</strong>
-            <span>SAT</span>
+        </section>
+        <section class="drives-dynamic-section" id="upcoming-view">
+          <div class="logs-heading">
+            <h2>Available Blood Drives</h2>
           </div>
-          <div>
-            <h3>City Hall Community Drive</h3>
-            <p>10:00 AM – 10:30 AM · Main Concourse, 100 Civic Plaza</p>
-            <span>Bring a valid ID and your Fast Admission Pass.</span>
+          <div class="donor-drive-list" id="drive-list"></div>
+          <p class="empty-drive-results" hidden="" id="drive-empty">
+            There are no upcoming blood drives in the database.
+          </p>
+        </section>
+        <section class="drives-dynamic-section" hidden="" id="bookings-view">
+          <div class="logs-heading">
+            <h2>Your Bookings</h2>
           </div>
-          <button class="secondary-action" type="button">Reschedule</button>
-        </article>
-      </section>
-    </main>
+          <div class="donor-drive-list" id="booking-list"></div>
+          <p class="empty-drive-results" hidden="" id="booking-empty">
+            You have no bookings yet.
+          </p>
+        </section>
+      </main>
+    </div>
     <!-- Frontend Interactions -->
-    <script>
-      // Frontend interactions for navigation, search, filters and time-slot selection.
-      // Booking, details and rescheduling actions remain unconnected for backend integration.
-      const upcomingTab = document.getElementById("tab-upcoming");
-      const bookingsTab = document.getElementById("tab-bookings");
-      const upcoming = document.getElementById("upcoming-view");
-      const bookings = document.getElementById("bookings-view");
-      const search = document.getElementById("drive-search");
-      const driveCards = [...document.querySelectorAll(".drive-card")];
-      const chips = [...document.querySelectorAll(".filter-chip")];
-      let selectedFilter = "5";
-      function setView(showBookings) {
-        upcoming.hidden = showBookings;
-        bookings.hidden = !showBookings;
-        upcomingTab.classList.toggle("selected", !showBookings);
-        bookingsTab.classList.toggle("selected", showBookings);
-        upcomingTab.setAttribute("aria-selected", String(!showBookings));
-        bookingsTab.setAttribute("aria-selected", String(showBookings));
-      }
-      upcomingTab.addEventListener("click", () => setView(false));
-      bookingsTab.addEventListener("click", () => setView(true));
-      function applyFilter() {
-        const query = search.value.trim().toLowerCase();
-        driveCards.forEach((card) => {
-          const distance = Number(card.dataset.distance);
-          const matches = (card.dataset.driveSearch || "").includes(query);
-          const within =
-            selectedFilter === "5"
-              ? distance <= 5
-              : selectedFilter === "15"
-                ? distance <= 15
-                : true;
-          // Weekend/this week are display-only presets until real schedule filtering is wired.
-          card.hidden = !(matches && within);
-        });
-      }
-      search.addEventListener("input", applyFilter);
-      chips.forEach((chip) =>
-        chip.addEventListener("click", () => {
-          selectedFilter = chip.dataset.filter;
-          chips.forEach((item) =>
-            item.classList.toggle("selected", item === chip),
-          );
-          applyFilter();
-        }),
-      );
-      document
-        .querySelectorAll(".slot-button:not(:disabled)")
-        .forEach((button) =>
-          button.addEventListener("click", () => {
-            document.querySelectorAll(".slot-button").forEach((slot) => {
-              slot.classList.toggle("chosen", slot === button);
-              slot.setAttribute("aria-pressed", String(slot === button));
-            });
-            document.querySelector("#book-slot span").textContent =
-              "Book Time Slot (" + button.dataset.time + ")";
-          }),
-        );
-    </script>
-
-    <script src="../../js/app.js" defer></script>
+    <script
+      defer=""
+      src="../../js/donor_js/donor-common.js?go-drives-2"
+    ></script>
+    <script
+      defer=""
+      src="../../js/donor_js/drives-booking.js?go-drives-2"
+    ></script>
   </body>
 </html>

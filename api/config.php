@@ -1,5 +1,4 @@
 <?php
-// this is config.php - contains configuration settings and database connection function
 declare(strict_types=1);
 
 ini_set('display_errors', '0');
@@ -21,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 define('DB_HOST', '127.0.0.1');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'kadugo_db');
+define('DB_NAME', 'kadugo');
 define('DB_PORT', 3306);
 
 function getDbConnection(): mysqli {

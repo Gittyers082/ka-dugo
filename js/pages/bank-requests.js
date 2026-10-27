@@ -1,10 +1,11 @@
+import { el } from '../ui/dom.js';
+
 // ============================================================================
-// BANK REQUESTS LOGIC
+// BANK REQUESTS LOGIC (Secure DOM Refactor)
 // ============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // --- Toast Notifications ---
     function showToast(message) {
         const toast = document.getElementById("toast");
         if (!toast) return;
@@ -13,19 +14,23 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => toast.classList.remove("show"), 3000);
     }
 
-    const refreshBtn = document.getElementById("refresh-btn");
-    if (refreshBtn) refreshBtn.addEventListener("click", () => showToast("Syncing network status..."));
+    const refreshBtn = document.querySelector(".refresh");
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+            const icon = refreshBtn.querySelector("svg");
+            if (icon) {
+                icon.style.transition = "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+                icon.style.transform = "rotate(360deg)";
+                setTimeout(() => {
+                    icon.style.transition = "none";
+                    icon.style.transform = "rotate(0deg)";
+                }, 1000);
+            }
+            showToast("Resetting requests...");
+            setTimeout(() => window.location.reload(), 600);
+        });
+    }
 
-    // --- State Management ---
-    const state = {
-        bloodType: "O-",
-        component: "Packed RBC<br>(PRBC)",
-        units: 10,
-        radius: 15,
-        donors: 142
-    };
-
-    // --- DOM Elements ---
     const previewBlood = document.getElementById("preview-blood");
     const previewUnits = document.getElementById("preview-units");
     const previewComp = document.getElementById("preview-comp");
@@ -38,16 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const typeLabel = document.getElementById("type-label");
     const compLabel = document.getElementById("component-label");
-
-    // --- Form Handlers ---
-
-    // 1. Blood Type Selection
     const bloodBtns = document.querySelectorAll(".blood-grid .blood");
     bloodBtns.forEach(btn => {
         btn.addEventListener("click", () => {
-            bloodBtns.forEach(b => {
-                b.classList.remove("selected", "critical");
-            });
+            bloodBtns.forEach(b => b.classList.remove("selected", "critical"));
             btn.classList.add("selected");
 
             const type = btn.getAttribute("data-type");
@@ -64,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 2. Component Selection
     const compBtns = document.querySelectorAll(".component-grid .component-btn");
     compBtns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -74,11 +72,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const comp = btn.getAttribute("data-comp");
             state.component = comp;
             compLabel.textContent = `${comp.split('(')[0]} Selected`;
-            previewComp.innerHTML = comp.replace("(", "<br>(");
+            previewComp.textContent = "";
+            const parts = comp.split("(");
+
+            previewComp.append(
+                document.createTextNode(parts[0]),
+                parts[1] ? el("br") : "",
+                parts[1] ? document.createTextNode(`(${parts[1]}`) : ""
+            );
         });
     });
 
-    // 3. Units Stepper
     const btnMinus = document.getElementById("units-minus");
     const btnPlus = document.getElementById("units-plus");
     const unitsDisplay = document.getElementById("units-display");
@@ -106,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 4. Urgency Selection
     const urgencyBtns = document.querySelectorAll(".urgency-grid .urgency-btn");
     urgencyBtns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -118,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 5. Text Input Syncing
     const notesInput = document.getElementById("notes-input");
     const doctorInput = document.getElementById("doctor-input");
     const previewNotes = document.getElementById("preview-notes");
@@ -126,13 +128,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateNotesPreview() {
         const doc = doctorInput.value || "Unknown Attending";
         const note = notesInput.value.split('\n')[0] || "No clinical rationale provided.";
-        previewNotes.innerHTML = `${note} • Attending: ${doc}`;
+        previewNotes.textContent = `${note} • Attending: ${doc}`;
     }
 
     if (notesInput) notesInput.addEventListener("input", updateNotesPreview);
     if (doctorInput) doctorInput.addEventListener("input", updateNotesPreview);
 
-    // 6. Radius Buttons
     const radiusBtns = document.querySelectorAll(".radius-grid .radius-btn");
     radiusBtns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -141,8 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const radius = parseInt(btn.getAttribute("data-radius"));
             state.radius = radius;
-
-            // Simulate changing donor reach
             const simulatedDonors = { 5: 48, 15: 142, 25: 298 };
             state.donors = simulatedDonors[radius];
 
@@ -153,28 +152,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 7. Dispatch Action
     const dispatchBtn = document.getElementById("dispatch-btn");
     if (dispatchBtn) {
         dispatchBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            const originalHTML = dispatchBtn.innerHTML;
+
+            const originalNodes = Array.from(dispatchBtn.childNodes);
 
             dispatchBtn.disabled = true;
-            dispatchBtn.innerHTML = "Dispatching Alerts...";
+            dispatchBtn.textContent = "Dispatching Alerts...";
             dispatchBtn.style.opacity = "0.7";
-
-            // Simulate network request
             setTimeout(() => {
                 showToast(`SUCCESS: Request broadcasted to ${state.donors} eligible donors.`);
 
                 dispatchBtn.disabled = false;
-                dispatchBtn.innerHTML = "✓ Broadcast Active";
-                dispatchBtn.style.backgroundColor = "#287a4b"; // Success green
+                dispatchBtn.textContent = "✓ Broadcast Active";
+                dispatchBtn.style.backgroundColor = "#287a4b";
                 dispatchBtn.style.opacity = "1";
-
                 setTimeout(() => {
-                    dispatchBtn.innerHTML = originalHTML;
+                    dispatchBtn.textContent = "";
+                    originalNodes.forEach(node => dispatchBtn.append(node));
                     dispatchBtn.style.backgroundColor = "var(--urgent)";
                 }, 4000);
 

@@ -6,6 +6,7 @@ require_once __DIR__ . '/eligibility.php';
 $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
+requireRole(['bank', 'phlebotomist', 'admin', 'organizer']);
 
 /**
  * Helper to fetch a donor record and evaluate eligibility via evaluateDonorEligibility()

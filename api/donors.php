@@ -17,22 +17,20 @@ if ($method === 'GET') {
     $isMe = !empty($input['me']);
 
     // If ?me=1 is requested from Donor Dashboard, resolve from active session account_id
-    if ($isMe && $donorId <= 0 && $qrCode === '') {
-        $sessionAccountId = isset($_SESSION['account_id']) ? (int)$_SESSION['account_id'] : 0;
-        if ($sessionAccountId > 0) {
-            $stmtAcct = $conn->prepare("SELECT donor_id FROM donor WHERE account_id = ? LIMIT 1");
-            $stmtAcct->bind_param('i', $sessionAccountId);
-            $stmtAcct->execute();
-            $acctRow = $stmtAcct->get_result()->fetch_assoc();
-            $stmtAcct->close();
-            if ($acctRow) {
-                $donorId = (int)$acctRow['donor_id'];
-            }
+    if ($isMe) {
+        $sessionAccountId = requireRole(['donor']);
+        $qrCode = '';
+        $stmtAcct = $conn->prepare("SELECT donor_id FROM donor WHERE account_id = ? LIMIT 1");
+        $stmtAcct->bind_param('i', $sessionAccountId);
+        $stmtAcct->execute();
+        $acctRow = $stmtAcct->get_result()->fetch_assoc();
+        $stmtAcct->close();
+        if (!$acctRow) {
+            sendJson(false, 'Donor profile not found for this account.', null, 404);
         }
-        // Fallback to Donor #1 (Miguel Cruz) if previewed without a donor session
-        if ($donorId <= 0) {
-            $donorId = 1;
-        }
+        $donorId = (int)$acctRow['donor_id'];
+    } else {
+        requireRole(['bank', 'phlebotomist', 'admin']);
     }
 
     if ($donorId > 0 || $qrCode !== '') {
@@ -87,6 +85,7 @@ if ($method === 'GET') {
     sendJson(true, 'Donors loaded.', ['count' => count($donors), 'donors' => $donors]);
 
 } elseif ($method === 'POST') {
+    requireRole(['bank', 'phlebotomist', 'admin']);
     requireFields($input, ['full_name', 'birthdate', 'sex', 'weight_kg', 'contact_no', 'blood_type_id']);
     $qrCode = !empty($input['qr_code']) ? sanitizeString($input['qr_code']) : 'DNR-QR-' . time();
 
