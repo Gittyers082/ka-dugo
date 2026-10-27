@@ -9,7 +9,7 @@
         <link href="../../css/base.css" rel="stylesheet"/>
         <link href="../../css/styles.css" rel="stylesheet"/>
         <link href="../../css/Donor_Css/donor-dashboard.css?v=profile-qr-2" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/notifications.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/notifications.css?notifs-3" rel="stylesheet"/>
         <link href="../../css/Donor_Css/donor-data.css?db-1" rel="stylesheet"/>
     </head>
     <body class="dashboard-layout donor-dashboard notifications-page">
@@ -90,12 +90,16 @@
                             <button aria-selected="true" class="notice-tab active" id="show-all-alerts" role="tab" type="button">All</button>
                             <button aria-selected="false" class="notice-tab" id="show-unread-alerts" role="tab" type="button">Unread <span id="unread-tab-count">0</span></button>
                         </div>
-                        <button class="mark-all-read" id="mark-all-alerts-read" type="button">Mark all as read</button>
+                        <div class="notification-toolbar-actions">
+                            <button class="mark-all-read" id="refresh-notifications" type="button">Refresh</button>
+                            <button class="mark-all-read" id="mark-all-alerts-read" type="button">Mark all as read</button>
+                        </div>
                     </div>
                     <!--Example alerts-->
                     <div class="notification-list" id="donor-notification-list">
                         <p class="donor-data-status" id="notification-load-status" role="status">Loading your notifications...</p>
                     </div>
+                    <p class="donor-data-status" id="notification-feedback" role="status" hidden></p>
                     <!-- Empty State -->
                     <div class="notifications-empty" hidden="" id="notifications-empty">
                         <p>No unread notifications.</p>
@@ -112,10 +116,13 @@
                 <h2 id="notice-detail-title"></h2>
                 <p class="notice-dialog-sender" id="notice-detail-sender"></p>
                 <p class="notice-dialog-message" id="notice-detail-message"></p>
-                <button class="notice-done" id="notice-done" type="button">Done</button>
+                <div class="notice-dialog-actions">
+                    <button class="notice-done" id="notice-done" type="button">Done</button>
+                    <button class="notice-go" id="notice-go" type="button" aria-label="Go to Drives and Booking">Go →</button>
+                </div>
             </section>
         </div>
-        <script defer="" src="../../js/donor_js/donor-common.js?db-1"></script>
-        <script defer="" src="../../js/donor_js/donor-notifications.js?db-1"></script>
+        <script defer="" src="../../js/donor_js/donor-common.js?go-drives-2"></script>
+        <script defer="" src="../../js/donor_js/donor-notifications.js?go-drives-2"></script>
     </body>
 </html>

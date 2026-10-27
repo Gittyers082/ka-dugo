@@ -8,9 +8,9 @@
         <link href="../../css/tokens.css" rel="stylesheet"/>
         <link href="../../css/base.css" rel="stylesheet"/>
         <link href="../../css/styles.css" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/drives-booking.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/drives-booking.css?go-drives-2" rel="stylesheet"/>
         <link href="../../css/Donor_Css/donor-shell.css" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/donor-data.css?db-1" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/donor-data.css?requests-1" rel="stylesheet"/>
     </head>
     <body class="dashboard-layout drives-page">
         <!-- Sidebar Navigation -->
@@ -74,10 +74,19 @@
                 <div aria-live="polite" class="donor-data-status" id="donor-page-status" role="status">Loading available blood drives...</div>
                 <div class="booking-page-controls">
                     <div aria-label="Drive and booking tabs" class="view-switch" role="group">
+                        <button aria-pressed="false" class="switch-tab" id="tab-requests" type="button">Matching Bank Requests</button>
                         <button aria-pressed="true" class="switch-tab selected" id="tab-upcoming" type="button">Upcoming Drives</button>
                         <button aria-pressed="false" class="switch-tab" id="tab-bookings" type="button">My Bookings</button>
                     </div>
                 </div>
+                <section aria-label="Matching blood bank requests" class="drives-dynamic-section" hidden id="requests-view">
+                    <div class="logs-heading">
+                        <h2>Matching Blood Bank Requests</h2>
+                        <p class="request-help">These requests match your blood type. They are not scheduled blood drives, so there are no booking slots. Contact the blood bank to confirm how to help.</p>
+                    </div>
+                    <div class="donor-drive-list" id="request-list"></div>
+                    <p class="empty-drive-results" hidden id="request-empty">No matching open bank requests at the moment.</p>
+                </section>
                 <section class="drives-dynamic-section" id="upcoming-view">
                     <div class="logs-heading">
                         <h2>Available Blood Drives</h2>
@@ -95,7 +104,7 @@
             </main>
         </div>
         <!-- Frontend Interactions -->
-        <script defer="" src="../../js/donor_js/donor-common.js?db-1"></script>
-        <script defer="" src="../../js/donor_js/drives-booking.js?db-1"></script>
+        <script defer="" src="../../js/donor_js/donor-common.js?go-drives-2"></script>
+        <script defer="" src="../../js/donor_js/drives-booking.js?go-drives-2"></script>
     </body>
 </html>

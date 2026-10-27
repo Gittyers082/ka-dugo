@@ -130,13 +130,15 @@ function bookedRegistrations(mysqli $db, int $donorId): array
     );
 }
 
+/* changes: Combine verified history with live bank donations not yet inserted into blood_history. */
 function historyRows(mysqli $db, int $donorId): array
 {
     return donorQuery(
         $db,
-        "SELECT h.history_id, h.public_ref, h.blood_type_id, bt.code AS blood_type_code, h.donated_on, h.units, h.source, h.verification,"
-            . " h.donation_id, d.collected_at, d.status AS donation_status, bc.name AS component_name, bb.name AS bank_name,"
-            . " dv.title AS drive_title"
+        "SELECT h.history_id, h.public_ref, h.blood_type_id, bt.code AS blood_type_code,"
+            . " h.donated_on, h.units, h.source, h.verification, h.donation_id,"
+            . " d.collected_at, d.status AS donation_status, bc.name AS component_name,"
+            . " bb.name AS bank_name, dv.title AS drive_title"
             . " FROM blood_history h"
             . " JOIN blood_type bt ON bt.blood_type_id=h.blood_type_id"
             . " LEFT JOIN donation d ON d.donation_id=h.donation_id"
@@ -144,9 +146,24 @@ function historyRows(mysqli $db, int $donorId): array
             . " LEFT JOIN blood_bank bb ON bb.bank_id=d.bank_id"
             . " LEFT JOIN drive dv ON dv.drive_id=d.drive_id"
             . " WHERE h.donor_id=?"
-            . " ORDER BY h.donated_on DESC, h.history_id DESC",
-        'i',
-        [$donorId]
+            . " UNION ALL"
+            . " SELECT NULL AS history_id, d.client_uuid AS public_ref, d.blood_type_id,"
+            . " bt.code AS blood_type_code, DATE(d.collected_at) AS donated_on, d.units,"
+            . " 'system' AS source,"
+            . " CASE WHEN d.status IN ('tested','processed','transfused') THEN 'verified'"
+            . " WHEN d.status='discarded' THEN 'rejected' ELSE 'pending' END AS verification,"
+            . " d.donation_id, d.collected_at, d.status AS donation_status,"
+            . " bc.name AS component_name, bb.name AS bank_name, dv.title AS drive_title"
+            . " FROM donation d"
+            . " JOIN blood_type bt ON bt.blood_type_id=d.blood_type_id"
+            . " JOIN blood_component bc ON bc.component_id=d.component_id"
+            . " JOIN blood_bank bb ON bb.bank_id=d.bank_id"
+            . " LEFT JOIN drive dv ON dv.drive_id=d.drive_id"
+            . " WHERE d.donor_id=? AND NOT EXISTS"
+            . " (SELECT 1 FROM blood_history h WHERE h.donation_id=d.donation_id)"
+            . " ORDER BY donated_on DESC, collected_at DESC",
+        'ii',
+        [$donorId, $donorId]
     );
 }
 
@@ -165,6 +182,8 @@ function unreadCount(mysqli $db, int $donorId): int
 }
 
 if ($method === 'GET') {
+    // Compare request deadlines using the PHP application's Asia/Manila timezone.
+    $nowManila = date('Y-m-d H:i:s');
     if ($action === 'me' || $action === 'overview') {
         $donor['eligibility'] = eligibilityData($db, $donor);
         $history = historyRows($db, $donorId);
@@ -190,6 +209,7 @@ if ($method === 'GET') {
                 break;
             }
         }
+        /* DONOR MATCHING REQUESTS: only open requests whose deadlines are in the future. */
         $donor['matching_requests'] = donorQuery(
             $db,
             "SELECT br.request_id, br.ward, br.units_needed, br.urgency, br.needed_by, br.status, br.blood_type_id,"
@@ -198,21 +218,17 @@ if ($method === 'GET') {
                 . " JOIN blood_type bt ON bt.blood_type_id=br.blood_type_id"
                 . " JOIN blood_component bc ON bc.component_id=br.component_id"
                 . " JOIN blood_bank bb ON bb.bank_id=br.bank_id"
-                . " WHERE br.status='open' AND br.needed_by >= NOW() AND br.blood_type_id=?"
-                . " ORDER BY FIELD(br.urgency,'critical','urgent','normal'), br.needed_by"
+                . " WHERE br.status='open' AND br.blood_type_id=? AND br.needed_by > ?"
+                . " ORDER BY FIELD(br.urgency,'critical','high','normal'), br.needed_by, br.request_id DESC"
                 . " LIMIT 3",
-            'i',
-            [(int)$donor['blood_type_id']]
+            'is',
+            [(int)$donor['blood_type_id'], $nowManila]
         );
         sendJson(true, 'Donor account loaded.', $donor);
     }
     if ($action === 'history') {
         sendJson(true, 'Donation history loaded.', [
             'history' => historyRows($db, $donorId),
-            'blood_types' => donorQuery(
-                $db,
-                'SELECT blood_type_id, code FROM blood_type ORDER BY blood_type_id'
-            ),
         ]);
     }
     if ($action === 'drives') {
@@ -257,18 +273,100 @@ if ($method === 'GET') {
         $alerts = donorQuery(
             $db,
             "SELECT a.alert_id, a.message, a.sender_type, a.level, a.status, a.sent_at, a.drive_id, a.request_id, bt.code AS blood_type_code,"
-                . " COALESCE(bb.name,o.org_name,'Ka-dugo') AS sender_name, ar.is_read, ar.responded_at"
+                . " COALESCE(bb.name,o.org_name,'Ka-dugo') AS sender_name, ar.is_read, ar.responded_at,"
+                . " br.needed_by AS request_needed_by, br.status AS request_status,"
+                . " CASE WHEN br.request_id IS NOT NULL AND br.needed_by <= ? THEN 1 ELSE 0 END AS request_expired"
                 . " FROM alert_recipient ar"
                 . " JOIN alert a ON a.alert_id=ar.alert_id"
                 . " JOIN blood_type bt ON bt.blood_type_id=a.blood_type_id"
                 . " LEFT JOIN blood_bank bb ON bb.bank_id=a.bank_id"
                 . " LEFT JOIN organizer o ON o.organizer_id=a.organizer_id"
+                . " LEFT JOIN blood_request br ON br.request_id=a.request_id"
                 . " WHERE ar.donor_id=? AND a.status='active'"
                 . " ORDER BY a.sent_at DESC, a.alert_id DESC",
-            'i',
-            [$donorId]
+            'si',
+            [$nowManila, $donorId]
         );
-        sendJson(true, 'Notifications loaded.', ['alerts' => $alerts, 'unread_count' => unreadCount($db, $donorId)]);
+        /* DONOR NOTIFICATIONS
+         * Existing dispatched alerts use alert_recipient (server-side read receipts).
+         * An open bank request does NOT automatically create an alert; expose matching
+         * requests as live inbox items without modifying bank/organizer records.
+         */
+        $matchingRequests = donorQuery(
+            $db,
+            "SELECT br.request_id, br.ward, br.units_needed, br.urgency, br.needed_by,"
+                . " br.blood_type_id, bt.code AS blood_type_code,"
+                . " bc.name AS component_name, bb.name AS bank_name"
+                . " FROM blood_request br"
+                . " JOIN blood_type bt ON bt.blood_type_id=br.blood_type_id"
+                . " JOIN blood_component bc ON bc.component_id=br.component_id"
+                . " JOIN blood_bank bb ON bb.bank_id=br.bank_id"
+                . " WHERE br.status='open' AND br.blood_type_id=? AND br.needed_by > ?"
+                . " ORDER BY FIELD(br.urgency,'critical','high','normal'), br.needed_by, br.request_id DESC"
+                . " LIMIT 30",
+            'is',
+            [(int)$donor['blood_type_id'], $nowManila]
+        );
+
+        /* Expired open bank requests are shown as a distinct notification, never
+         * as actionable dashboard requests or bookable blood drives. The donor
+         * reads these browser-local notices; no bank request status is changed.
+         */
+        $expiredRequests = donorQuery(
+            $db,
+            "SELECT br.request_id, br.ward, br.units_needed, br.urgency, br.needed_by,"
+                . " bt.code AS blood_type_code, bc.name AS component_name, bb.name AS bank_name"
+                . " FROM blood_request br"
+                . " JOIN blood_type bt ON bt.blood_type_id=br.blood_type_id"
+                . " JOIN blood_component bc ON bc.component_id=br.component_id"
+                . " JOIN blood_bank bb ON bb.bank_id=br.bank_id"
+                . " WHERE br.status='open' AND br.blood_type_id=? AND br.needed_by <= ?"
+                . " ORDER BY br.needed_by DESC, br.request_id DESC"
+                . " LIMIT 50",
+            'is',
+            [(int)$donor['blood_type_id'], $nowManila]
+        );
+
+        /* Show ongoing/upcoming drives that accept this donor's blood type.
+         * Drives without a target blood type list are open to every donor type.
+         */
+        $upcomingDrives = donorQuery(
+            $db,
+            "SELECT d.drive_id, d.title, d.venue, d.drive_date, d.start_time,"
+                . " d.status, o.org_name AS organizer_name"
+                . " FROM drive d"
+                . " JOIN organizer o ON o.organizer_id=d.organizer_id"
+                . " WHERE d.status IN ('scheduled','ongoing')"
+                . " AND d.drive_date >= CURRENT_DATE"
+                . " AND (NOT EXISTS (SELECT 1 FROM drive_blood_type t WHERE t.drive_id=d.drive_id)"
+                . " OR EXISTS (SELECT 1 FROM drive_blood_type t"
+                . " WHERE t.drive_id=d.drive_id AND t.blood_type_id=?))"
+                . " ORDER BY d.drive_date, d.start_time, d.drive_id"
+                . " LIMIT 30",
+            'i',
+            [(int)$donor['blood_type_id']]
+        );
+
+        /* Only link notifications to drives the donor can currently find
+         * under Drives & Booking. Use the same availability conditions and
+         * organizer join as the donor `drives` endpoint.
+         */
+        $browseableDrives = donorQuery(
+            $db,
+            "SELECT d.drive_id FROM drive d"
+                . " JOIN organizer o ON o.organizer_id=d.organizer_id"
+                . " WHERE d.status IN ('scheduled','ongoing') AND d.drive_date >= CURRENT_DATE"
+        );
+
+        sendJson(true, 'Notifications loaded.', [
+            'donor_id' => $donorId,
+            'browseable_drive_ids' => array_map('intval', array_column($browseableDrives, 'drive_id')),
+            'alerts' => $alerts,
+            'matching_requests' => $matchingRequests,
+            'expired_requests' => $expiredRequests,
+            'upcoming_drives' => $upcomingDrives,
+            'unread_count' => unreadCount($db, $donorId),
+        ]);
     }
     sendJson(false, 'Unknown donor operation.', null, 404);
 }
@@ -295,43 +393,7 @@ if ($action === 'logout') {
     sendJson(true, 'Signed out.');
 }
 
-if ($action === 'add_history') {
-    $day = (string)($input['donated_on'] ?? '');
-    $dt = DateTimeImmutable::createFromFormat('!Y-m-d', $day);
-    $units = filter_var($input['units'] ?? null, FILTER_VALIDATE_FLOAT);
-    $bloodType = (int)($input['blood_type_id'] ?? $donor['blood_type_id']);
-    if (
-        !$dt
-        || $dt->format('Y-m-d') !== $day
-        || $day > date('Y-m-d')
-        || $units === false
-        || $units <= 0
-        || $units > 10
-        || $bloodType !== (int)$donor['blood_type_id']
-    ) {
-        sendJson(false, 'Enter a valid past donation date and units for your blood type.', null, 422);
-    }
-    try {
-        $ref = sprintf(
-            '%s-%s-%s-%s-%s',
-            bin2hex(random_bytes(4)),
-            bin2hex(random_bytes(2)),
-            bin2hex(random_bytes(2)),
-            bin2hex(random_bytes(2)),
-            bin2hex(random_bytes(6))
-        );
-        $id = donorWrite(
-            $db,
-            "INSERT INTO blood_history (public_ref,donor_id,blood_type_id,units,donated_on,source,verification)"
-                . " VALUES (?,?,?,?,?,'manual','pending')",
-            'iiids',
-            [$ref, $donorId, $bloodType, $units, $day]
-        );
-        sendJson(true, 'Self-reported history saved for verification.', ['history_id' => $id]);
-    } catch (Throwable $e) {
-        sendJson(false, 'Could not save donation history.', null, 500);
-    }
-}
+/* changes: Self-reported donation creation removed; history is read-only for donors. */
 
 if ($action === 'book' || $action === 'reschedule' || $action === 'cancel_booking') {
     $regId = $action === 'book' ? 0 : validPositiveId($input['registration_id'] ?? null);

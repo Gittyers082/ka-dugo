@@ -293,3 +293,27 @@
   .drives-page .donor-drive-card > .secondary-action { align-self: stretch; }
   .drives-page .donor-slot-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* Matching Bank Requests */
+.drives-page .request-help {
+  margin: 8px 0 0;
+  color: #745f58;
+  font: 500 15px/1.5 var(--font-body);
+}
+
+.drives-page .request-type-tile {
+  display: grid;
+  place-items: center;
+  flex: 0 0 84px;
+  min-height: 84px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--maroon, #870e24);
+  color: white;
+  font: 700 25px/1 var(--font-body);
+}
+
+.drives-page .donor-bank-request.request-highlight {
+  border: 2px solid var(--maroon, #870e24);
+  box-shadow: 0 0 0 3px rgba(135, 14, 36, .1);
+}

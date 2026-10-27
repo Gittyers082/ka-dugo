@@ -371,3 +371,23 @@
 .notification-card[hidden] {
   display: none;
 }
+
+/* LIVE NOTIFICATION CONTROLS */
+.notification-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#notification-feedback:not([hidden]) {
+  margin: 8px 0 16px;
+  color: var(--maroon);
+}
+
+.notice-detail-link:not([hidden]) {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--maroon);
+  font-weight: 700;
+}

@@ -1137,3 +1137,9 @@
 .drives-page .bookings-view {
   scroll-margin-top: 118px;
 }
+
+/* DRIVE FROM NOTIFICATION */
+.donor-drive-card.drive-highlight {
+    outline: 2px solid #8a3029;
+    outline-offset: 2px;
+}

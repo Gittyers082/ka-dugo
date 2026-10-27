@@ -4,14 +4,14 @@
     const app = window.KaDonor;
     const qrDialog = $('#donor-qr-dialog');
     let previousFocus = null;
-    let greetingName='';
-    function refreshGreeting(){if(!greetingName)return;const h=new Date().getHours();setText('.welcome-heading',`Good ${h<12?'morning':h<18?'afternoon':'evening'}, ${greetingName} ♥`);}
-    setInterval(refreshGreeting,30000);document.addEventListener('visibilitychange',refreshGreeting);
     function setText(selector, text) { const element = $(selector); if (element)
         element.textContent = text; }
     function renderProfile(data) {
         const name = String(data.full_name);
-        greetingName=app.first(name); refreshGreeting();
+        setText(
+            '.welcome-heading',
+            `Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, ${app.first(name)} ♥`
+        );
 
         setText('.donor-id', `ID: ${data.donor_id}`);
         const eligible = Boolean(data.eligibility?.is_eligible);
@@ -77,8 +77,8 @@
         const request = (data.matching_requests || [])[0];
         if (!request) {
             card.innerHTML = '<p class="request-eyebrow">MATCHING BLOOD REQUESTS' +
-                '</p><h2>No matching open requests' +
-                '</h2><p class="request-location">Requests matching your blood type will appear here when available.' +
+                '</p><h2>No matching active requests' +
+                '</h2><p class="request-location">Only open requests with future deadlines appear here. Expired requests are shown in Notifications.' +
                 '</p>';
             return;
         }
@@ -95,9 +95,9 @@
             `</strong><p>${app.safe(request.component_name)} · Needed by ${app.safe(app.formatDate(request.needed_by))}` +
             `</p></div></div><p class="request-notice">Please contact the blood bank to confirm availability and donation steps. Booking a drive is not a response to this request.` +
             `</p><div class="request-actions">` +
-            `<button type="button" class="respond-button" id="respond-to-request">Browse Available Drives →` +
+            `<button type="button" class="respond-button" id="respond-to-request">View Matching Requests →` +
             `</button></div>`;
-        $('#respond-to-request')?.addEventListener('click', () => window.location.href = 'drives-booking.html?view=upcoming');
+        $('#respond-to-request')?.addEventListener('click', () => window.location.href = `drives-booking.html?view=requests&request=${encodeURIComponent(request.request_id)}`);
     }
     function renderBooking(data) {
         const section = $('.scheduled-drive-section');
@@ -130,12 +130,41 @@
             `</p></aside></article>`;
         $('#dashboard-reschedule')?.addEventListener('click', () => window.location.href = `drives-booking.html?view=bookings&action=reschedule&registration=${encodeURIComponent(b.registration_id)}`);
     }
-    app.profile().then(data => { renderProfile(data); renderRequest(data); renderBooking(data); }).catch(error => {
-        setText('.welcome-heading', 'Donor Dashboard');
-        app.displayError(error.message, $('.eligibility-explanation'));
-        setText('.matching-request-card h2', 'Unable to load requests');
-        setText('#dashboard-booking-placeholder', 'Unable to load your bookings');
+    /* DONOR DASHBOARD NOTIFICATIONS */
+    // Overview only counts dispatched alerts; include unread live database items.
+    async function refreshNotificationBadge() {
+        try {
+            const feed = await app.loadNotices();
+            const dot = $('.notification-dot');
+            if (dot) dot.hidden = feed.unreadCount === 0;
+        } catch (error) {
+            // Keep the overview's DB alert count if the notification feed fails.
+            console.warn('Could not refresh donor notifications:', error.message);
+        }
+    }
+
+    // Refresh bank requests and organizer bookings from the server when dashboard is viewed.
+    function refreshDashboard() {
+        return app.request('overview').then(data => {
+            renderProfile(data);
+            renderRequest(data);
+            renderBooking(data);
+            return refreshNotificationBadge();
+        }).catch(error => {
+            setText('.welcome-heading', 'Donor Dashboard');
+            app.displayError(error.message, $('.eligibility-explanation'));
+            setText('.matching-request-card h2', 'Unable to load requests');
+            setText('#dashboard-booking-placeholder', 'Unable to load your bookings');
+        });
+    }
+    refreshDashboard();
+    window.addEventListener('pageshow', event => {
+        if (event.persisted) refreshDashboard();
     });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshDashboard();
+    });
+    setInterval(() => { if (!document.hidden) refreshDashboard(); }, 60000);
     function openQr() {
         if (!qrDialog || qrDialog.open || !window.KaDonorQr)
             return;
