@@ -31,6 +31,10 @@ if ($method === 'GET') {
         $donorId = (int)$acctRow['donor_id'];
     } else {
         requireRole(['bank', 'phlebotomist', 'admin']);
+        // Scanner staff may query one donor, not download the donor directory.
+        if (($_SESSION['role'] ?? '') === 'phlebotomist' && $donorId <= 0 && $qrCode === '') {
+            sendJson(false, 'Scan a QR code or enter a donor ID.', null, 403);
+        }
     }
 
     if ($donorId > 0 || $qrCode !== '') {
@@ -59,6 +63,15 @@ if ($method === 'GET') {
             $stmtCnt->close();
             $donor['total_units'] = (float)($cntRow['total_units'] ?? 0);
 
+            if (($_SESSION['role'] ?? '') === 'phlebotomist') {
+                // Only data needed to identify and evaluate the scanned donor.
+                $scannerFields = [
+                    'donor_id', 'full_name', 'blood_type_id', 'blood_type_code',
+                    'qr_code', 'birthdate', 'weight_kg', 'last_donation_date',
+                    'eligibility', 'total_units'
+                ];
+                $donor = array_intersect_key($donor, array_flip($scannerFields));
+            }
             sendJson(true, 'Donor retrieved.', $donor);
         }
         sendJson(false, 'Donor not found.', null, 404);
@@ -85,7 +98,7 @@ if ($method === 'GET') {
     sendJson(true, 'Donors loaded.', ['count' => count($donors), 'donors' => $donors]);
 
 } elseif ($method === 'POST') {
-    requireRole(['bank', 'phlebotomist', 'admin']);
+    requireRole(['bank', 'admin']);
     requireFields($input, ['full_name', 'birthdate', 'sex', 'weight_kg', 'contact_no', 'blood_type_id']);
     $fullName = sanitizeString($input['full_name']);
     $birthdate = validateDateString((string)$input['birthdate'], 'birthdate');

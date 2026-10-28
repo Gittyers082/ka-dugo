@@ -174,9 +174,10 @@ function unreadCount(mysqli $db, int $donorId): int
         "SELECT COUNT(*) AS n"
             . " FROM alert_recipient ar"
             . " JOIN alert a ON a.alert_id=ar.alert_id"
-            . " WHERE ar.donor_id=? AND ar.is_read=0 AND a.status='active'",
-        'i',
-        [$donorId]
+            . " WHERE ar.donor_id=? AND ar.is_read=0 AND a.status='active'"
+            . " AND a.blood_type_id=(SELECT blood_type_id FROM donor WHERE donor_id=?)",
+        'ii',
+        [$donorId, $donorId]
     );
     return (int)($row['n'] ?? 0);
 }
@@ -241,7 +242,12 @@ if ($method === 'GET') {
                 . " JOIN organizer o ON o.organizer_id=d.organizer_id"
                 . " LEFT JOIN blood_bank bb ON bb.bank_id=d.bank_id"
                 . " WHERE d.status IN ('scheduled','ongoing') AND d.drive_date >= CURRENT_DATE"
-                . " ORDER BY d.drive_date, d.start_time"
+                . " AND (NOT EXISTS (SELECT 1 FROM drive_blood_type t WHERE t.drive_id=d.drive_id)"
+                . " OR EXISTS (SELECT 1 FROM drive_blood_type t"
+                . " WHERE t.drive_id=d.drive_id AND t.blood_type_id=?))"
+                . " ORDER BY d.drive_date, d.start_time",
+            'i',
+            [(int)$donor['blood_type_id']]
         );
         foreach ($rows as &$drive) {
             $drive['slots'] = donorQuery(
@@ -282,10 +288,10 @@ if ($method === 'GET') {
                 . " LEFT JOIN blood_bank bb ON bb.bank_id=a.bank_id"
                 . " LEFT JOIN organizer o ON o.organizer_id=a.organizer_id"
                 . " LEFT JOIN blood_request br ON br.request_id=a.request_id"
-                . " WHERE ar.donor_id=? AND a.status='active'"
+                . " WHERE ar.donor_id=? AND a.status='active' AND a.blood_type_id=?"
                 . " ORDER BY a.sent_at DESC, a.alert_id DESC",
-            'si',
-            [$nowManila, $donorId]
+            'sii',
+            [$nowManila, $donorId, (int)$donor['blood_type_id']]
         );
         /* DONOR NOTIFICATIONS
          * Existing dispatched alerts use alert_recipient (server-side read receipts).
@@ -356,6 +362,11 @@ if ($method === 'GET') {
             "SELECT d.drive_id FROM drive d"
                 . " JOIN organizer o ON o.organizer_id=d.organizer_id"
                 . " WHERE d.status IN ('scheduled','ongoing') AND d.drive_date >= CURRENT_DATE"
+                . " AND (NOT EXISTS (SELECT 1 FROM drive_blood_type t WHERE t.drive_id=d.drive_id)"
+                . " OR EXISTS (SELECT 1 FROM drive_blood_type t"
+                . " WHERE t.drive_id=d.drive_id AND t.blood_type_id=?))",
+            'i',
+            [(int)$donor['blood_type_id']]
         );
 
         sendJson(true, 'Notifications loaded.', [
@@ -424,6 +435,19 @@ if ($action === 'book' || $action === 'reschedule' || $action === 'cancel_bookin
             );
             $db->commit();
             sendJson(true, 'Registration cancelled.');
+        }
+        $match = oneRow(
+            $db,
+            "SELECT 1 AS allowed FROM drive d WHERE d.drive_id=?"
+                . " AND (NOT EXISTS (SELECT 1 FROM drive_blood_type t WHERE t.drive_id=d.drive_id)"
+                . " OR EXISTS (SELECT 1 FROM drive_blood_type t"
+                . " WHERE t.drive_id=d.drive_id AND t.blood_type_id=?))",
+            'ii',
+            [$driveId, (int)$donor['blood_type_id']]
+        );
+        if (!$match) {
+            $db->rollback();
+            sendJson(false, 'This drive does not accept your blood type.', null, 422);
         }
         $slot = oneRow(
             $db,
@@ -517,17 +541,18 @@ if ($action === 'read_alert' || $action === 'read_all') {
                 "UPDATE alert_recipient ar"
                     . " JOIN alert a ON a.alert_id=ar.alert_id"
                     . " SET ar.is_read=1"
-                    . " WHERE ar.donor_id=? AND a.status='active'",
-                'i',
-                [$donorId]
+                    . " WHERE ar.donor_id=? AND a.status='active' AND a.blood_type_id=?",
+                'ii',
+                [$donorId, (int)$donor['blood_type_id']]
             );
         } else {
             $alertId = validPositiveId($input['alert_id'] ?? null);
             donorWrite(
                 $db,
-                'UPDATE alert_recipient SET is_read=1 WHERE alert_id=? AND donor_id=?',
-                'ii',
-                [$alertId, $donorId]
+                'UPDATE alert_recipient ar JOIN alert a ON a.alert_id=ar.alert_id'
+                    . ' SET ar.is_read=1 WHERE ar.alert_id=? AND ar.donor_id=? AND a.blood_type_id=?',
+                'iii',
+                [$alertId, $donorId, (int)$donor['blood_type_id']]
             );
         }
         sendJson(true, 'Notification marked as read.', ['unread_count' => unreadCount($db, $donorId)]);

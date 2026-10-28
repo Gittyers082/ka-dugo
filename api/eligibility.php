@@ -56,7 +56,7 @@ function evaluateDonorEligibility(array $donor, array $activeDeferrals = [], arr
 
 if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'eligibility.php') {
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') sendJson(false, 'Method not allowed.', null, 405);
-    requireRole(['bank', 'phlebotomist', 'admin', 'organizer']);$conn = getDbConnection();
+    requireRole(['bank', 'admin', 'organizer']);$conn = getDbConnection();
     $input = getRequestData();$donorId = isset($input['donor_id']) ? (int)$input['donor_id'] : 0;
     $qrCode = sanitizeString($input['qr_code'] ?? '');
 
