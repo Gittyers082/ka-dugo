@@ -7,6 +7,10 @@ $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
 requireRole(['bank', 'phlebotomist', 'admin']);
+// Scanner staff can only create a collected donation, not browse/edit/delete the log.
+if (($_SESSION['role'] ?? '') === 'phlebotomist' && $method !== 'POST') {
+    sendJson(false, 'Phlebotomists can only record donations from the scanner.', null, 403);
+}
 const DONATION_STATUSES = ['collected', 'tested', 'processed', 'discarded', 'transfused'];
 
 // Bank staff only see and write their own bank's donations; the session decides, not the browser.
@@ -46,6 +50,20 @@ try {
             $ph->bind_param('i', $accountId);
             $ph->execute();
             $input['phlebotomist_id'] = (int)($ph->get_result()->fetch_assoc()['phlebotomist_id'] ?? 0);
+            $ph->close();
+            if ($input['phlebotomist_id'] < 1) {
+                sendJson(false, 'Phlebotomist profile not found.', null, 403);
+            }
+            // Ignore caller-supplied status and blood type for scanner records.
+            $input['status'] = 'collected';
+            $donorId = (int)($input['donor_id'] ?? 0);
+            $typeStmt = $conn->prepare('SELECT blood_type_id FROM donor WHERE donor_id = ? LIMIT 1');
+            $typeStmt->bind_param('i', $donorId);
+            $typeStmt->execute();
+            $donorType = $typeStmt->get_result()->fetch_assoc();
+            $typeStmt->close();
+            if (!$donorType) sendJson(false, 'Donor not found.', null, 404);
+            $input['blood_type_id'] = (int)$donorType['blood_type_id'];
         }
         requireFields($input, ['donor_id', 'bank_id', 'blood_type_id', 'component_id', 'units']);
         $input['donor_id'] = validateIntRange($input['donor_id'], 1, PHP_INT_MAX, 'donor_id');

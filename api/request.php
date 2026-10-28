@@ -6,7 +6,7 @@ require_once __DIR__ . '/validation.php';
 $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
-requireRole($method === 'GET' ? ['bank', 'phlebotomist', 'admin', 'organizer'] : ['bank', 'admin']);
+requireRole($method === 'GET' ? ['bank', 'admin', 'organizer'] : ['bank', 'admin']);
 
 // Bank staff only see and manage their own bank's requests; the session decides, not the browser.
 $sessionBankId = signedInBankId();

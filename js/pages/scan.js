@@ -403,18 +403,22 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(payload),
           });
           const json = await res.json().catch(() => ({}));
-          if (!res.ok || json.ok === false) throw new Error("Offline");
+          if (!res.ok || !json.ok) throw new Error(json.error || "Could not save donation. Please try again.");
           result.status = "saved";
         }
 
         stopCamera();
         showToast(result.status === "saved" ? "Donation synced to MySQL database!" : "Offline: Donation securely queued in local storage!");
-        setTimeout(() => { window.location.href = "donation-log.html"; }, 1200);
+        setTimeout(() => {
+          window.location.href = window.kadugoBankRole === "phlebotomist" ? "scan.html" : "donation-log.html";
+        }, 1200);
 
       } catch (err) {
-        stopCamera();
-        showToast("Offline: Donation securely queued in local storage!");
-        setTimeout(() => { window.location.href = "donation-log.html"; }, 1200);
+        showToast(err.message || "Donation could not be saved. Check your connection and retry.");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = "1";
+        saveBtn.textContent = "Save & Log Donation";
       }
     };
   }
