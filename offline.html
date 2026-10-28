@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Offline | Ka-dugo</title>
+    <link rel="icon" type="image/x-icon" href="assets/icons/kadugo-ico.ico">
+    <link rel="stylesheet" href="css/tokens.css">
+    <link rel="stylesheet" href="css/base.css">
+
+    <style>
+        /* ==========================================================================
+           OFFLINE PAGE STYLES
+           ========================================================================== */
+        body.offline-page {
+            margin: 0;
+            padding: 0;
+            background-color: var(--oxblood);
+            /* Dark red background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: var(--font-body);
+        }
+
+        .offline-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .offline-title {
+            color: var(--bone);
+            font-family: var(--font-heading);
+            font-size: 32px;
+            font-weight: 500;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .offline-logo {
+            width: 140px;
+            height: auto;
+            margin: 48px 0;
+        }
+
+        .btn-reconnect {
+            background-color: var(--bone);
+            color: var(--maroon);
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 15px;
+            border: none;
+            border-radius: var(--radius-full);
+            padding: 14px 48px;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            width: 200px;
+        }
+
+        .btn-reconnect:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reconnect:active {
+            transform: scale(0.98);
+        }
+
+        /* Tooltip Hover System for "What still Works" */
+        .tooltip-container {
+            position: relative;
+            margin-top: 24px;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .what-works-link {
+            color: var(--bone);
+            font-size: 13px;
+            text-decoration: none;
+            opacity: 0.9;
+        }
+
+        .tooltip-container:hover .what-works-link {
+            opacity: 1;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .tooltip-message {
+            visibility: hidden;
+            opacity: 0;
+            background-color: var(--bone);
+            color: var(--oxblood);
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: absolute;
+            z-index: 10;
+            bottom: 150%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            width: 240px;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.4;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Tooltip Arrow */
+        .tooltip-message::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: var(--bone) transparent transparent transparent;
+        }
+
+        /* Show Tooltip on Hover */
+        .tooltip-container:hover .tooltip-message {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body class="offline-page">
+
+    <main class="offline-container">
+        <!-- Title -->
+        <h1 class="offline-title">Offline ka, Jo.</h1>
+
+        <!-- Icon -->
+        <img class="offline-logo" src="assets/icons/bone/192-bone_icon.png" alt="Offline Heart Icon">
+
+        <!-- Reconnect Button -->
+        <button class="btn-reconnect" onclick="window.location.reload()">Reconnect</button>
+
+        <!-- Hover Message -->
+        <div class="tooltip-container">
+            <span class="what-works-link">What still Works</span>
+
+            <!-- This message appears when hovering over "What still Works" -->
+            <div class="tooltip-message">
+                <strong>Offline Mode Active:</strong><br><br>
+                You can still view cached Blood Requests and use the QR Scanner to log donations. Data will
+                automatically sync when your connection is restored.
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>

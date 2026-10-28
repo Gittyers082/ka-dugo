@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="width=device-width, initial-scale=1" name="viewport"/>
+        <title>My Donations - Ka-dugo</title>
+        <link href="../../assets/icons/kadugo-ico.ico" rel="icon" type="image/x-icon"/>
+        <link href="../../css/tokens.css" rel="stylesheet"/>
+        <link href="../../css/base.css" rel="stylesheet"/>
+        <link href="../../css/styles.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/my-donations.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/donor-shell.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/donor-data.css?db-1" rel="stylesheet"/>
+    </head>
+    <body class="dashboard-layout donations-page">
+        <!-- Sidebar Navigation -->
+        <aside aria-label="Donor navigation" class="sidebar">
+            <div aria-label="Ka-dugo Donor" class="sidebar-brand">
+                <span>KA-DUGO</span>
+                <span>DONOR</span>
+            </div>
+            <nav aria-label="Main menu" class="nav-menu">
+                <a class="nav-item t-button" href="donor-dashboard.html">
+                    <svg aria-hidden="true" viewbox="0 0 24 24">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a aria-current="page" class="nav-item active t-button" href="my-donations.html">
+                    <svg aria-hidden="true" viewbox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" x2="8" y1="13" y2="13"></line>
+                        <line x1="16" x2="8" y1="17" y2="17"></line>
+                    </svg>
+                    <span>My Donations</span>
+                </a>
+                <a class="nav-item t-button" href="drives-booking.html">
+                    <svg aria-hidden="true" viewbox="0 0 24 24">
+                        <rect height="16" rx="2" width="18" x="3" y="5"></rect>
+                        <path d="M7 3v5M17 3v5M3 10h18"></path>
+                    </svg>
+                    <span>Drives &amp; Booking</span>
+                </a>
+            </nav>
+            <div class="nav-profile">
+                <a aria-label="Open donor profile" class="profile-image-link" href="profile.html" title="View profile">
+                    <img alt="Donor profile picture" class="avatar" src="../../assets/img/avatar-placeholder.svg"/>
+                </a>
+            </div>
+        </aside>
+        <!-- Workspace -->
+        <div class="dashboard-workspace">
+            <!-- Top Header -->
+            <header class="topbar">
+                <img alt="Ka-dugo logo" class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg"/>
+                <div class="brand-copy">
+                    <h2>My Donations</h2>
+                    <p>Ka-dugo Donor Portal</p>
+                </div>
+                <!-- Refresh Control -->
+                <button aria-label="Refresh this page" class="refresh-button" title="Refresh" type="button">
+                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="24">
+                        <path d="M3 11a9 9 0 0 1 15.4-6.4L21 7"></path>
+                        <path d="M21 3v4h-4"></path>
+                        <path d="M21 13a9 9 0 0 1-15.4 6.4L3 17"></path>
+                        <path d="M3 21v-4h4"></path>
+                    </svg>
+                </button>
+            </header>
+            <main class="dashboard-content">
+                <div aria-live="polite" class="donor-data-status" id="donor-page-status" role="status">Loading your donation records...</div>
+                <div class="top-grid">
+                    <section aria-label="Donation summary" class="lifetime-card">
+                        <div class="lifetime-heading">
+                            <div>
+                                <p class="panel-eyebrow">MY DONATION HISTORY</p>
+                                <h2 id="history-volume">— <span>Verified units</span></h2>
+                            </div>
+                            <span class="ready-badge" id="history-eligibility">Checking eligibility</span>
+                        </div>
+                        <div class="lifetime-stats">
+                            <div>
+                                <strong id="history-count">—</strong>
+                                <span>History records</span>
+                            </div>
+                            <div>
+                                <strong id="history-verified">—</strong>
+                                <span>Verified records</span>
+                            </div>
+                            <div>
+                                <strong id="history-last-date">—</strong>
+                                <span>Latest record</span>
+                            </div>
+                        </div>
+                    </section>
+                    <section aria-label="Donation history filters" class="filter-card">
+                        <div class="filter-title-row">
+                            <div>
+                                <p class="filter-kicker">YOUR RECORDS</p>
+                                <h2>Browse donation history</h2>
+                            </div>
+                            <span class="blood-pill" id="history-blood-pill">Blood type: —</span>
+                        </div>
+                        <div aria-label="Filter records by year" class="year-tabs" id="history-years" role="group"></div>
+                        <div aria-label="Filter by source" class="type-filters" role="group">
+                            <span class="filter-caption">FILTER:</span>
+                            <button aria-pressed="true" class="type-filter active" data-type="all" type="button">All records</button>
+                            <button aria-pressed="false" class="type-filter" data-type="system" type="button">System records</button>
+                        </div>
+                    </section>
+                </div>
+                <!-- changes: Removed donor self-add donation form. -->
+                <section aria-labelledby="logs-title" class="logs-section">
+                    <div class="logs-heading">
+                        <div>
+                            <p class="eyebrow">DONATION ACTIVITY</p>
+                            <h2 id="logs-title">Your Donation History</h2>
+                        </div>
+                    </div>
+                    <div class="logs-grid" id="logs-grid"></div>
+                    <div class="empty-drive-results" hidden="" id="empty-state">No donation history matches these filters.</div>
+                </section>
+            </main>
+        </div>
+        <script defer="" src="../../js/donor_js/donor-common.js?go-drives-2"></script>
+        <script defer="" src="../../js/donor_js/my-donations.js?db-2"></script>
+    </body>
+</html>

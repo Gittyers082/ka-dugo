@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <title>Notifications - Ka-dugo</title>
+        <link href="../../assets/icons/kadugo-ico.ico" rel="icon" type="image/x-icon"/>
+        <link href="../../css/tokens.css" rel="stylesheet"/>
+        <link href="../../css/base.css" rel="stylesheet"/>
+        <link href="../../css/styles.css" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/donor-dashboard.css?v=profile-qr-2" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/notifications.css?notifs-3" rel="stylesheet"/>
+        <link href="../../css/Donor_Css/donor-data.css?db-1" rel="stylesheet"/>
+    </head>
+    <body class="dashboard-layout donor-dashboard notifications-page">
+        <!-- Donor Sidebar -->
+        <aside aria-label="Donor navigation" class="sidebar">
+            <div aria-label="Ka-dugo Donor" class="sidebar-brand">
+                <span>KA-DUGO</span>
+                <span>DONOR</span>
+            </div>
+            <nav aria-label="Main menu" class="nav-menu">
+                <!-- Dashboard -->
+                <a aria-current="page" class="nav-item active t-button" href="donor-dashboard.html">
+                    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <!-- My Donations -->
+                <a class="nav-item t-button" href="my-donations.html">
+                    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" x2="8" y1="13" y2="13"></line>
+                        <line x1="16" x2="8" y1="17" y2="17"></line>
+                    </svg>
+                    <span>My Donations</span>
+                </a>
+                <!-- Drives & Booking -->
+                <a class="nav-item t-button" href="drives-booking.html">
+                    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
+                        <rect height="16" rx="2" width="18" x="3" y="5"></rect>
+                        <path d="M7 3v5M17 3v5M3 10h18"></path>
+                    </svg>
+                    <span>Drives &amp; Booking</span>
+                </a>
+            </nav>
+            <!-- Clickable Profile Picture -->
+            <div class="nav-profile">
+                <a aria-label="Open donor account" class="profile-image-link" href="profile.html">
+                    <img alt="Donor Profile" class="avatar" src="../../assets/img/avatar-placeholder.svg"/>
+                </a>
+            </div>
+        </aside>
+        <!-- Main Workspace -->
+        <div class="dashboard-workspace">
+            <!--Top Bar-->
+            <header class="topbar">
+                <img alt="Ka-dugo logo" class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg"/>
+                <div class="brand-copy">
+                    <h2>Donor Dashboard</h2>
+                    <p>Ka-dugo Donor Portal</p>
+                </div>
+                <!-- Refresh Control -->
+                <button aria-label="Refresh this page" class="refresh-button" title="Refresh" type="button">
+                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="24">
+                        <path d="M3 11a9 9 0 0 1 15.4-6.4L21 7"></path>
+                        <path d="M21 3v4h-4"></path>
+                        <path d="M21 13a9 9 0 0 1-15.4 6.4L3 17"></path>
+                        <path d="M3 21v-4h4"></path>
+                    </svg>
+                </button>
+            </header>
+            <main class="dashboard-content" id="notifications-main">
+                <!-- Page Header -->
+                <header class="notifications-heading">
+                    <div>
+                        <a class="notifications-back" href="donor-dashboard.html">← Back to Dashboard</a>
+                        <h1>Notifications</h1>
+                        <p>Blood requests and announcements sent to your donor account.</p>
+                    </div>
+                    <span aria-live="polite" class="notification-summary" id="unread-summary">— unread</span>
+                </header>
+                <!-- All and Unread Tabs -->
+                <section aria-label="Donor notifications" class="notification-panel">
+                    <div class="notification-toolbar">
+                        <div aria-label="Filter notifications" class="notification-tabs" role="tablist">
+                            <button aria-selected="true" class="notice-tab active" id="show-all-alerts" role="tab" type="button">All</button>
+                            <button aria-selected="false" class="notice-tab" id="show-unread-alerts" role="tab" type="button">Unread <span id="unread-tab-count">0</span></button>
+                        </div>
+                        <div class="notification-toolbar-actions">
+                            <button class="mark-all-read" id="refresh-notifications" type="button">Refresh</button>
+                            <button class="mark-all-read" id="mark-all-alerts-read" type="button">Mark all as read</button>
+                        </div>
+                    </div>
+                    <!--Example alerts-->
+                    <div class="notification-list" id="donor-notification-list">
+                        <p class="donor-data-status" id="notification-load-status" role="status">Loading your notifications...</p>
+                    </div>
+                    <p class="donor-data-status" id="notification-feedback" role="status" hidden></p>
+                    <!-- Empty State -->
+                    <div class="notifications-empty" hidden="" id="notifications-empty">
+                        <p>No unread notifications.</p>
+                        <button id="empty-show-all" type="button">See all notifications</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+        <!-- Notification Detail Dialog -->
+        <div class="notice-overlay" hidden="" id="notice-overlay">
+            <section aria-labelledby="notice-detail-title" aria-modal="true" class="notice-dialog" role="dialog">
+                <button aria-label="Close notification" class="notice-close" id="notice-close" type="button">×</button>
+                <span class="notice-dialog-kind" id="notice-detail-kind"></span>
+                <h2 id="notice-detail-title"></h2>
+                <p class="notice-dialog-sender" id="notice-detail-sender"></p>
+                <p class="notice-dialog-message" id="notice-detail-message"></p>
+                <div class="notice-dialog-actions">
+                    <button class="notice-done" id="notice-done" type="button">Done</button>
+                    <button class="notice-go" id="notice-go" type="button" aria-label="Go to Drives and Booking">Go →</button>
+                </div>
+            </section>
+        </div>
+        <script defer="" src="../../js/donor_js/donor-common.js?go-drives-2"></script>
+        <script defer="" src="../../js/donor_js/donor-notifications.js?go-drives-2"></script>
+    </body>
+</html>

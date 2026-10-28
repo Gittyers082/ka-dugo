@@ -1,0 +1,44 @@
+/* BANK SIDEBAR IDENTITY */
+/* Only the real labels are displayed; no extra generated labels. */
+.bottom-nav::before,
+.bottom-nav::after {
+  content: none !important;
+}
+
+/* Mobile uses the bottom navigation with no identity labels. */
+.bottom-nav .nav-brand,
+.bottom-nav .nav-org {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .bottom-nav .nav-brand {
+    display: block;
+    position: absolute;
+    top: 34px;
+    left: 24px;
+    right: 20px;
+    margin: 0;
+    padding: 0;
+    color: var(--bone, #e4ddd6);
+    white-space: pre-line;
+    font: 700 21px/1.45 var(--font-heading), sans-serif;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .bottom-nav .nav-org {
+    display: block;
+    position: absolute;
+    bottom: 28px;
+    left: 24px;
+    right: 20px;
+    margin: 0;
+    padding: 0;
+    color: var(--bone, #e4ddd6);
+    opacity: 0.85;
+    white-space: normal;
+    overflow-wrap: break-word;
+    font: 400 13px/1.55 var(--font-body), sans-serif;
+  }
+}
