@@ -6,7 +6,7 @@ require_once __DIR__ . '/eligibility.php';
 $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
-requireRole(['bank', 'phlebotomist', 'admin', 'organizer']);
+requireRole(['bank', 'admin', 'organizer']);
 // Organizers only work with their own drives, and only clinical staff may override eligibility.
 $sessionOrganizerId = $_SESSION['role'] === 'organizer' ? signedInOrganizer() : null;
 if ($sessionOrganizerId !== null) unset($input['force_override']);
@@ -187,6 +187,22 @@ if ($method === 'GET') {
     }
     if (!in_array($drive['status'], ['scheduled', 'ongoing'], true)) {
         sendJson(false, "Cannot book registration for a {$drive['status']} drive.", null, 422);
+    }
+
+    // Accept only donors of the drive's selected blood types.
+    // An empty selection means the organizer left the drive open to all types.
+    $stmtMatch = $conn->prepare(
+        "SELECT 1 FROM drive d WHERE d.drive_id = ?"
+        . " AND (NOT EXISTS (SELECT 1 FROM drive_blood_type t WHERE t.drive_id=d.drive_id)"
+        . " OR EXISTS (SELECT 1 FROM drive_blood_type t WHERE t.drive_id=d.drive_id AND t.blood_type_id=?))"
+    );
+    $donorBloodTypeId = (int)$donor['blood_type_id'];
+    $stmtMatch->bind_param('ii', $driveId, $donorBloodTypeId);
+    $stmtMatch->execute();
+    $isMatchingType = (bool)$stmtMatch->get_result()->fetch_assoc();
+    $stmtMatch->close();
+    if (!$isMatchingType) {
+        sendJson(false, "This drive does not accept the donor's blood type.", null, 422);
     }
 
     // 3. Prevent duplicate active registration for the same drive

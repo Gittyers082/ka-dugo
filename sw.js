@@ -4,7 +4,7 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v12";
+const VERSION = "v13-phleb-scan-only";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
@@ -39,10 +39,6 @@ const STATIC_ASSETS = [
   "assets/icons/crimson/192-crimson_icon.png",
   "assets/icons/crimson/512-crimson_icon.png",
   "assets/icons/bone/192-bone_icon.png",
-  "pages/bank/dashboard.html",
-  "pages/bank/scan.html",
-  "pages/bank/requests.html",
-  "pages/bank/active_requests.html",
   "pages/donor/donor-dashboard.html",
   "pages/organizer/drives.html",
   "pages/organizer/organizer.dash.html",
@@ -96,6 +92,12 @@ self.addEventListener("fetch", (event) => {
 
   if (url.pathname.includes("/api/")) {
     event.respondWith(fetch(req).catch(() => new Response(JSON.stringify({ok:false,data:null,error:'Connect to the local server to load current data.'}),{status:503,headers:{'Content-Type':'application/json'}})));
+    return;
+  }
+  // Always send bank HTML requests to Apache for session authorization.
+  // No cache-first bank pages, even when navigating from an installed PWA.
+  if (url.pathname.includes("/pages/bank/") && (req.mode === "navigate" || url.pathname.endsWith(".html"))) {
+    event.respondWith(fetch(req).catch(() => Response.redirect(OFFLINE_URL, 302)));
     return;
   }
   event.respondWith(staticStrategy(event));
