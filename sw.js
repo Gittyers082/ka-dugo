@@ -4,7 +4,7 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v14";
+const VERSION = "v15";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
@@ -37,6 +37,29 @@ const STATIC_ASSETS = [
   "js/pages/bank-log.js",
   "js/pages/bank-active-requests.js",
   "js/pages/bank-requests.js",
+  "js/pages/scan.js",
+  "css/bank_css/scan.css",
+  "css/bank_css/donation-log.css",
+  "pages/bank/donation-log.html",
+  // Donor area (query strings on the page tags are ignored by the cache lookup)
+  "css/Donor_Css/donor-dashboard.css",
+  "css/Donor_Css/donor-data.css",
+  "css/Donor_Css/donor-shell.css",
+  "css/Donor_Css/drives-booking.css",
+  "css/Donor_Css/my-donations.css",
+  "css/Donor_Css/notifications.css",
+  "css/Donor_Css/profile.css",
+  "js/donor_js/donor-common.js",
+  "js/donor_js/donor-dashboard.js",
+  "js/donor_js/donor-notifications.js",
+  "js/donor_js/donor-profile.js",
+  "js/donor_js/donor-qr.js",
+  "js/donor_js/drives-booking.js",
+  "js/donor_js/my-donations.js",
+  "pages/donor/drives-booking.html",
+  "pages/donor/my-donations.html",
+  "pages/donor/notifications.html",
+  "pages/donor/profile.html",
   "assets/icons/crimson/192-crimson_icon.png",
   "assets/icons/crimson/512-crimson_icon.png",
   "assets/icons/bone/192-bone_icon.png",

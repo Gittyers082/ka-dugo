@@ -383,39 +383,56 @@ document.addEventListener("DOMContentLoaded", () => {
         component_id: 1,
         units: units,
         notes: remarksInput ? remarksInput.value.trim() : "Standard collection",
+        // Local wall-clock time, so a donation synced later still counts on the day it was collected.
+        collected_at: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 19).replace("T", " "),
       };
 
-      saveBtn.innerHTML = "Processing...";
+      const originalLabel = saveBtn.innerHTML; // static markup (icon + label), restored after a failed save
+      const restoreButton = () => {
+        saveBtn.innerHTML = originalLabel;
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = "1";
+      };
+      saveBtn.textContent = "Processing...";
       saveBtn.disabled = true;
       saveBtn.style.opacity = "0.8";
 
-      try {
-        let result = { status: "queued" };
+      const finish = (message) => {
+        stopCamera();
+        showToast(message);
+        setTimeout(() => { window.location.href = "donation-log.html"; }, 1200);
+      };
 
-        // 1. Try PWA method first (handles its own offline queueing)
-        if (window.KadugoPWA && window.KadugoPWA.submitDonation) {
-          result = await window.KadugoPWA.submitDonation(payload);
-        } else {
-          // 2. Direct Fetch Fallback
-          const res = await fetch("../../api/donations.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          const json = await res.json().catch(() => ({}));
-          if (!res.ok || json.ok === false) throw new Error("Offline");
-          result.status = "saved";
+      // No connection, server down or signed out: keep it in IndexedDB; sync.js retries it automatically.
+      const queue = async (message) => {
+        try {
+          await DB.putRecord({ client_uuid: clientUuid, payload, status: "Pending Sync", created_at: new Date().toISOString() });
+          finish(message);
+        } catch (dbErr) {
+          showToast("Could not save this donation on the device. Do not discard the form.");
+          restoreButton();
         }
+      };
 
-        stopCamera();
-        showToast(result.status === "saved" ? "Donation synced to MySQL database!" : "Offline: Donation securely queued in local storage!");
-        setTimeout(() => { window.location.href = "donation-log.html"; }, 1200);
-
-      } catch (err) {
-        stopCamera();
-        showToast("Offline: Donation securely queued in local storage!");
-        setTimeout(() => { window.location.href = "donation-log.html"; }, 1200);
+      let res;
+      try {
+        res = await fetch("../../api/donations.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (networkErr) {
+        return queue("Offline: donation saved on this device and will sync automatically.");
       }
+
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.ok) return finish("Donation saved to the database.");
+      if (res.status === 401) return queue("Session expired: donation saved on this device. Sign in again to sync it.");
+      if (res.status >= 500) return queue("Server unavailable: donation saved on this device and will sync automatically.");
+
+      // 4xx: the server rejected the data; queueing would only fail again, so let staff fix it.
+      showToast(json.error || "The server rejected this donation.");
+      restoreButton();
     };
   }
 });
