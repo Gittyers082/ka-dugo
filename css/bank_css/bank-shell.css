@@ -1,10 +1,11 @@
-/* ==========================================================================
-   Shared bank sidebar identity (#nav-brand / #nav-org)
-   Link this on EVERY bank page, after the page's own stylesheet:
-   <link rel="stylesheet" href="../../css/bank_css/bank-shell.css" />
-   ========================================================================== */
+/* BANK SIDEBAR IDENTITY */
+/* Only the real labels are displayed; no extra generated labels. */
+.bottom-nav::before,
+.bottom-nav::after {
+  content: none !important;
+}
 
-/* Mobile: identity text stays out of the bottom bar. */
+/* Mobile uses the bottom navigation with no identity labels. */
 .bottom-nav .nav-brand,
 .bottom-nav .nav-org {
   display: none;
@@ -14,25 +15,30 @@
   .bottom-nav .nav-brand {
     display: block;
     position: absolute;
-    top: 40px;
-    left: 32px;
-    right: 24px;
+    top: 34px;
+    left: 24px;
+    right: 20px;
+    margin: 0;
+    padding: 0;
+    color: var(--bone, #e4ddd6);
     white-space: pre-line;
-    color: var(--on-action, #fff);
-    font: 800 24px/1.1 var(--font-heading);
+    font: 700 21px/1.45 var(--font-heading), sans-serif;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
   }
 
   .bottom-nav .nav-org {
     display: block;
     position: absolute;
-    bottom: 32px;
-    left: 32px;
-    right: 24px;
+    bottom: 28px;
+    left: 24px;
+    right: 20px;
     margin: 0;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    color: var(--on-action, #fff);
+    padding: 0;
+    color: var(--bone, #e4ddd6);
     opacity: 0.85;
-    font: 400 13px/1.4 var(--font-body);
+    white-space: normal;
+    overflow-wrap: break-word;
+    font: 400 13px/1.55 var(--font-body), sans-serif;
   }
 }
