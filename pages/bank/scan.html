@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-bank-access="pending">
 
 <head>
     <meta charset="UTF-8">
@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="../../css/bank_css/scan.css">
     <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
 
+    <!-- Hide content until session role check completes. -->
+    <style>html[data-bank-access="pending"] body { visibility: hidden; }</style>
+    <script src="../../js/pages/bank-access.js" defer></script>
 </head>
 
 <body>
@@ -300,7 +303,7 @@
                         <div class="form-actions flex-row mt-4 mb-4">
                             <button
                                 class="btn-primary flex-1 bg-maroon text-bone t-button flex-row justify-center gap-2 border-none p-4"
-                                onclick="window.location.href='donation-log.html'">
+                                type="button">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5">
                                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>

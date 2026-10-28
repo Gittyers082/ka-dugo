@@ -155,7 +155,7 @@
             });
         }
 
-        // Keep recipient-specific dispatched alerts, including ones sent to O- donors.
+        // Only dispatched alerts matching this donor's registered blood type appear.
         for (const alert of alerts) {
             const id = Number(alert.alert_id);
             if (!id) continue;

@@ -86,16 +86,11 @@ function dispatchAlertRecipients(
     bool $broadcastAllTypes = false,
     bool $includeDeferred = false
 ): int {
-    if ($broadcastAllTypes) {
-        $stmtDonors = $conn->prepare("SELECT * FROM donor");
-    } elseif ($level >= 2) {
-        // Include target blood type + universal O- donor (blood_type_id = 8) for high/critical alerts
-        $stmtDonors = $conn->prepare("SELECT * FROM donor WHERE blood_type_id IN (?, 8)");
-        $stmtDonors->bind_param('i', $bloodTypeId);
-    } else {
-        $stmtDonors = $conn->prepare("SELECT * FROM donor WHERE blood_type_id = ?");
-        $stmtDonors->bind_param('i', $bloodTypeId);
-    }
+    // Exact match only: an O- donor or broadcast option must not receive
+    // an alert targeted at another blood type. Previous recipient rows are
+    // additionally filtered by donor_portal.php during inbox reads.
+    $stmtDonors = $conn->prepare("SELECT * FROM donor WHERE blood_type_id = ?");
+    $stmtDonors->bind_param('i', $bloodTypeId);
 
     $stmtDonors->execute();
     $candidateDonors = $stmtDonors->get_result()->fetch_all(MYSQLI_ASSOC);
