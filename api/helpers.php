@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/config.php';
 
+// Every endpoint answers {ok, data, error}; success messages are not sent because no client shows them.
 function sendJson(bool $success, string $message, mixed $data = null, int $statusCode = 200): void {
     http_response_code($statusCode);
     echo json_encode([
-        'success' => $success,
-        'message' => $message,
+        'ok' => $success,
         'data' => $data,
-        'timestamp' => date('Y-m-d H:i:s')
+        'error' => $success ? null : $message,
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
+
+// Anything uncaught still answers in the same shape instead of an empty 500 or a PHP error page.
+set_exception_handler(function (Throwable $e): void {
+    error_log((string)$e);
+    sendJson(false, 'Something went wrong on the server. Please try again.', null, 500);
+});
 
 function getRequestData(): array {
     $rawInput = file_get_contents('php://input');

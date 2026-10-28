@@ -44,8 +44,9 @@ header('Cache-Control: no-store');
 
 // Blood type choices come from the database rather than fixed IDs in the organizer form.
 if ($method === 'GET' && ($input['lookup'] ?? '') === 'blood_types') {
-    $result = $conn->query('SELECT blood_type_id, code FROM blood_type ORDER BY blood_type_id ASC');
-    sendJson(true, 'Blood types loaded.', ['blood_types' => $result->fetch_all(MYSQLI_ASSOC)]);
+    $stmt = $conn->prepare('SELECT blood_type_id, code FROM blood_type ORDER BY blood_type_id ASC');
+    $stmt->execute();
+    sendJson(true, 'Blood types loaded.', ['blood_types' => $stmt->get_result()->fetch_all(MYSQLI_ASSOC)]);
 }
 
 if ($method === 'GET') {
@@ -227,10 +228,10 @@ if ($method === 'GET') {
     if (!is_array($submittedBloodTypes) || count($submittedBloodTypes) === 0) {
         sendJson(false, 'Select at least one target blood type.', null, 422);
     }
-    $configuredBloodTypes = array_map('intval', array_column(
-        $conn->query('SELECT blood_type_id FROM blood_type')->fetch_all(MYSQLI_ASSOC),
-        'blood_type_id'
-    ));
+    $btStmt = $conn->prepare('SELECT blood_type_id FROM blood_type');
+    $btStmt->execute();
+    $configuredBloodTypes = array_map('intval', array_column($btStmt->get_result()->fetch_all(MYSQLI_ASSOC), 'blood_type_id'));
+    $btStmt->close();
     $bloodTypeIds = [];
     foreach ($submittedBloodTypes as $bloodTypeId) {
         if ((!is_int($bloodTypeId) && !(is_string($bloodTypeId) && preg_match('/^[1-9][0-9]*$/', $bloodTypeId)))

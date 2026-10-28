@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`../../api/profile.php?organizer_id=${organizerId}`);
             const result = await response.json();
-            if (!response.ok || !result.success) throw new Error(result.message || 'Unable to load profile.');
+            if (!response.ok || !result.ok) throw new Error(result.error || 'Unable to load profile.');
             const data = result.data;
             profileButton.disabled=false;
             safeSet('display-org-name', data.org_name || 'Organization Name');
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`../../api/drives.php?organizer_id=${organizerId}`);
             const result = await response.json();
-            const drives = result.success ? (result.data.drives || []) : [];
+            const drives = result.ok ? (result.data.drives || []) : [];
             safeSet('impact-drives', drives.length);
             safeSet('impact-donors', drives.reduce((sum, drive) => sum + Number(drive.registered_count || 0), 0));
         } catch (error) {
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
             });
             const result = await response.json();
-            if (!response.ok || !result.success) throw new Error(result.message || 'Profile update failed.');
+            if (!response.ok || !result.ok) throw new Error(result.error || 'Profile update failed.');
             safeSet('display-contact-person', result.data.contact_person);
             safeSet('display-phone', result.data.contact_no);
             profileDialog.close();

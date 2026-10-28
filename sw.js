@@ -4,7 +4,7 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v11";
+const VERSION = "v12";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
@@ -95,7 +95,7 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (url.pathname.includes("/api/")) {
-    event.respondWith(fetch(req).catch(() => new Response(JSON.stringify({success:false,message:'Connect to the local server to load current data.'}),{status:503,headers:{'Content-Type':'application/json'}})));
+    event.respondWith(fetch(req).catch(() => new Response(JSON.stringify({ok:false,data:null,error:'Connect to the local server to load current data.'}),{status:503,headers:{'Content-Type':'application/json'}})));
     return;
   }
   event.respondWith(staticStrategy(event));
@@ -130,7 +130,7 @@ async function networkFirstApi(event) {
       });
     }
     return new Response(
-      JSON.stringify({ success: false, offline: true, error: "Offline" }),
+      JSON.stringify({ ok: false, data: null, error: "Offline", offline: true }),
       {
         status: 503,
         headers: { "Content-Type": "application/json" },

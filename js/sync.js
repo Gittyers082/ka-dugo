@@ -49,7 +49,7 @@ export async function syncPendingDonations() {
                     await putRecord(
                         Object.assign({}, record, {
                             status: "Failed",
-                            last_error: err.message || "HTTP " + res.status,
+                            last_error: err.error || "HTTP " + res.status,
                         }),
                     );
                     failed++;

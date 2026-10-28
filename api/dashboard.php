@@ -3,6 +3,7 @@
 declare(strict_types=1);
 require_once __DIR__ . '/helpers.php';
 
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') sendJson(false, 'Method not allowed.', null, 405);
 $organizerId = signedInOrganizer();
 $conn = getDbConnection();
 header('Cache-Control: no-store');

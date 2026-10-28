@@ -21,7 +21,9 @@ if ($sessionBankId !== null) {
     }
 } elseif ($method === 'POST' && empty($input['bank_id'])) {
     // shortcut: admin has no linked bank, so default to the first one; add a bank picker when there are several banks
-    $input['bank_id'] = (int)($conn->query('SELECT MIN(bank_id) AS id FROM blood_bank')->fetch_assoc()['id'] ?? 0);
+    $first = $conn->prepare('SELECT MIN(bank_id) AS id FROM blood_bank');
+    $first->execute();
+    $input['bank_id'] = (int)($first->get_result()->fetch_assoc()['id'] ?? 0);
 }
 
 if ($method === 'GET') {
@@ -170,13 +172,10 @@ if ($method === 'GET') {
     $ward = sanitizeString($input['ward']);
     $unitsNeeded = validateIntRange($input['units_needed'], 1, 500, 'units_needed');
     $urgency = validateEnum(sanitizeString($input['urgency'] ?? 'normal'), ['normal', 'high', 'critical'], 'urgency');
-    $neededBy = sanitizeString($input['needed_by']);
+    $neededBy = validateDateTime((string)$input['needed_by'], 'needed_by');
     $status = validateEnum(sanitizeString($input['status'] ?? 'open'), ['open', 'fulfilled', 'cancelled'], 'status');
-
-    // Normalize needed_by if passed as YYYY-MM-DDTHH:MM
-    if (strlen($neededBy) === 16 && strpos($neededBy, 'T') !== false) {
-        $neededBy = str_replace('T', ' ', $neededBy) . ':00';
-    }
+    if ($bankId < 1) sendJson(false, 'No blood bank is available for this request.', null, 422);
+    if ($ward === '' || mb_strlen($ward) > 100) sendJson(false, 'Ward must be 1–100 characters.', null, 422);
 
     $stmt = $conn->prepare(
         "INSERT INTO blood_request (bank_id, blood_type_id, component_id, ward, units_needed, urgency, needed_by, status)
@@ -232,19 +231,17 @@ if ($method === 'GET') {
     }
 
     if (isset($input['ward']) && trim((string)$input['ward']) !== '') {
+        $ward = sanitizeString($input['ward']);
+        if ($ward === '' || mb_strlen($ward) > 100) sendJson(false, 'Ward must be 1–100 characters.', null, 422);
         $fields[] = "ward = ?";
         $types .= "s";
-        $params[] = sanitizeString($input['ward']);
+        $params[] = $ward;
     }
 
     if (isset($input['needed_by']) && trim((string)$input['needed_by']) !== '') {
-        $neededBy = sanitizeString($input['needed_by']);
-        if (strlen($neededBy) === 16 && strpos($neededBy, 'T') !== false) {
-            $neededBy = str_replace('T', ' ', $neededBy) . ':00';
-        }
         $fields[] = "needed_by = ?";
         $types .= "s";
-        $params[] = $neededBy;
+        $params[] = validateDateTime((string)$input['needed_by'], 'needed_by');
     }
 
     if (empty($fields)) {

@@ -80,6 +80,16 @@ function validateDateString(string $dateStr, string $fieldName): string {
     return $trimmed;
 }
 
+// Accepts "Y-m-d H:i:s", "Y-m-d H:i" or the datetime-local "Y-m-dTH:i"; returns "Y-m-d H:i:s".
+function validateDateTime(string $value, string $fieldName): string {
+    $trimmed = str_replace('T', ' ', trim($value));
+    foreach (['Y-m-d H:i:s', 'Y-m-d H:i'] as $format) {
+        $dt = DateTime::createFromFormat($format, $trimmed);
+        if ($dt && $dt->format($format) === $trimmed) return $dt->format('Y-m-d H:i:s');
+    }
+    sendJson(false, "{$fieldName} must be a valid date and time (YYYY-MM-DD HH:MM).", null, 422);
+}
+
 function validateBloodPressure(string $bp): string {
     $trimmed = trim($bp);
     if (!preg_match('/^(\d{2,3})\/(\d{2,3})$/', $trimmed, $matches)) {

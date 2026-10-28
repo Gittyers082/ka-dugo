@@ -48,9 +48,16 @@ try {
             $input['phlebotomist_id'] = (int)($ph->get_result()->fetch_assoc()['phlebotomist_id'] ?? 0);
         }
         requireFields($input, ['donor_id', 'bank_id', 'blood_type_id', 'component_id', 'units']);
-        
+        $input['donor_id'] = validateIntRange($input['donor_id'], 1, PHP_INT_MAX, 'donor_id');
+        $input['bank_id'] = validateIntRange($input['bank_id'], 1, PHP_INT_MAX, 'bank_id');
+        $input['blood_type_id'] = validateIntRange($input['blood_type_id'], 1, 8, 'blood_type_id');
+        $input['component_id'] = validateIntRange($input['component_id'], 1, 4, 'component_id');
+        $input['units'] = validateFloatRange($input['units'], 0.25, 10, 'units');
+        if (!empty($input['drive_id'])) validateIntRange($input['drive_id'], 1, PHP_INT_MAX, 'drive_id');
+
         $clientUuid = !empty($input['client_uuid']) ? sanitizeString($input['client_uuid']) : uniqid('SYNC-');
-        $collectedAt = !empty($input['collected_at']) ? sanitizeString($input['collected_at']) : date('Y-m-d H:i:s');
+        if (strlen($clientUuid) > 36) sendJson(false, 'client_uuid must be at most 36 characters.', null, 422);
+        $collectedAt = !empty($input['collected_at']) ? validateDateTime((string)$input['collected_at'], 'collected_at') : date('Y-m-d H:i:s');
         $status = validateEnum((string)($input['status'] ?? 'collected'), DONATION_STATUSES, 'status');
 
         $stmt = $conn->prepare(
@@ -86,10 +93,12 @@ try {
         requireFields($input, ['donation_id']);
         $donationId = (int)$input['donation_id'];
         
-        $units = isset($input['units']) ? (float)$input['units'] : 1.0;
-        $status = validateEnum(sanitizeString($input['status'] ?? 'collected'), DONATION_STATUSES, 'status');
+        // Omitted fields keep their stored value instead of being reset to defaults.
+        $units = isset($input['units']) && $input['units'] !== '' ? validateFloatRange($input['units'], 0.25, 10, 'units') : null;
+        $status = isset($input['status']) && $input['status'] !== '' ? validateEnum(sanitizeString($input['status']), DONATION_STATUSES, 'status') : null;
+        if ($units === null && $status === null) sendJson(false, 'Provide units or status to update.', null, 422);
 
-        $stmt = $conn->prepare("UPDATE donation SET units = ?, status = ? WHERE donation_id = ?");
+        $stmt = $conn->prepare("UPDATE donation SET units = COALESCE(?, units), status = COALESCE(?, status) WHERE donation_id = ?");
         $stmt->bind_param('dsi', $units, $status, $donationId);
         if ($stmt->execute()) {
             sendJson(true, 'Donation updated.', ['donation_id' => $donationId]);
@@ -100,15 +109,19 @@ try {
         requireFields($input, ['donation_id']);
         $donationId = (int)$input['donation_id'];
 
-        $conn->query("UPDATE blood_history SET donation_id = NULL WHERE donation_id = {$donationId}");
+        $unlink = $conn->prepare("UPDATE blood_history SET donation_id = NULL WHERE donation_id = ?");
+        $unlink->bind_param('i', $donationId);
+        $unlink->execute();
         $stmt = $conn->prepare("DELETE FROM donation WHERE donation_id = ?");
         $stmt->bind_param('i', $donationId);
         if ($stmt->execute()) {
             sendJson(true, 'Donation deleted.', ['donation_id' => $donationId]);
         }
         sendJson(false, 'Delete failed: ' . $stmt->error, null, 400);
+    } else {
+        sendJson(false, 'Method not allowed.', null, 405);
     }
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    error_log((string)$e);
+    sendJson(false, 'Could not process the donation request.', null, 500);
 }

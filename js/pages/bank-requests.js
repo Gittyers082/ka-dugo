@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(body),
         });
         const json = await res.json().catch(() => ({}));
-        if (!res.ok || !json.success) throw new Error(json.message || `Request failed (${res.status}).`);
+        if (!res.ok || !json.ok) throw new Error(json.error || `Request failed (${res.status}).`);
         return json.data;
     }
 
@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const res = await fetch(`../../api/alerts.php?action=reach&blood_type_id=${BLOOD_TYPE_IDS[state.bloodType]}&radius_km=${state.radius}`, { credentials: "same-origin", cache: "no-store" });
             const json = await res.json();
-            if (!json.success) throw new Error(json.message);
+            if (!json.ok) throw new Error(json.error);
             state.donors = json.data.count;
             setCount(state.donors);
         } catch (err) {

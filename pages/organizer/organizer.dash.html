@@ -206,7 +206,7 @@
                 let totalDonors = 0;
                 const container = document.getElementById('dashboard-drives-list');
 
-                if (result.success && result.data.drives && result.data.drives.length > 0) {
+                if (result.ok && result.data.drives && result.data.drives.length > 0) {
                     const drives = result.data.drives;
                     if (container) container.innerHTML = '';
 

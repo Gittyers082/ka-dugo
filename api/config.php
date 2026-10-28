@@ -31,12 +31,10 @@ function getDbConnection(): mysqli {
         $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
         if ($conn->connect_errno) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Database connection failed: ' . $conn->connect_error,
-                'data'    => null
-            ]);
+            // Log the real reason; never send DB details to the browser.
+            error_log('DB connection failed: ' . $conn->connect_error);
+            http_response_code(503);
+            echo json_encode(['ok' => false, 'data' => null, 'error' => 'The database is unavailable. Please try again shortly.']);
             exit;
         }
 
