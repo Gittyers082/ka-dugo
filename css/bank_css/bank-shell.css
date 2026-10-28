@@ -1,0 +1,38 @@
+/* ==========================================================================
+   Shared bank sidebar identity (#nav-brand / #nav-org)
+   Link this on EVERY bank page, after the page's own stylesheet:
+   <link rel="stylesheet" href="../../css/bank_css/bank-shell.css" />
+   ========================================================================== */
+
+/* Mobile: identity text stays out of the bottom bar. */
+.bottom-nav .nav-brand,
+.bottom-nav .nav-org {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .bottom-nav .nav-brand {
+    display: block;
+    position: absolute;
+    top: 40px;
+    left: 32px;
+    right: 24px;
+    white-space: pre-line;
+    color: var(--on-action, #fff);
+    font: 800 24px/1.1 var(--font-heading);
+  }
+
+  .bottom-nav .nav-org {
+    display: block;
+    position: absolute;
+    bottom: 32px;
+    left: 32px;
+    right: 24px;
+    margin: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    color: var(--on-action, #fff);
+    opacity: 0.85;
+    font: 400 13px/1.4 var(--font-body);
+  }
+}

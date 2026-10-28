@@ -347,7 +347,10 @@ body {
 .bottom-nav .active {
   color: var(--urgent);
 }
-
+.nav-brand,
+.nav-org {
+  display: none;
+}
 /* Desktop Workspace Override */
 @media (min-width: 900px) {
   html,
@@ -402,25 +405,28 @@ body {
     padding: 120px 24px 40px;
     gap: 8px;
   }
-  .bottom-nav::before {
-    content: "KA-DUGO\A BANK";
-    white-space: pre;
+  .nav-brand {
+    display: block;
     position: absolute;
     top: 40px;
     left: 32px;
-    color: var(--surface);
+    right: 24px;
+    white-space: pre-line;
+    color: var(--on-action, #fff);
     font: 800 24px/1.1 var(--font-heading);
-    letter-spacing: 0.02em;
   }
-  .bottom-nav::after {
-    content: "Philippine Red Cross\A Cavite Chapter";
-    white-space: pre;
+  .nav-org {
+    display: block;
     position: absolute;
     bottom: 32px;
     left: 32px;
-    color: var(--surface);
+    right: 24px;
+    margin: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    color: var(--on-action, #fff);
+    opacity: 0.85;
     font: 400 13px/1.4 var(--font-body);
-    opacity: 0.8;
   }
   .bottom-nav a {
     flex: 0 0 56px !important;

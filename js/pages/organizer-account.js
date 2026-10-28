@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (!response.ok || !result.ok) throw new Error(result.error || 'Unable to load profile.');
             const data = result.data;
-            profileButton.disabled=false;
+            profileButton.disabled = false;
             safeSet('display-org-name', data.org_name || 'Organization Name');
             // Initials of the first three words, e.g. "Philippine Red Cross" -> "PRC".
             safeSet('display-org-initials', String(data.org_name || '').split(/s+/).filter(Boolean).slice(0, 3).map(w => w[0].toUpperCase()).join('') || '—');
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Profile load failed:', error);
             showToast(error.message, true);
-            profileButton.disabled=true;
+            profileButton.disabled = true;
         }
     }
 

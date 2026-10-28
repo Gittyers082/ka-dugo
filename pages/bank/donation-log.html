@@ -10,9 +10,14 @@
     <link rel="stylesheet" href="../../css/base.css">
     <link rel="stylesheet" href="../../css/bank_css/donation-log.css">
     <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="stylesheet" href="../../css/bank_css/bank-shell.css" />
 
     <!-- Hide content until session role check completes. -->
-    <style>html[data-bank-access="pending"] body { visibility: hidden; }</style>
+    <style>
+        html[data-bank-access="pending"] body {
+            visibility: hidden;
+        }
+    </style>
     <script src="../../js/pages/bank-access.js" defer></script>
 </head>
 
@@ -146,6 +151,8 @@
                 </span>
                 Logout
             </a>
+            <span class="nav-brand" id="nav-brand">KA-DUGO</span>
+            <p class="nav-org" id="nav-org"></p>
         </nav>
     </main>
 
@@ -318,7 +325,8 @@
                                 </div>
                             </div>
                             <h4 class="notif-title">URGENT BANK ALERT</h4>
-                            <p class="notif-body" id="preview-body">URGENT: Our blood bank needs O- donors today. If you are eligible, please visit the bank or book a drive slot in Ka-dugo.</p>
+                            <p class="notif-body" id="preview-body">URGENT: Our blood bank needs O- donors today. If you
+                                are eligible, please visit the bank or book a drive slot in Ka-dugo.</p>
                             <div class="notif-footer">
                                 <span>⌾ Within 15km Geofence</span>
                             </div>

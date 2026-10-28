@@ -9,9 +9,14 @@
     <link rel="stylesheet" href="../../css/base.css">
     <link rel="stylesheet" href="../../css/bank_css/scan.css">
     <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="stylesheet" href="../../css/bank_css/bank-shell.css" />
 
     <!-- Hide content until session role check completes. -->
-    <style>html[data-bank-access="pending"] body { visibility: hidden; }</style>
+    <style>
+        html[data-bank-access="pending"] body {
+            visibility: hidden;
+        }
+    </style>
     <script src="../../js/pages/bank-access.js" defer></script>
 </head>
 
@@ -293,7 +298,8 @@
                                     </svg>
                                     Local storage ready for queue
                                 </span>
-                                <span class="t-caption font-bold text-urgent" style="letter-spacing: 0.05em;" id="save-mode">SAVES ONLINE</span>
+                                <span class="t-caption font-bold text-urgent" style="letter-spacing: 0.05em;"
+                                    id="save-mode">SAVES ONLINE</span>
                             </div>
                         </div>
 
@@ -370,6 +376,8 @@
                 </span>
                 Logout
             </a>
+            <span class="nav-brand" id="nav-brand">KA-DUGO</span>
+            <p class="nav-org" id="nav-org"></p>
         </nav>
     </main>
     <script type="module" src="../../js/pages/scan.js"></script>

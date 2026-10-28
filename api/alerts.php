@@ -32,8 +32,15 @@ function bankReach(mysqli $conn, string $centerSql, int $centerKey, int $bloodTy
     return ['ids'=>$ids,'count'=>count($ids),'missing_location'=>$missing,'center_name'=>$center['name'],'radius_km'=>$radius];
 }
 // The bank whose location centers a bank alert: the session's bank, else (admin) the bank_id sent.
-function alertBankId(array $input): int {
-    return signedInBankId() ?? (int)($input['bank_id'] ?? 0);
+function alertBankId(mysqli $conn, array $input): int {
+    $id = signedInBankId() ?? (int)($input['bank_id'] ?? 0);
+    // Admin with no bank_id sent: center on the first bank instead of failing with a 422.
+    if ($id < 1 && ($_SESSION['role'] ?? '') === 'admin') {
+        $res = $conn->query('SELECT bank_id FROM blood_bank ORDER BY bank_id LIMIT 1');
+        $row = $res ? $res->fetch_assoc() : null;
+        $id = (int)($row['bank_id'] ?? 0);
+    }
+    return $id;
 }
 
 if($method==='GET' && ($input['action'] ?? '')==='reach'){
@@ -42,7 +49,7 @@ if($method==='GET' && ($input['action'] ?? '')==='reach'){
     $radius=validateIntRange($input['radius_km'] ?? null,5,30,'radius');
     $reach=$_SESSION['role']==='organizer'
         ? organizerReach($conn,signedInOrganizer(),$bt,$radius)
-        : bankReach($conn,'SELECT name,latitude,longitude FROM blood_bank WHERE bank_id=?',alertBankId($input),$bt,$radius);
+        : bankReach($conn,'SELECT name,latitude,longitude FROM blood_bank WHERE bank_id=?',alertBankId($conn,$input),$bt,$radius);
     unset($reach['ids']);
     header('Cache-Control: no-store');sendJson(true,'Live reach loaded.',$reach);
 }
@@ -281,7 +288,7 @@ if ($method === 'GET') {
         if($status==='active' && !$organizerMatch['count'])sendJson(false,'No eligible donors match this selection. Change the targeting or save a draft.',null,422);
     }
     if($senderType==='bank') {
-        $bankId=alertBankId($input) ?: null;
+        $bankId=alertBankId($conn,$input) ?: null;
         if(isset($input['radius_km']) && $input['radius_km']!=='') {
             $radius=validateIntRange($input['radius_km'],5,30,'radius');
             $organizerMatch=bankReach($conn,'SELECT name,latitude,longitude FROM blood_bank WHERE bank_id=?',(int)$bankId,$bloodTypeId,$radius);

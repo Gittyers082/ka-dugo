@@ -905,7 +905,6 @@ textarea.form-control {
   }
 
   .bottom-nav::before {
-    content: "KA-DUGO\A BANK";
     white-space: pre;
     position: absolute;
     top: 40px;
@@ -916,7 +915,6 @@ textarea.form-control {
   }
 
   .bottom-nav::after {
-    content: "Philippine Red Cross\A Cavite Chapter";
     white-space: pre;
     position: absolute;
     bottom: 32px;
