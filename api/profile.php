@@ -17,7 +17,7 @@ $role = (string)($_SESSION['role'] ?? '');
 
 // 401 (not 403) so app.js redirects to the login page when the session is gone.
 if ($accountId < 1 || $role === '') {
-    sendJson(false, 'Unauthorized session.', null, 401);
+sendJson(false, 'Unauthorized session.', null, 401);
 }
 
 // Prepare a statement, or log the SQL error and fail cleanly instead of crashing.
@@ -156,5 +156,18 @@ if ($role === 'donor') {
         sendJson(true, 'Donor profile loaded.', $data);
     }
 }
+/* Admin */
+if ($role === 'admin' && $method === 'GET') {
+    $stmt = prepareOrFail($conn, "SELECT account_id, email, 'admin' AS role FROM account WHERE account_id = ? LIMIT 1");
+    $stmt->bind_param('i', $accountId);
+    $stmt->execute();
+    $data = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
 
+    if (!$data) {
+        sendJson(false, 'Admin profile not found.', null, 404);
+    }
+    $data['org_name'] = 'Ka-dugo Admin';
+    sendJson(true, 'Admin profile loaded.', $data);
+}
 sendJson(false, 'Method not allowed or unauthorized role.', null, 405);

@@ -1,10 +1,10 @@
 /* ==========================================================================
    KA-DUGO SERVICE WORKER
-   Static files : cached on install, served cache-first, refreshed in background
+   Static files : cached on install, served network-first (always fresh), cache used offline
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v16";
+const VERSION = "v17";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
@@ -116,13 +116,13 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (url.pathname.includes("/api/")) {
-    event.respondWith(fetch(req).catch(() => new Response(JSON.stringify({ok:false,data:null,error:'Connect to the local server to load current data.'}),{status:503,headers:{'Content-Type':'application/json'}})));
+    event.respondWith(fetch(req).catch(() => new Response(JSON.stringify({ ok: false, data: null, error: 'Connect to the local server to load current data.' }), { status: 503, headers: { 'Content-Type': 'application/json' } })));
     return;
   }
   // Always send bank HTML requests to Apache for session authorization.
   // No cache-first bank pages, even when navigating from an installed PWA.
   if (url.pathname.includes("/pages/bank/") && (req.mode === "navigate" || url.pathname.endsWith(".html"))) {
-    event.respondWith(fetch(req).catch(() => Response.redirect(OFFLINE_URL, 302)));
+    event.respondWith(bankPage(req));
     return;
   }
   event.respondWith(staticStrategy(event));
@@ -166,34 +166,43 @@ async function networkFirstApi(event) {
   }
 }
 
+// Bank pages always come from Apache (session authorization). Retry once so a
+// single dropped connection does not bounce the user to offline.html.
+async function bankPage(req) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      return await fetch(req);
+    } catch (err) {
+      /* try again, then fall through */
+    }
+  }
+  return Response.redirect(OFFLINE_URL, 302);
+}
+
+// Network-first: edited CSS/JS/HTML shows up immediately. The cache is only
+// used when the network is unavailable (offline mode).
 async function staticStrategy(event) {
   const req = event.request;
   const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(req, { ignoreSearch: true });
 
-  const refresh = fetch(req)
-    .then((res) => {
-      if (res && res.ok && res.type === "basic" && !res.redirected)
-        cache.put(req, res.clone());
-      return res;
-    })
-    .catch(() => null);
+  try {
+    const res = await fetch(req);
+    if (res && res.ok && res.type === "basic" && !res.redirected) {
+      event.waitUntil(cache.put(req, res.clone()));
+    }
+    return res;
+  } catch (err) {
+    const cached = await cache.match(req, { ignoreSearch: true });
+    if (cached) return cached;
 
-  if (cached) {
-    event.waitUntil(refresh);
-    return cached;
+    // Redirect (not serve in place) so offline.html's relative asset paths resolve from the app root.
+    if (req.mode === "navigate") {
+      return (await cache.match(OFFLINE_URL))
+        ? Response.redirect(OFFLINE_URL, 302)
+        : Response.error();
+    }
+    return Response.error();
   }
-
-  const res = await refresh;
-  if (res) return res;
-
-  //offline.html reroute
-  // Redirect (not serve in place) so offline.html's relative asset paths resolve from the app root.
-  if (req.mode === "navigate") {
-    return (await cache.match(OFFLINE_URL)) ? Response.redirect(OFFLINE_URL, 302) : Response.error();
-  }
-
-  return Response.error();
 }
 
 /* ---------- NOTIFICATION CLICK: focus or open the app ---------- */
