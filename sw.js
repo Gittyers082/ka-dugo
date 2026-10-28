@@ -4,7 +4,7 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v13";
+const VERSION = "v14";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 
@@ -35,6 +35,7 @@ const STATIC_ASSETS = [
   "js/pages/organizer-scheduler.js",
   "js/pages/bank-dashboard.js",
   "js/pages/bank-log.js",
+  "js/pages/bank-active-requests.js",
   "js/pages/bank-requests.js",
   "assets/icons/crimson/192-crimson_icon.png",
   "assets/icons/crimson/512-crimson_icon.png",

@@ -308,7 +308,7 @@ body {
 
 .active-requests-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr));
   gap: 24px;
   align-items: stretch;
 }
@@ -822,4 +822,41 @@ body {
   .bottom-nav a:hover:not(.active) {
     background: var(--line);
   }
+}
+
+/* Edit dialog for active blood requests (built by bank-active-requests.js) */
+.edit-request-dialog {
+  border: 0;
+  border-radius: 6px;
+  padding: 0;
+  width: min(420px, calc(100% - 32px));
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.edit-request-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+.edit-request-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+}
+.edit-request-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--oxblood);
+}
+.edit-request-field input,
+.edit-request-field select {
+  font: inherit;
+  font-weight: 400;
+  font-size: 16px; /* 16px keeps iOS from zooming the page on focus */
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
 }

@@ -356,47 +356,11 @@ Protocol #EM-TRANS-9042</textarea>
                     <!-- Existing Requests Feed -->
                     <div class="feed-header flex-between mb-4" id="existing">
                         <h3 class="t-title font-heading text-oxblood m-0">Existing Requests</h3>
-                        <a href="active_requests.html" class="t-caption text-urgent font-bold">View All (6)</a>
+                        <a href="active_requests.html" id="view-all-count" class="t-caption text-urgent font-bold">View All</a>
                     </div>
 
-                    <div class="feed-list">
-                        <!-- Feed Card 1 -->
-                        <article class="card p-4 border-line mb-3">
-                            <div class="flex-between items-start mb-2">
-                                <div class="flex-row gap-3">
-                                    <div class="mini-blood-box bg-maroon-light text-maroon font-bold t-label">O-</div>
-                                    <div>
-                                        <h4 class="t-heading text-oxblood font-heading m-0">O- Negative</h4>
-                                        <p class="t-caption text-muted m-0 mt-1">12 Units PRBC • Surgical Ward 3B (8
-                                            fulfilled, 4 remaining)</p>
-                                    </div>
-                                </div>
-                                <span class="badge-pill bg-urgent-light text-urgent font-bold">Critical</span>
-                            </div>
-                            <div class="progress-track mt-2 mb-3">
-                                <div class="progress-fill bg-maroon" style="width: 66%;"></div>
-                            </div>
-                            <div class="flex-row justify-end gap-2">
-                                <button class="btn-outline-small">Edit</button>
-                                <button class="btn-outline-small text-urgent" style="border-color:var(--urgent);">Close
-                                    Request</button>
-                            </div>
-                        </article>
-
-                        <!-- Feed Card 2 -->
-                        <article class="card p-4 border-line mb-3">
-                            <div class="flex-between items-start mb-2">
-                                <div class="flex-row gap-3">
-                                    <div class="mini-blood-box bg-bone text-oxblood font-bold t-label">B+</div>
-                                    <div>
-                                        <h4 class="t-heading text-oxblood font-heading m-0">B+ Positive</h4>
-                                        <p class="t-caption text-muted m-0 mt-1">8 Units Whole Blood • Emergency Resus
-                                            Bay 2 (5 fulfilled, 3 pending)</p>
-                                    </div>
-                                </div>
-                                <span class="badge-pill bg-warning-light text-warning font-bold">Urgent</span>
-                            </div>
-                        </article>
+                    <div class="feed-list" data-request-list data-limit="3" aria-live="polite">
+                        <p class="t-caption text-muted">Loading requests…</p>
                     </div>
                 </div>
 
@@ -460,6 +424,7 @@ Protocol #EM-TRANS-9042</textarea>
     <script type="module" src="../../js/app.js"></script>
     <script type="module" src="../../js/pages/account.js"></script>
     <script type="module" src="../../js/pages/bank-requests.js"></script>
+    <script type="module" src="../../js/pages/bank-active-requests.js"></script>
 </body>
 
 </html>
