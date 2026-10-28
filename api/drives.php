@@ -42,6 +42,12 @@ if($method !== 'GET') {
 }
 header('Cache-Control: no-store');
 
+// Blood type choices come from the database rather than fixed IDs in the organizer form.
+if ($method === 'GET' && ($input['lookup'] ?? '') === 'blood_types') {
+    $result = $conn->query('SELECT blood_type_id, code FROM blood_type ORDER BY blood_type_id ASC');
+    sendJson(true, 'Blood types loaded.', ['blood_types' => $result->fetch_all(MYSQLI_ASSOC)]);
+}
+
 if ($method === 'GET') {
     $driveId = isset($input['drive_id']) ? (int)$input['drive_id'] : 0;
     $refCode = sanitizeString($input['ref_code'] ?? '');
@@ -215,6 +221,25 @@ if ($method === 'GET') {
     if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/',$startTime) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/',$endTime) || strtotime($endTime)<=strtotime($startTime)) sendJson(false,'End time must be after a valid start time.',null,422);
     if(strtotime("$driveDate $startTime")<=time()) sendJson(false,'Choose a future drive date and time.',null,422);
     if(!$title || !$venue || mb_strlen($title)>150 || mb_strlen($venue)>255) sendJson(false,'Enter a title (up to 150 characters) and venue (up to 255).',null,422);
+
+    // The organizer must explicitly select one or more real blood types.
+    $submittedBloodTypes = $input['blood_type_ids'] ?? null;
+    if (!is_array($submittedBloodTypes) || count($submittedBloodTypes) === 0) {
+        sendJson(false, 'Select at least one target blood type.', null, 422);
+    }
+    $configuredBloodTypes = array_map('intval', array_column(
+        $conn->query('SELECT blood_type_id FROM blood_type')->fetch_all(MYSQLI_ASSOC),
+        'blood_type_id'
+    ));
+    $bloodTypeIds = [];
+    foreach ($submittedBloodTypes as $bloodTypeId) {
+        if ((!is_int($bloodTypeId) && !(is_string($bloodTypeId) && preg_match('/^[1-9][0-9]*$/', $bloodTypeId)))
+            || !in_array((int)$bloodTypeId, $configuredBloodTypes, true)
+            || in_array((int)$bloodTypeId, $bloodTypeIds, true)) {
+            sendJson(false, 'Invalid or duplicate target blood type selected.', null, 422);
+        }
+        $bloodTypeIds[] = (int)$bloodTypeId;
+    }
     $times=[];
     for($t=strtotime($startTime);$t<strtotime($endTime);$t+=1800) $times[]=date('H:i:s',$t);
     $count=min(count($times),$slotsTotal); $generated=[];
@@ -240,22 +265,15 @@ if ($method === 'GET') {
         $newDriveId = (int)$stmt->insert_id;
         $stmt->close();
 
-        // Insert target blood types (defaults to all if none provided, or specific array of blood_type_id)
-        $bloodTypeIds = $input['blood_type_ids'] ?? [1, 3, 7, 8];
-        if (is_string($bloodTypeIds)) {
-            $bloodTypeIds = array_filter(array_map('intval', explode(',', $bloodTypeIds)));
-        }
-        if (is_array($bloodTypeIds) && count($bloodTypeIds) > 0) {
-            $stmtBt = $conn->prepare("INSERT IGNORE INTO drive_blood_type (drive_id, blood_type_id) VALUES (?, ?)");
-            foreach ($bloodTypeIds as $btId) {
-                $btIdInt = (int)$btId;
-                if ($btIdInt >= 1 && $btIdInt <= 8) {
-                    $stmtBt->bind_param('ii', $newDriveId, $btIdInt);
-                    $stmtBt->execute();
-                }
+        // Save only the types explicitly chosen by the organizer.
+        $stmtBt = $conn->prepare('INSERT INTO drive_blood_type (drive_id, blood_type_id) VALUES (?, ?)');
+        foreach ($bloodTypeIds as $bloodTypeId) {
+            $stmtBt->bind_param('ii', $newDriveId, $bloodTypeId);
+            if (!$stmtBt->execute()) {
+                throw new Exception('Failed to save target blood types.');
             }
-            $stmtBt->close();
         }
+        $stmtBt->close();
 
         // Insert time slots: either explicit `slots` array or auto-generated 30-min intervals
         $slotsCreated = 0;
@@ -403,6 +421,26 @@ if ($method === 'GET') {
         } catch (Throwable $e) {
             $conn->rollback();
             sendJson(false, $e->getMessage(), null, 422);
+        }
+    }
+
+    // Time edits must stay valid against each other and against the drive's existing slots.
+    $newStart = trim((string)($input['start_time'] ?? ''));
+    $newEnd = trim((string)($input['end_time'] ?? ''));
+    if ($newStart !== '' || $newEnd !== '') {
+        $timeRe = '/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/';
+        foreach ([$newStart, $newEnd] as $t) {
+            if ($t !== '' && !preg_match($timeRe, $t)) sendJson(false, 'Times must use HH:MM or HH:MM:SS format.', null, 422);
+        }
+        $cur = $conn->prepare('SELECT start_time, end_time, (SELECT MIN(slot_time) FROM drive_slot WHERE drive_id = d.drive_id) AS first_slot, (SELECT MAX(slot_time) FROM drive_slot WHERE drive_id = d.drive_id) AS last_slot FROM drive d WHERE drive_id = ?');
+        $cur->bind_param('i', $driveId);
+        $cur->execute();
+        $row = $cur->get_result()->fetch_assoc();
+        $start = $newStart !== '' ? (strlen($newStart) === 5 ? "$newStart:00" : $newStart) : $row['start_time'];
+        $end = $newEnd !== '' ? (strlen($newEnd) === 5 ? "$newEnd:00" : $newEnd) : $row['end_time'];
+        if ($end <= $start) sendJson(false, 'End time must be after the start time.', null, 422);
+        if ($row['first_slot'] !== null && ($row['first_slot'] < $start || $row['last_slot'] >= $end)) {
+            sendJson(false, 'Existing time slots fall outside the new drive hours. Adjust the slots first.', null, 422);
         }
     }
 

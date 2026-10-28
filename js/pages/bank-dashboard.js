@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
         dateHeader.textContent = new Date().toLocaleDateString('en-US', options);
     }
 
-    const BANK_ID = localStorage.getItem('kadugo_active_user') || 1;
+    // Ward, bank and component names come from staff input; escape before using innerHTML.
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     const safeSet = (id, text) => {
         const element = document.getElementById(id);
@@ -26,9 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     let counts = { PRBC: 0, Platelets: 0, 'Whole Blood': 0, Total: 0 };
 
                     const todayStr = new Date().toISOString().split('T')[0];
-                    const todayDonations = donData.data.donations.filter(d =>
-                        d.collected_at.startsWith(todayStr) && parseInt(d.bank_id) === parseInt(BANK_ID)
-                    );
+                    // The server already limits donations to the signed-in bank.
+                    const todayDonations = donData.data.donations.filter(d => d.collected_at.startsWith(todayStr));
 
                     todayDonations.forEach(d => {
                         const units = parseFloat(d.units) || 1;
@@ -53,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Fetch Open Requests
-            const reqRes = await fetch(`../../api/request.php?bank_id=${BANK_ID}&status=open`);
+            // The server picks the bank from the session.
+            const reqRes = await fetch('../../api/request.php?status=open');
             if (reqRes.ok) {
                 const reqData = await reqRes.json();
 
@@ -97,14 +98,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                         <div class="request-top flex-between items-start">
                                             <div class="flex-row gap-4">
                                                 <div class="blood-type-box bg-maroon text-bone t-title font-heading font-bold">
-                                                    ${req.blood_type_code}
+                                                    ${esc(req.blood_type_code)}
                                                 </div>
                                                 <div>
                                                     <h4 class="t-heading text-oxblood font-heading m-0">
-                                                        ${req.ward}
+                                                        ${esc(req.ward)}
                                                     </h4>
                                                     <p class="t-label text-urgent font-bold m-0 mt-1">
-                                                        Status: ${req.urgency.toUpperCase()} Need
+                                                        Status: ${esc(String(req.urgency).toUpperCase())} Need
                                                     </p>
                                                 </div>
                                             </div>
@@ -125,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                         </div>
                                         <div class="flex-between mt-1">
                                             <p class="t-caption text-muted">
-                                                Required: ${req.component_name}
+                                                Required: ${esc(req.component_name)}
                                             </p>
                                             <p class="t-caption text-urgent font-bold">${remaining} units remaining</p>
                                         </div>

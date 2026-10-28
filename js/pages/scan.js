@@ -119,7 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((r) => r.json())
       .then((json) => {
         if (json && json.success && json.data && Array.isArray(json.data.drives)) {
-          driveSelect.innerHTML = json.data.drives.map(d => `<option value="${d.drive_id}">${d.title} - ${d.venue} (${d.ref_code})</option>`).join("");
+          // Drive titles/venues are organizer input, so build options as text, not HTML.
+          driveSelect.replaceChildren(...json.data.drives.map(d => new Option(`${d.title} - ${d.venue} (${d.ref_code})`, d.drive_id)));
         }
       })
       .catch(() => { });
@@ -369,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const remarksInput = document.querySelector(".custom-textarea");
-      const selectedDriveId = driveSelect && driveSelect.value ? Number(driveSelect.value) : 1;
+      const selectedDriveId = driveSelect && driveSelect.value ? Number(driveSelect.value) : null;
 
       const payload = {
         client_uuid: clientUuid,
@@ -377,10 +378,9 @@ document.addEventListener("DOMContentLoaded", () => {
         donor_name: activeDonor.full_name,
         blood_type_id: activeDonor.blood_type_id,
         blood_type_code: activeDonor.blood_type_code,
-        bank_id: 1,
-        drive_id: selectedDriveId || 1,
+        bank_id: 1, // shortcut: only used for admin scans; bank/phlebotomist sessions override it server-side
+        drive_id: selectedDriveId,
         component_id: 1,
-        phlebotomist_id: 1,
         units: units,
         notes: remarksInput ? remarksInput.value.trim() : "Standard collection",
       };

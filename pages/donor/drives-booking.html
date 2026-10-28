@@ -1,110 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html data-theme="light" lang="en">
-    <head>
-        <meta charset="utf-8"/>
-        <meta content="width=device-width, initial-scale=1" name="viewport"/>
-        <title>Drives &amp; Booking - Ka-dugo</title>
-        <link href="../../assets/icons/kadugo-ico.ico" rel="icon"/>
-        <link href="../../css/tokens.css" rel="stylesheet"/>
-        <link href="../../css/base.css" rel="stylesheet"/>
-        <link href="../../css/styles.css" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/drives-booking.css?go-drives-2" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/donor-shell.css" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/donor-data.css?requests-1" rel="stylesheet"/>
-    </head>
-    <body class="dashboard-layout drives-page">
-        <!-- Sidebar Navigation -->
-        <aside aria-label="Donor navigation" class="sidebar">
-            <div aria-label="Ka-dugo Donor" class="sidebar-brand">
-                <span>KA-DUGO</span>
-                <span>DONOR</span>
-            </div>
-            <nav aria-label="Main menu" class="nav-menu">
-                <a class="nav-item t-button" href="donor-dashboard.html">
-                    <svg aria-hidden="true" viewbox="0 0 24 24">
-                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-                <a class="nav-item t-button" href="my-donations.html">
-                    <svg aria-hidden="true" viewbox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" x2="8" y1="13" y2="13"></line>
-                        <line x1="16" x2="8" y1="17" y2="17"></line>
-                    </svg>
-                    <span>My Donations</span>
-                </a>
-                <a aria-current="page" class="nav-item active t-button" href="drives-booking.html">
-                    <svg aria-hidden="true" viewbox="0 0 24 24">
-                        <rect height="16" rx="2" width="18" x="3" y="5"></rect>
-                        <path d="M7 3v5M17 3v5M3 10h18"></path>
-                    </svg>
-                    <span>Drives &amp; Booking</span>
-                </a>
-            </nav>
-            <div class="nav-profile">
-                <a aria-label="Open donor profile" class="profile-image-link" href="profile.html" title="View profile">
-                    <img alt="Donor profile picture" class="avatar" src="../../assets/img/avatar-placeholder.svg"/>
-                </a>
-            </div>
-        </aside>
-        <!-- Workspace -->
-        <div class="dashboard-workspace">
-            <!-- Top Header -->
-            <header class="topbar">
-                <img alt="Ka-dugo logo" class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg"/>
-                <div class="brand-copy">
-                    <h2>Drives &amp; Booking</h2>
-                    <p>Ka-dugo Donor Portal</p>
-                </div>
-                <!-- Refresh Control -->
-                <button aria-label="Refresh this page" class="refresh-button" title="Refresh" type="button">
-                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="24">
-                        <path d="M3 11a9 9 0 0 1 15.4-6.4L21 7"></path>
-                        <path d="M21 3v4h-4"></path>
-                        <path d="M21 13a9 9 0 0 1-15.4 6.4L3 17"></path>
-                        <path d="M3 21v-4h4"></path>
-                    </svg>
-                </button>
-            </header>
-            <!-- Main Content Area -->
-            <main class="dashboard-content">
-                <div aria-live="polite" class="donor-data-status" id="donor-page-status" role="status">Loading available blood drives...</div>
-                <div class="booking-page-controls">
-                    <div aria-label="Drive and booking tabs" class="view-switch" role="group">
-                        <button aria-pressed="false" class="switch-tab" id="tab-requests" type="button">Matching Bank Requests</button>
-                        <button aria-pressed="true" class="switch-tab selected" id="tab-upcoming" type="button">Upcoming Drives</button>
-                        <button aria-pressed="false" class="switch-tab" id="tab-bookings" type="button">My Bookings</button>
-                    </div>
-                </div>
-                <section aria-label="Matching blood bank requests" class="drives-dynamic-section" hidden id="requests-view">
-                    <div class="logs-heading">
-                        <h2>Matching Blood Bank Requests</h2>
-                        <p class="request-help">These requests match your blood type. They are not scheduled blood drives, so there are no booking slots. Contact the blood bank to confirm how to help.</p>
-                    </div>
-                    <div class="donor-drive-list" id="request-list"></div>
-                    <p class="empty-drive-results" hidden id="request-empty">No matching open bank requests at the moment.</p>
-                </section>
-                <section class="drives-dynamic-section" id="upcoming-view">
-                    <div class="logs-heading">
-                        <h2>Available Blood Drives</h2>
-                    </div>
-                    <div class="donor-drive-list" id="drive-list"></div>
-                    <p class="empty-drive-results" hidden="" id="drive-empty">There are no upcoming blood drives in the database.</p>
-                </section>
-                <section class="drives-dynamic-section" hidden="" id="bookings-view">
-                    <div class="logs-heading">
-                        <h2>Your Bookings</h2>
-                    </div>
-                    <div class="donor-drive-list" id="booking-list"></div>
-                    <p class="empty-drive-results" hidden="" id="booking-empty">You have no bookings yet.</p>
-                </section>
-            </main>
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Drives &amp; Booking - Ka-dugo</title>
+    <link href="../../assets/icons/kadugo-ico.ico" rel="icon" />
+    <link href="../../css/tokens.css" rel="stylesheet" />
+    <link href="../../css/base.css" rel="stylesheet" />
+    <link href="../../css/styles.css" rel="stylesheet" />
+    <link
+      href="../../css/Donor_Css/drives-booking.css?go-drives-2"
+      rel="stylesheet"
+    />
+    <link href="../../css/Donor_Css/donor-shell.css" rel="stylesheet" />
+    <link
+      href="../../css/Donor_Css/donor-data.css?requests-1"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="dashboard-layout drives-page">
+    <!-- Sidebar Navigation -->
+    <aside aria-label="Donor navigation" class="sidebar">
+      <div aria-label="Ka-dugo Donor" class="sidebar-brand">
+        <span>KA-DUGO</span>
+        <span>DONOR</span>
+      </div>
+      <nav aria-label="Main menu" class="nav-menu">
+        <a class="nav-item t-button" href="donor-dashboard.html">
+          <svg aria-hidden="true" viewbox="0 0 24 24">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item t-button" href="my-donations.html">
+          <svg aria-hidden="true" viewbox="0 0 24 24">
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" x2="8" y1="13" y2="13"></line>
+            <line x1="16" x2="8" y1="17" y2="17"></line>
+          </svg>
+          <span>My Donations</span>
+        </a>
+        <a
+          aria-current="page"
+          class="nav-item active t-button"
+          href="drives-booking.html"
+        >
+          <svg aria-hidden="true" viewbox="0 0 24 24">
+            <rect height="16" rx="2" width="18" x="3" y="5"></rect>
+            <path d="M7 3v5M17 3v5M3 10h18"></path>
+          </svg>
+          <span>Drives &amp; Booking</span>
+        </a>
+      </nav>
+      <div class="nav-profile">
+        <a
+          aria-label="Open donor profile"
+          class="profile-image-link"
+          href="profile.html"
+          title="View profile"
+        >
+          <img
+            alt="Donor profile picture"
+            class="avatar"
+            src="../../assets/img/avatar-placeholder.svg"
+          />
+        </a>
+      </div>
+    </aside>
+    <!-- Workspace -->
+    <div class="dashboard-workspace">
+      <!-- Top Header -->
+      <header class="topbar">
+        <img
+          alt="Ka-dugo logo"
+          class="brand-logo"
+          src="../../assets/icons/crimson/crimson-logo.svg"
+        />
+        <div class="brand-copy">
+          <h2>Drives &amp; Booking</h2>
+          <p>Ka-dugo Donor Portal</p>
         </div>
-        <!-- Frontend Interactions -->
-        <script defer="" src="../../js/donor_js/donor-common.js?go-drives-2"></script>
-        <script defer="" src="../../js/donor_js/drives-booking.js?go-drives-2"></script>
-    </body>
+        <!-- Refresh Control -->
+        <button
+          aria-label="Refresh this page"
+          class="refresh-button"
+          title="Refresh"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.2"
+            viewbox="0 0 24 24"
+            width="24"
+          >
+            <path d="M3 11a9 9 0 0 1 15.4-6.4L21 7"></path>
+            <path d="M21 3v4h-4"></path>
+            <path d="M21 13a9 9 0 0 1-15.4 6.4L3 17"></path>
+            <path d="M3 21v-4h4"></path>
+          </svg>
+        </button>
+      </header>
+      <!-- Main Content Area -->
+      <main class="dashboard-content">
+        <div
+          aria-live="polite"
+          class="donor-data-status"
+          id="donor-page-status"
+          role="status"
+        >
+          Loading available blood drives...
+        </div>
+        <div class="booking-page-controls">
+          <div
+            aria-label="Drive and booking tabs"
+            class="view-switch"
+            role="group"
+          >
+            <button
+              aria-pressed="false"
+              class="switch-tab"
+              id="tab-requests"
+              type="button"
+            >
+              Matching Bank Requests
+            </button>
+            <button
+              aria-pressed="true"
+              class="switch-tab selected"
+              id="tab-upcoming"
+              type="button"
+            >
+              Upcoming Drives
+            </button>
+            <button
+              aria-pressed="false"
+              class="switch-tab"
+              id="tab-bookings"
+              type="button"
+            >
+              My Bookings
+            </button>
+          </div>
+        </div>
+        <section
+          aria-label="Matching blood bank requests"
+          class="drives-dynamic-section"
+          hidden
+          id="requests-view"
+        >
+          <div class="logs-heading">
+            <h2>Matching Blood Bank Requests</h2>
+            <p class="request-help">
+              These requests match your blood type. They are not scheduled blood
+              drives, so there are no booking slots. Contact the blood bank to
+              confirm how to help.
+            </p>
+          </div>
+          <div class="donor-drive-list" id="request-list"></div>
+          <p class="empty-drive-results" hidden id="request-empty">
+            No matching open bank requests at the moment.
+          </p>
+        </section>
+        <section class="drives-dynamic-section" id="upcoming-view">
+          <div class="logs-heading">
+            <h2>Available Blood Drives</h2>
+          </div>
+          <div class="donor-drive-list" id="drive-list"></div>
+          <p class="empty-drive-results" hidden="" id="drive-empty">
+            There are no upcoming blood drives in the database.
+          </p>
+        </section>
+        <section class="drives-dynamic-section" hidden="" id="bookings-view">
+          <div class="logs-heading">
+            <h2>Your Bookings</h2>
+          </div>
+          <div class="donor-drive-list" id="booking-list"></div>
+          <p class="empty-drive-results" hidden="" id="booking-empty">
+            You have no bookings yet.
+          </p>
+        </section>
+      </main>
+    </div>
+    <!-- Frontend Interactions -->
+    <script
+      defer=""
+      src="../../js/donor_js/donor-common.js?go-drives-2"
+    ></script>
+    <script
+      defer=""
+      src="../../js/donor_js/drives-booking.js?go-drives-2"
+    ></script>
+  </body>
 </html>

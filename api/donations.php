@@ -6,30 +6,52 @@ require_once __DIR__ . '/eligibility.php';
 $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
+requireRole(['bank', 'phlebotomist', 'admin']);
+const DONATION_STATUSES = ['collected', 'tested', 'processed', 'discarded', 'transfused'];
+
+// Bank staff only see and write their own bank's donations; the session decides, not the browser.
+$sessionBankId = signedInBankId();
+if ($sessionBankId !== null && ($method === 'PUT' || $method === 'DELETE')) {
+    $ownDonationId = (int)($input['donation_id'] ?? 0);
+    $own = $conn->prepare('SELECT 1 FROM donation WHERE donation_id = ? AND bank_id = ?');
+    $own->bind_param('ii', $ownDonationId, $sessionBankId);
+    $own->execute();
+    if (!$own->get_result()->fetch_assoc()) sendJson(false, 'Donation not found for this bank.', null, 404);
+}
 
 try {
     if ($method === 'GET') {
-        $sql = "SELECT d.*, dn.full_name, dn.qr_code, bt.code as blood_type_code, bc.name as component_name, bb.name as bank_name 
+        $sql = "SELECT d.*, dn.full_name, dn.qr_code, bt.code as blood_type_code, bc.name as component_name, bb.name as bank_name
                 FROM donation d
                 LEFT JOIN donor dn ON d.donor_id = dn.donor_id
                 LEFT JOIN blood_type bt ON d.blood_type_id = bt.blood_type_id
                 LEFT JOIN blood_component bc ON d.component_id = bc.component_id
                 LEFT JOIN blood_bank bb ON d.bank_id = bb.bank_id
+                " . ($sessionBankId !== null ? "WHERE d.bank_id = ?" : "") . "
                 ORDER BY d.collected_at DESC";
-        
+
         $stmt = $conn->prepare($sql);
         if (!$stmt) throw new Exception("SQL Error: " . $conn->error);
+        if ($sessionBankId !== null) $stmt->bind_param('i', $sessionBankId);
 
         $stmt->execute();
         $donations = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         sendJson(true, 'Donations loaded.', ['count' => count($donations), 'donations' => $donations]);
 
     } elseif ($method === 'POST') {
+        if ($sessionBankId !== null) $input['bank_id'] = $sessionBankId;
+        if ($_SESSION['role'] === 'phlebotomist') {
+            $accountId = (int)$_SESSION['account_id'];
+            $ph = $conn->prepare('SELECT phlebotomist_id FROM phlebotomist WHERE account_id = ? LIMIT 1');
+            $ph->bind_param('i', $accountId);
+            $ph->execute();
+            $input['phlebotomist_id'] = (int)($ph->get_result()->fetch_assoc()['phlebotomist_id'] ?? 0);
+        }
         requireFields($input, ['donor_id', 'bank_id', 'blood_type_id', 'component_id', 'units']);
         
         $clientUuid = !empty($input['client_uuid']) ? sanitizeString($input['client_uuid']) : uniqid('SYNC-');
         $collectedAt = !empty($input['collected_at']) ? sanitizeString($input['collected_at']) : date('Y-m-d H:i:s');
-        $status = $input['status'] ?? 'collected';
+        $status = validateEnum((string)($input['status'] ?? 'collected'), DONATION_STATUSES, 'status');
 
         $stmt = $conn->prepare(
             "INSERT INTO donation (client_uuid, donor_id, bank_id, drive_id, blood_type_id, component_id, phlebotomist_id, units, collected_at, status) 
@@ -40,7 +62,7 @@ try {
         $driveId = !empty($input['drive_id']) ? (int)$input['drive_id'] : null;
         $phlebId = !empty($input['phlebotomist_id']) ? (int)$input['phlebotomist_id'] : null;
 
-        $stmt->bind_param('siiiiidsss', 
+        $stmt->bind_param('siiiiiidss',
             $clientUuid, $input['donor_id'], $input['bank_id'], $driveId, 
             $input['blood_type_id'], $input['component_id'], $phlebId, 
             $input['units'], $collectedAt, $status
@@ -49,7 +71,11 @@ try {
         if ($stmt->execute()) {
             $insertId = $stmt->insert_id;
             $dateOnly = substr($collectedAt, 0, 10);
-            $conn->query("UPDATE donor SET last_donation_date = '$dateOnly' WHERE donor_id = " . (int)$input['donor_id']);
+            $donorId = (int)$input['donor_id'];
+            $upd = $conn->prepare("UPDATE donor SET last_donation_date = ? WHERE donor_id = ?");
+            $upd->bind_param('si', $dateOnly, $donorId);
+            $upd->execute();
+            $upd->close();
 
             sendJson(true, 'Donation recorded.', ['donation_id' => $insertId, 'client_uuid' => $clientUuid, 'synced' => true], 201);
         }
@@ -61,7 +87,7 @@ try {
         $donationId = (int)$input['donation_id'];
         
         $units = isset($input['units']) ? (float)$input['units'] : 1.0;
-        $status = sanitizeString($input['status'] ?? 'collected');
+        $status = validateEnum(sanitizeString($input['status'] ?? 'collected'), DONATION_STATUSES, 'status');
 
         $stmt = $conn->prepare("UPDATE donation SET units = ?, status = ? WHERE donation_id = ?");
         $stmt->bind_param('dsi', $units, $status, $donationId);

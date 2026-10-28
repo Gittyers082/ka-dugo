@@ -36,6 +36,16 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100 || strlen
     exit;
 }
 
+// shortcut: failed-attempt counter in a temp file per email+IP; move to a DB table if the app runs on more than one server
+$throttleFile = sys_get_temp_dir() . '/kadugo_login_' . sha1($email . '|' . ($_SERVER['REMOTE_ADDR'] ?? ''));
+$attempts = is_file($throttleFile) ? (json_decode((string)file_get_contents($throttleFile), true) ?: []) : [];
+$attempts = array_filter($attempts, fn($t) => $t > time() - 900);
+if (count($attempts) >= 5) {
+    http_response_code(429);
+    echo json_encode(['ok' => false, 'error' => 'Too many failed attempts. Try again in 15 minutes.']);
+    exit;
+}
+
 $conn = getDbConnection();
 $stmt = $conn->prepare('SELECT account_id, password_hash, role, is_active FROM account WHERE email = ? LIMIT 1');
 $stmt->bind_param('s', $email);
@@ -44,6 +54,8 @@ $acct = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$acct || !password_verify($pass, $acct['password_hash'])) {
+    $attempts[] = time();
+    file_put_contents($throttleFile, json_encode(array_values($attempts)), LOCK_EX);
     http_response_code(401);
     echo json_encode(['ok' => false, 'error' => 'Incorrect email or password.']);
     exit;
@@ -55,6 +67,7 @@ if ((int) $acct['is_active'] !== 1) {
     exit;
 }
 
+if (is_file($throttleFile)) unlink($throttleFile);
 session_regenerate_id(true);
 $_SESSION['account_id'] = (int) $acct['account_id'];
 $_SESSION['email'] = $email;

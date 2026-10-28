@@ -4,7 +4,41 @@ import { el } from '../ui/dom.js';
 // BANK REQUESTS LOGIC (Secure DOM Refactor)
 // ============================================================================
 
+const BLOOD_TYPE_IDS = { "A+": 1, "A-": 2, "B+": 3, "B-": 4, "AB+": 5, "AB-": 6, "O+": 7, "O-": 8 };
+// Matches blood_component rows; Cryoprecipitate has no row yet, so it can't be requested.
+const COMPONENT_IDS = { "Whole Blood": 1, "Packed RBC (PRBC)": 2, "Platelets Apheresis": 3, "Fresh Frozen Plasma": 4 };
+const URGENCY = { Normal: { urgency: "normal", level: 1 }, Urgent: { urgency: "high", level: 2 }, Critical: { urgency: "critical", level: 3 } };
+
 document.addEventListener("DOMContentLoaded", () => {
+
+    // Start from whatever the markup pre-selects.
+    const state = {
+        bloodType: document.querySelector(".blood-grid .blood.selected")?.dataset.type || "O-",
+        component: document.querySelector(".component-grid .component-btn.selected")?.dataset.comp || "Whole Blood",
+        urgency: document.querySelector(".urgency-grid .urgency-btn.selected")?.dataset.level || "Normal",
+        units: parseInt(document.getElementById("units-display")?.textContent) || 1,
+        radius: parseInt(document.querySelector(".radius-grid .radius-btn.selected")?.dataset.radius) || 15,
+        donors: parseInt(document.getElementById("preview-donors")?.textContent) || 0,
+    };
+
+    const neededByInput = document.getElementById("needed-by-input");
+    if (neededByInput && !neededByInput.value) {
+        const d = new Date(Date.now() + 6 * 3600 * 1000);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        neededByInput.value = d.toISOString().slice(0, 16);
+    }
+
+    async function postJson(url, body) {
+        const res = await fetch(url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.success) throw new Error(json.message || `Request failed (${res.status}).`);
+        return json.data;
+    }
 
     function showToast(message) {
         const toast = document.getElementById("toast");
@@ -60,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             footerType.textContent = type;
 
             showToast(`${type} set as target blood type`);
+            updateReach();
         });
     });
 
@@ -115,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", () => {
             urgencyBtns.forEach(b => b.classList.remove("selected", "critical"));
             btn.classList.add("selected");
+            state.urgency = btn.getAttribute("data-level");
             if (btn.getAttribute("data-level") === "Critical") {
                 btn.classList.add("critical");
             }
@@ -142,40 +178,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const radius = parseInt(btn.getAttribute("data-radius"));
             state.radius = radius;
-            const simulatedDonors = { 5: 48, 15: 142, 25: 298 };
-            state.donors = simulatedDonors[radius];
-
             previewRadius.textContent = radius;
-            previewDonors.textContent = state.donors;
-            reachCountLabel.textContent = `${state.donors} Donors`;
-            footerDonors.textContent = state.donors;
+            updateReach();
         });
     });
 
+    // Live count of eligible donors of the chosen type within the radius of this bank.
+    async function updateReach() {
+        const setCount = (text) => {
+            previewDonors.textContent = text;
+            reachCountLabel.textContent = `${text} Donors`;
+            footerDonors.textContent = text;
+        };
+        try {
+            const res = await fetch(`../../api/alerts.php?action=reach&blood_type_id=${BLOOD_TYPE_IDS[state.bloodType]}&radius_km=${state.radius}`, { credentials: "same-origin", cache: "no-store" });
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message);
+            state.donors = json.data.count;
+            setCount(state.donors);
+        } catch (err) {
+            setCount("—");
+        }
+    }
+    updateReach();
+
     const dispatchBtn = document.getElementById("dispatch-btn");
     if (dispatchBtn) {
-        dispatchBtn.addEventListener("click", (e) => {
+        dispatchBtn.addEventListener("click", async (e) => {
             e.preventDefault();
 
-            const originalNodes = Array.from(dispatchBtn.childNodes);
+            const ward = document.getElementById("ward-input")?.value.trim();
+            const neededBy = neededByInput?.value;
+            const componentId = COMPONENT_IDS[state.component];
+            const { urgency, level } = URGENCY[state.urgency] || URGENCY.Normal;
+            if (!ward) return showToast("Enter the ward or unit that needs the blood.");
+            if (!neededBy) return showToast("Choose when the blood is needed by.");
+            if (!componentId) return showToast(`${state.component} can't be requested yet.`);
 
+            const originalNodes = Array.from(dispatchBtn.childNodes);
             dispatchBtn.disabled = true;
             dispatchBtn.textContent = "Dispatching Alerts...";
             dispatchBtn.style.opacity = "0.7";
-            setTimeout(() => {
-                showToast(`SUCCESS: Request broadcasted to ${state.donors} eligible donors.`);
 
-                dispatchBtn.disabled = false;
+            try {
+                const request = await postJson("../../api/request.php", {
+                    blood_type_id: BLOOD_TYPE_IDS[state.bloodType],
+                    component_id: componentId,
+                    ward,
+                    units_needed: state.units,
+                    urgency,
+                    needed_by: neededBy,
+                });
+                const note = notesInput?.value.split("\n")[0].trim();
+                const alert = await postJson("../../api/alerts.php", {
+                    sender_type: "bank",
+                    bank_id: request.bank_id,
+                    request_id: request.request_id,
+                    blood_type_id: request.blood_type_id,
+                    level,
+                    radius_km: state.radius,
+                    message: `${urgency.toUpperCase()}: ${state.units} unit(s) of ${state.bloodType} ${state.component} needed at ${ward}.${note ? " " + note : ""}`,
+                    status: "active",
+                });
+
+                showToast(`SUCCESS: Request broadcasted to ${alert.recipients_notified} eligible donors.`);
                 dispatchBtn.textContent = "✓ Broadcast Active";
                 dispatchBtn.style.backgroundColor = "#287a4b";
-                dispatchBtn.style.opacity = "1";
                 setTimeout(() => {
                     dispatchBtn.textContent = "";
                     originalNodes.forEach(node => dispatchBtn.append(node));
                     dispatchBtn.style.backgroundColor = "var(--urgent)";
                 }, 4000);
-
-            }, 1200);
+            } catch (err) {
+                showToast(err.message);
+                dispatchBtn.textContent = "";
+                originalNodes.forEach(node => dispatchBtn.append(node));
+            } finally {
+                dispatchBtn.disabled = false;
+                dispatchBtn.style.opacity = "1";
+            }
         });
     }
 });

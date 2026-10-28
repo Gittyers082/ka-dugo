@@ -1209,3 +1209,182 @@ body :is(.app-shell,.dashboard-app,.drive-app) :is(h1,h2,h3,.t-heading,.card-hea
  .app-shell .bottom-nav a,.drive-app .bottom-nav a{flex:1;min-width:0;gap:8px;padding:8px 2px;font-size:12px;border-radius:8px!important;color:var(--muted)}
  .app-shell .bottom-nav a.active,.drive-app .bottom-nav a.active{color:var(--wine);background:#f4e7ea}
 }
+
+/* ORGANIZER DRIVE BLOOD TYPE SELECTION */
+.drive-app .target-types {
+    margin: 18px 0;
+    padding: 17px;
+    background: #f7f2ee;
+    border: 2px solid #e3d8d1;
+    border-radius: var(--radius-lg);
+}
+
+.target-types__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.target-types__heading h3 {
+    margin: 0;
+    color: #421316;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.target-types__heading h3 span {
+    color: #a32636;
+}
+
+.target-types__heading p {
+    margin: 5px 0 0;
+    color: #765d60;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.target-types__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.target-types__actions button {
+    border: 1px solid #cdb8b4;
+    border-radius: var(--radius-full);
+    background: #fff;
+    color: #69232f;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.target-types__actions button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.blood-type-options {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.drive-app .blood-type-choice {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 45px;
+    margin: 0;
+    padding: 9px 10px;
+    border: 2px solid #d9cac4;
+    border-radius: var(--radius-md);
+    background: #fffdfb;
+    color: #51333a;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.drive-app .blood-type-choice.is-selected {
+    border-color: #8d2537;
+    background: #f8e8e9;
+    color: #6d1525;
+}
+
+.drive-app .blood-type-choice:focus-within {
+    outline: 2px solid #8d2537;
+    outline-offset: 2px;
+}
+
+.drive-app .blood-type-choice input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    accent-color: #8d2537;
+    flex: 0 0 auto;
+}
+
+.blood-types-loading {
+    grid-column: 1 / -1;
+    color: #765d60;
+    font-size: 13px;
+}
+
+.target-types__status {
+    margin: 12px 0 0;
+    color: #765d60;
+    font-size: 12px;
+}
+
+.target-types__status.is-error {
+    color: #a32636;
+    font-weight: 700;
+}
+
+.drive-item .target-summary {
+    margin: 10px 0;
+    color: #6f555c;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+@media (max-width: 560px) {
+    .blood-type-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .target-types__heading {
+        flex-direction: column;
+    }
+}
+
+
+/* ORGANIZER DRIVE COLUMN LAYOUT */
+/* Keep the form and cancellation notice independent of the drive list height. */
+.drive-app .scheduler-column {
+    min-width: 0;
+}
+
+.drive-app .scheduler-column .warning {
+    margin-top: 28px;
+}
+
+@media (min-width: 1200px) {
+    .drive-app .content {
+        align-items: start;
+    }
+
+    .drive-app .scheduler-column {
+        grid-column: 1;
+        grid-row: 3;
+        align-self: start;
+    }
+
+    .drive-app .scheduled {
+        grid-column: 2;
+        grid-row: 3;
+        align-self: start;
+        position: static;
+        margin-top: 0;
+    }
+}
+
+
+@media (min-width: 800px) and (max-width: 1199px) {
+    .drive-app .content {
+        display: block;
+    }
+
+    .drive-app .scheduled {
+        position: static;
+        margin-top: 24px;
+    }
+}
