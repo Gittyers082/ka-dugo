@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = result.data;
             profileButton.disabled=false;
             safeSet('display-org-name', data.org_name || 'Organization Name');
+            // Initials of the first three words, e.g. "Philippine Red Cross" -> "PRC".
+            safeSet('display-org-initials', String(data.org_name || '').split(/s+/).filter(Boolean).slice(0, 3).map(w => w[0].toUpperCase()).join('') || '—');
             safeSet('display-org-code', data.org_code ? `Node #${data.org_code}` : 'No Code');
             safeSet('display-contact-person', data.contact_person || 'Not provided');
             safeSet('display-email', data.email || 'Not provided');
@@ -90,11 +92,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('change-password-form')?.addEventListener('submit', (event) => {
+    document.getElementById('change-password-form')?.addEventListener('submit', async (event) => {
         event.preventDefault();
-        passwordDialog?.close();
-        event.currentTarget.reset();
-        showToast('Password updates require the account service.');
+        const form = event.currentTarget;
+        const submit = form.querySelector('[type="submit"]');
+        submit.disabled = true;
+        try {
+            const response = await fetch('../../api/change_password.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    current_password: document.getElementById('current-password').value,
+                    new_password: document.getElementById('new-password').value,
+                }),
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || !result.ok) throw new Error(result.error || 'Password update failed.');
+            passwordDialog?.close();
+            form.reset();
+            showToast('Password updated.');
+        } catch (error) {
+            showToast(error.message, true);
+        } finally {
+            submit.disabled = false;
+        }
     });
     document.getElementById('refreshBtn')?.addEventListener('click', async () => {
         await Promise.all([loadProfile(), loadStats()]);

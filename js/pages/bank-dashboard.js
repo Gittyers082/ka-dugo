@@ -1,5 +1,6 @@
 import { el } from '../ui/dom.js';
 import { getAllRecords } from '../db.js';
+import { GOALS, loadTodayCounts } from './bank-quota.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     const dateHeader = document.querySelector(".date-header h2");
@@ -18,39 +19,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadBankDashboard() {
         try {
-            // Fetch Quota Data
-            const donRes = await fetch('../../api/donations.php');
-            if (donRes.ok) {
-                const donData = await donRes.json();
-                if (donData.ok) {
-                    const goals = { PRBC: 28, Platelets: 12, 'Whole Blood': 10, Total: 50 };
-                    let counts = { PRBC: 0, Platelets: 0, 'Whole Blood': 0, Total: 0 };
-
-                    // Local calendar date (en-CA gives YYYY-MM-DD); toISOString() would use UTC and miss early-morning donations.
-                    const todayStr = new Date().toLocaleDateString('en-CA');
-                    // The server already limits donations to the signed-in bank.
-                    const todayDonations = donData.data.donations.filter(d => d.collected_at.startsWith(todayStr) && d.status !== 'discarded');
-
-                    todayDonations.forEach(d => {
-                        const units = parseFloat(d.units) || 1;
-                        counts.Total += units;
-                        if (d.component_name === 'Packed Red Blood Cells') counts.PRBC += units;
-                        if (d.component_name === 'Platelets') counts.Platelets += units;
-                        if (d.component_name === 'Whole Blood') counts['Whole Blood'] += units;
-                    });
-
-                    safeSet('quota-total-text', `${counts.Total}/${goals.Total}`);
-                    const remaining = Math.max(0, goals.Total - counts.Total);
-                    safeSet('quota-remaining-text', `${remaining} Units Remaining to Reach Shift Goal`);
-
-                    safeSet('quota-prbc', `PRBC: ${counts.PRBC}/${goals.PRBC}`);
-                    safeSet('quota-platelets', `Platelets: ${counts.Platelets}/${goals.Platelets}`);
-                    safeSet('quota-wb', `Whole Blood: ${counts['Whole Blood']}/${goals['Whole Blood']}`);
-
-                    const progressPct = Math.min(100, (counts.Total / goals.Total) * 100);
-                    const bar = document.getElementById('quota-progress-bar');
-                    if (bar) bar.style.width = `${progressPct}%`;
-                }
+            // Quota: the server already limits donations to the signed-in bank.
+            try {
+                const counts = await loadTodayCounts();
+                safeSet('quota-total-text', `${counts.Total}/${GOALS.Total}`);
+                safeSet('quota-remaining-text', `${Math.max(0, GOALS.Total - counts.Total)} Units Remaining to Reach Shift Goal`);
+                safeSet('quota-prbc', `PRBC: ${counts.PRBC}/${GOALS.PRBC}`);
+                safeSet('quota-platelets', `Platelets: ${counts.Platelets}/${GOALS.Platelets}`);
+                safeSet('quota-wb', `Whole Blood: ${counts['Whole Blood']}/${GOALS['Whole Blood']}`);
+                const bar = document.getElementById('quota-progress-bar');
+                if (bar) bar.style.width = `${Math.min(100, (counts.Total / GOALS.Total) * 100)}%`;
+            } catch (quotaError) {
+                safeSet('quota-remaining-text', quotaError.message);
             }
 
             // Fetch Open Requests
@@ -70,6 +50,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     safeSet('active-requests-text', `${requests.length} Active`);
                     safeSet('urgent-requests-text', `${urgentCount} urgent protocol`);
                     safeSet('feed-count-badge', requests.length);
+
+                    // Priority card: live reach for the most urgent open request (list is sorted by urgency).
+                    const top = requests[0];
+                    if (!top) {
+                        safeSet('priority-reach-text', 'No open requests need donor outreach right now.');
+                    } else {
+                        try {
+                            const reach = await fetch(`../../api/alerts.php?action=reach&blood_type_id=${top.blood_type_id}&radius_km=15`).then(r => r.json());
+                            safeSet('priority-reach-text', reach.ok
+                                ? `${reach.data.count} eligible ${top.blood_type_code} donors within 15 km of ${reach.data.center_name}`
+                                : reach.error);
+                        } catch (reachError) {
+                            safeSet('priority-reach-text', 'Donor reach is unavailable offline.');
+                        }
+                    }
 
                     const container = document.getElementById('requests-feed-container');
                     if (container) {

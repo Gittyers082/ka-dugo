@@ -58,13 +58,12 @@
                         </svg>
                         <div>
                             <span class="t-label font-bold text-oxblood block mb-1">BANK DAILY TARGET: <span
-                                    class="text-maroon">42 / 50 Units</span></span>
-                            <span class="t-caption text-urgent font-bold block">Critical Deficit: O- Negative (10 Units
-                                Required)</span>
+                                    class="text-maroon" id="req-quota-text">— / 50 Units</span></span>
+                            <span class="t-caption text-urgent font-bold block" id="req-quota-deficit">Checking open requests…</span>
                         </div>
                     </div>
                     <div class="quota-badge bg-maroon text-bone font-bold text-center">
-                        <span class="block t-body">84%</span>
+                        <span class="block t-body" id="req-quota-pct">—</span>
                         <span class="block t-caption" style="font-size:10px;">QUOTA</span>
                     </div>
                 </div>
@@ -74,7 +73,7 @@
             <div class="tabs mb-6">
                 <button class="active" type="button">Create Request</button>
                 <button type="button" onclick="window.location.href='active_requests.html'">Active Requests <span
-                        class="badge-count">6</span></button>
+                        class="badge-count" id="active-tab-count">…</span></button>
             </div>
             <div class="requests-grid">
 
@@ -173,9 +172,8 @@
                                     <path d="M12 5v6"></path>
                                     <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
                                 </svg>
-                                <input type="text" id="ward-input" value="Trauma Center ICU - Bay 4"
+                                <input type="text" id="ward-input" placeholder="e.g. Trauma Center ICU - Bay 4" maxlength="100"
                                     class="t-body text-oxblood font-bold">
-                                <span class="inner-badge">Bed T-04</span>
                             </div>
                         </div>
 
@@ -183,8 +181,7 @@
                             <label class="t-caption font-bold text-oxblood block mb-2 text-uppercase">Clinical Rationale
                                 & Notes</label>
                             <textarea id="notes-input"
-                                class="custom-textarea bg-surface border-line t-body text-oxblood" rows="3">Acute hemorrhagic shock secondary to multi-trauma MVA; emergency uncrossmatched to matched protocol activated.
-Protocol #EM-TRANS-9042</textarea>
+                                class="custom-textarea bg-surface border-line t-body text-oxblood" rows="3" placeholder="Clinical rationale (first line is added to the donor alert)"></textarea>
                         </div>
 
                         <div class="input-card">
@@ -196,11 +193,9 @@ Protocol #EM-TRANS-9042</textarea>
                                     <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
                                 </svg>
                                 <div style="flex:1">
-                                    <input type="text" id="doctor-input" value="Dr. H. Vance, Trauma Attending"
+                                    <input type="text" id="doctor-input" placeholder="e.g. Dr. Santos, Trauma Attending"
                                         class="t-body text-oxblood font-bold w-full"
                                         style="border:none; background:transparent; outline:none;">
-                                    <span class="t-caption text-muted block mt-1">Pager: #8812 • Verified by Charge
-                                        Nurse S. Kelly</span>
                                 </div>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#287a4b"
                                     stroke-width="2.5">
@@ -235,8 +230,8 @@ Protocol #EM-TRANS-9042</textarea>
                                         height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2.5">
                                         <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg> Push App Alert + Urgent SMS Dispatch</span>
-                                <span class="t-label font-bold text-urgent" id="donor-reach-count">142 Donors</span>
+                                    </svg> In-app donor alert</span>
+                                <span class="t-label font-bold text-urgent" id="donor-reach-count">— Donors</span>
                             </div>
                         </div>
 
@@ -271,7 +266,7 @@ Protocol #EM-TRANS-9042</textarea>
                                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                         <circle cx="12" cy="12" r="10"></circle>
                                     </svg>
-                                    <span class="t-body text-oxblood font-bold flex-1">Open - High Priority</span>
+                                    <span class="t-body text-oxblood font-bold flex-1" id="broadcast-status">Open - Critical Priority</span>
                                     <span class="badge-pill bg-charcoal text-bone text-uppercase"
                                         style="font-size:10px;">Auto-Routed</span>
                                 </div>
@@ -303,7 +298,7 @@ Protocol #EM-TRANS-9042</textarea>
                                 <h3 class="t-heading font-heading m-0 text-bone">EMERGENCY<br>NOTICE</h3>
                             </div>
                             <span
-                                class="ep-badge bg-charcoal text-bone font-bold text-uppercase">Critical<br>Urgency</span>
+                                class="ep-badge bg-charcoal text-bone font-bold text-uppercase" id="preview-urgency">Critical<br>Urgency</span>
                         </div>
 
                         <div class="ep-body p-4 bg-surface">
@@ -315,18 +310,14 @@ Protocol #EM-TRANS-9042</textarea>
                                         <h4 class="t-heading text-oxblood font-heading m-0" id="preview-title"><span
                                                 id="preview-units">10</span> Units <span id="preview-comp">Packed
                                                 RBC<br>(PRBC)</span></h4>
-                                        <p class="t-caption text-muted m-0 mt-1" id="preview-ward">Trauma Center ICU -
-                                            Bay 4 • Bed T-04</p>
+                                        <p class="t-caption text-muted m-0 mt-1" id="preview-ward">Ward not set</p>
                                     </div>
                                 </div>
-                                <span class="ep-tag text-urgent font-bold text-uppercase bg-urgent-light p-1">ICU
-                                    Priority</span>
                             </div>
 
                             <div class="ep-clinical bg-bone p-3 mb-4">
                                 <span class="t-caption text-muted text-uppercase block mb-1">Clinical Indication:</span>
-                                <p class="t-caption text-oxblood m-0" id="preview-notes">Acute hemorrhagic shock •
-                                    Attending: Dr. H. Vance (Pager #8812)</p>
+                                <p class="t-caption text-oxblood m-0" id="preview-notes">No clinical rationale provided.</p>
                             </div>
 
                             <div class="ep-footer flex-between border-top pt-3">
@@ -334,9 +325,9 @@ Protocol #EM-TRANS-9042</textarea>
                                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <polyline points="12 6 12 12 16 14"></polyline>
-                                    </svg> Deadline in 03h 42m</span>
+                                    </svg> <span id="preview-deadline">Deadline not set</span></span>
                                 <span class="t-caption text-oxblood font-bold text-uppercase">Radius: <span
-                                        id="preview-radius">15</span> KM Reach + <span id="preview-donors">142</span>
+                                        id="preview-radius">15</span> KM Reach + <span id="preview-donors">—</span>
                                     Donors</span>
                             </div>
                         </div>
@@ -353,7 +344,7 @@ Protocol #EM-TRANS-9042</textarea>
                         Broadcast Request & Alert Donors Now
                     </button>
                     <p class="t-caption text-muted text-center mb-6">Will push immediate alert to <span
-                            id="footer-donors">142</span> matched <span id="footer-type">O-</span> registered donors.
+                            id="footer-donors">—</span> matched <span id="footer-type">O-</span> registered donors.
                     </p>
 
                     <!-- Existing Requests Feed -->

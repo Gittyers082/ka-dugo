@@ -62,6 +62,8 @@ function render() {
     });
     const count = document.getElementById('view-all-count');
     if (count) count.textContent = `View All (${requests.length})`;
+    const tabCount = document.getElementById('active-tab-count');
+    if (tabCount) tabCount.textContent = requests.length;
 }
 
 async function load() {
@@ -137,4 +139,5 @@ form.addEventListener('submit', async (e) => {
 });
 
 document.getElementById('refresh-btn')?.addEventListener('click', load);
+window.addEventListener('kadugo:requests-changed', load); // a new request was dispatched on requests.html
 load();
