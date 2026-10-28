@@ -16,7 +16,7 @@ $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $accountId = (int)($_SESSION['account_id'] ?? 0);
 
 if ($accountId <= 0 || ($_SESSION['role'] ?? '') !== 'donor') {
-    sendJson(false, 'Please log in as a donor.', null, 401);
+    sendJson(false, 'Please log in as a donor.', null, $accountId <= 0 ? 401 : 403);
 }
 $db = getDbConnection();
 

@@ -41,8 +41,8 @@ export async function syncPendingDonations() {
                 if (res.ok) {
                     await deleteRecord(record.client_uuid);
                     synced++;
-                } else if (res.status === 401) {
-                    // Signed out: keep the record pending and retry after the next login.
+                } else if (res.status === 401 || res.status === 403) {
+                    // Signed out or signed in as another role: keep it pending until bank staff sign in again.
                     break;
                 } else if (res.status >= 400 && res.status < 500) {
                     const err = await safeJson(res);

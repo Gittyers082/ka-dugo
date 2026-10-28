@@ -17,6 +17,21 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// On app pages, a 401 while loading data means the session ended: go to sign-in instead of showing empty data.
+// Not on index.html, where a 401 is just a wrong password; and only for GETs, because saves handle 401
+// themselves (scan.js queues the donation offline) and leaving mid-save could drop the record.
+if (location.pathname.includes("/pages/")) {
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = async (input, init) => {
+    const res = await nativeFetch(input, init);
+    const method = (init?.method || "GET").toUpperCase();
+    if (res.status === 401 && method === "GET" && new URL(res.url).pathname.includes("/api/")) {
+      location.replace(APP_BASE + "index.html");
+    }
+    return res;
+  };
+}
+
 /* ==========================================================================
    2. PWA INSTALL PROMPT & CUSTOM BANNER
    ========================================================================== */

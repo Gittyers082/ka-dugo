@@ -51,8 +51,12 @@ function getRequestMethod(array $requestData = []): string {
 // Require a signed-in account with one of the given roles; returns its account_id.
 function requireRole(array $roles): int {
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();
-    if (empty($_SESSION['account_id']) || !in_array($_SESSION['role'] ?? '', $roles, true)) {
-        sendJson(false, 'You are not allowed to do this. Please sign in with the right account.', null, 401);
+    // 401 = not signed in (the client sends you to login); 403 = signed in with the wrong role.
+    if (empty($_SESSION['account_id'])) {
+        sendJson(false, 'Your session has ended. Please sign in again.', null, 401);
+    }
+    if (!in_array($_SESSION['role'] ?? '', $roles, true)) {
+        sendJson(false, 'Your account is not allowed to do this.', null, 403);
     }
     return (int)$_SESSION['account_id'];
 }
@@ -77,7 +81,7 @@ function signedInBankId(): ?int {
 function signedInOrganizer(bool $required = true): ?int {
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();
     if (($_SESSION['role'] ?? '') !== 'organizer' || empty($_SESSION['account_id'])) {
-        if ($required) sendJson(false, 'Please sign in with an organizer account.', null, 401);
+        if ($required) sendJson(false, 'Please sign in with an organizer account.', null, empty($_SESSION['account_id']) ? 401 : 403);
         return null;
     }
     $accountId=(int)$_SESSION['account_id'];

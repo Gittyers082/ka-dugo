@@ -1,4 +1,4 @@
-import { getAllRecords } from '../db.js';
+import { getAllRecords, putRecord, deleteRecord } from '../db.js';
 
 const BLOOD_TYPES = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 
@@ -93,24 +93,38 @@ function closeEdit() {
   if (dialog) dialog.close();
 }
 
+// Sends a change to the API; returns null on success or a message to show.
+async function sendDonationChange(method, body) {
+  try {
+    const res = await fetch("../../api/donations.php", {
+      method,
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json().catch(() => ({}));
+    return res.ok && json.ok ? null : (json.error || `The server rejected the change (${res.status}).`);
+  } catch (err) {
+    return "You're offline. Saved records can only be changed while connected.";
+  }
+}
+
 async function handleEditSubmit(e) {
   e.preventDefault();
   if (!state.editingId) return;
 
+  const id = String(state.editingId);
   const newUnits = parseInt(document.getElementById("edit-units").value, 10);
   const recordIndex = state.donations.findIndex((d) => d.id === state.editingId);
+  if (!(newUnits >= 1 && newUnits <= 10)) return showToast("Units must be between 1 and 10.");
 
-  if (String(state.editingId).startsWith("db-")) {
-    const dbId = Number(String(state.editingId).replace("db-", ""));
-    try {
-      await fetch("../../api/donations.php", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ donation_id: dbId, units: newUnits, status: "processed" }),
-      });
-    } catch (err) {
-      console.warn("Offline: Edit not synced to DB.");
-    }
+  if (id.startsWith("db-")) {
+    const error = await sendDonationChange("PUT", { donation_id: Number(id.slice(3)), units: newUnits });
+    if (error) return showToast(error);
+  } else {
+    // Still in the offline queue: change the record that will be synced, not just the screen.
+    const queued = (await getAllRecords()).find((r) => r.client_uuid === id);
+    if (queued) await putRecord({ ...queued, payload: { ...queued.payload, units: newUnits } });
   }
 
   if (recordIndex > -1) {
@@ -173,18 +187,17 @@ function closeDeleteConfirm() {
 
 async function confirmDelete() {
   if (!state.pendingDeleteId) return;
+  const id = String(state.pendingDeleteId);
 
-  if (String(state.pendingDeleteId).startsWith("db-")) {
-    const dbId = Number(String(state.pendingDeleteId).replace("db-", ""));
-    try {
-      await fetch("../../api/donations.php", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ donation_id: dbId }),
-      });
-    } catch (err) {
-      console.warn("Offline: Delete not synced to DB.");
+  if (id.startsWith("db-")) {
+    const error = await sendDonationChange("DELETE", { donation_id: Number(id.slice(3)) });
+    if (error) {
+      closeDeleteConfirm();
+      return showToast(error);
     }
+  } else {
+    // Remove it from the offline queue too, or it would reappear and still sync.
+    await deleteRecord(id);
   }
 
   state.donations = state.donations.filter((d) => d.id !== state.pendingDeleteId);
