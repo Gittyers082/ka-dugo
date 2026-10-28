@@ -145,7 +145,7 @@ function historyRows(mysqli $db, int $donorId): array
             . " LEFT JOIN blood_component bc ON bc.component_id=d.component_id"
             . " LEFT JOIN blood_bank bb ON bb.bank_id=d.bank_id"
             . " LEFT JOIN drive dv ON dv.drive_id=d.drive_id"
-            . " WHERE h.donor_id=?"
+            . " WHERE h.donor_id=? AND h.source='system'"
             . " UNION ALL"
             . " SELECT NULL AS history_id, d.client_uuid AS public_ref, d.blood_type_id,"
             . " bt.code AS blood_type_code, DATE(d.collected_at) AS donated_on, d.units,"

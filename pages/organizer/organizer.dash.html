@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="../../css/tokens.css">
     <link rel="stylesheet" href="../../css/base.css">
     <link rel="stylesheet" href="../../css/styles.css">
-    <link rel="stylesheet" href="../../css/organizer.css?v=10">
+    <link rel="stylesheet" href="../../css/organizer.css?v=13">
     <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
 </head>
 
@@ -116,7 +116,7 @@
                     <h2 class="t-heading"
                         style="margin: 0 0 4px 0; color: var(--oxblood); font-size: 22px; font-weight: 700;">Managed
                         Drives</h2>
-                    <p style="color: var(--muted); font-size: 13px; margin: 0;">Currently active or upcoming</p>
+                    <p style="color: var(--muted); font-size: 13px; margin: 0;">Recent drives and their status</p>
                 </div>
 
                 <!-- Empty container for JS to inject real drives -->
@@ -174,6 +174,9 @@
                     </svg>
                 </span>Logout
             </a>
+            <span class="nav-brand" id="nav-brand">KA-DUGO
+ORGANIZER</span>
+            <p class="nav-org" id="nav-org">Organizer Portal</p>
         </nav>
     </main>
 
@@ -222,14 +225,22 @@
                             const capacity = drive.slots_total || 1;
                             const progressPct = Math.min(100, Math.round((registered / capacity) * 100));
 
-                            const isScheduled = drive.status === 'scheduled';
-                            const badgeColor = isScheduled ? '#8e7314' : '#2e8551';
-                            const badgeBg = isScheduled ? '#fdf2cd' : '#e2f3e8';
+                            // Match the badge color to the actual drive status.
+                            const statusColors = {
+                                scheduled: { text: '#8e7314', background: '#fdf2cd' },
+                                ongoing: { text: '#2e8551', background: '#e2f3e8' },
+                                cancelled: { text: '#a42f42', background: '#fbecee' },
+                                completed: { text: '#62565a', background: '#eee9e5' }
+                            };
+                            const status = String(drive.status || '').toLowerCase();
+                            const badge = statusColors[status] || { text: '#62565a', background: '#eee9e5' };
+                            const badgeColor = badge.text;
+                            const badgeBg = badge.background;
 
                             container.innerHTML += `
                                 <article class="card" style="border-radius: 12px; padding: 24px; margin-bottom: 16px; background: #fffcf9;">
                                     <div class="heading-row" style="margin-bottom: 16px;">
-                                        <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px;">${drive.status.toUpperCase()}</span>
+                                        <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px;">${escapeText(status.toUpperCase())}</span>
                                         <span style="font-size: 11px; color: var(--muted); font-weight: 700;">REF: ${escapeText(drive.ref_code)}</span>
                                     </div>
                                     <h3 style="font-size: 20px; font-family: var(--font-heading); color: var(--oxblood); margin: 0 0 6px 0; font-weight: 700;">${escapeText(drive.title)}</h3>

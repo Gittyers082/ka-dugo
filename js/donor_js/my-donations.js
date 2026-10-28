@@ -12,20 +12,19 @@
             (selectedSource === 'all' || h.source === selectedSource)
         );
         grid.innerHTML = filtered.map(h => {
-            const manual = h.source === 'manual';
-            const sourceText = manual ? 'Self-reported donation' : (h.bank_name || h.drive_title || 'System donation record');
-            return `<article class="log-card ${manual ? 'self-record' : ''}">` +
+            const sourceText = h.bank_name || h.drive_title || 'System donation record';
+            return `<article class="log-card">` +
                 `<div class="log-card-top">` +
                 `<div class="log-title">` +
-                `<span class="log-dot ${manual ? 'self' : ''}">` +
+                `<span class="log-dot">` +
                 `</span><div><h3>${api.safe(sourceText)}` +
                 `</h3><p class="log-date">${api.safe(api.formatDate(h.donated_on))}` +
-                `</p></div></div><span class="verification ${manual ? 'self-badge' : ''}">${api.safe(h.verification)}` +
+                `</p></div></div><span class="verification">${api.safe(h.verification)}` +
                 `</span></div><div class="component-strip">` +
                 `<div><span>BLOOD TYPE &amp; UNITS` +
                 `</span><strong>${api.safe(h.blood_type_code)} · ${Number(h.units).toFixed(2)} units` +
                 `</strong></div><div><span>RECORD TYPE` +
-                `</span><strong>${api.safe(manual ? 'Manual entry' : (h.component_name || 'System record'))}` +
+                `</span><strong>${api.safe(h.component_name || 'System record')}` +
                 `</strong></div></div><p class="donor-reference">Reference: ${api.safe(h.public_ref)}` +
                 `</p></article>`;
         }).join('');
@@ -46,7 +45,10 @@
     }
     async function load() {
         const [me, data] = await Promise.all([api.profile(), api.request('history')]);
-        records = data.history || [];
+        // Guard against old self-reported rows that may still exist in MySQL.
+        records = Array.isArray(data.history)
+            ? data.history.filter(h => h.source === 'system')
+            : [];
         const verified = records.filter(h => h.verification === 'verified' && h.source === 'system');
         $('#history-volume').innerHTML = `${verified.reduce((sum, h) => sum + Number(h.units), 0).toFixed(2)} <span>Verified units</span>`;
         $('#history-count').textContent = records.length;
