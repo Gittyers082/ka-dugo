@@ -302,21 +302,22 @@ function renderList() {
 // LIVE API + OFFLINE INDEXEDDB INTEGRATION
 // ============================================================================
 
-// 1. Fetch Local IndexedDB (Pending Sync) via PWA Engine
-try {
-  if (window.KadugoPWA && window.KadugoPWA.getPendingDonations) {
-    const pendingList = await window.KadugoPWA.getPendingDonations();
+async function syncDonationLogWithBackend() {
+  const merged = [];
+  let todayTotal = 0;
+  const shiftGoal = 50;
 
+  // 1. Local IndexedDB queue (Pending Sync)
+  try {
+    const pendingList = (await getAllRecords()).filter(r => r.status === "Pending Sync");
     pendingList.forEach((item) => {
       const p = item.payload || {};
-      const units = Number(p.units || 1);
-
       merged.push({
         id: item.client_uuid,
         donor_name: (p.donor_name || `Donor #${p.donor_id || 1}`).replace(" ", "<br>"),
         blood_type: p.blood_type_code || "O+",
         component: "Whole Blood<br>(450 mL)",
-        units: units,
+        units: Number(p.units || 1),
         station: "Local Queue",
         collected_at: new Date(item.created_at || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         collected_by: "Current Staff",
@@ -328,35 +329,63 @@ try {
         can_delete: true,
       });
     });
-  } else {
-    // Raw DB fallback if PWA engine is unreachable
-    const allRecords = await getAllRecords();
-    const pendingList = allRecords.filter(r => r.status === "Pending Sync");
-
-    pendingList.forEach((item) => {
-      const p = item.payload || {};
-      const units = Number(p.units || 1);
-
-      merged.push({
-        id: item.client_uuid,
-        donor_name: (p.donor_name || `Donor #${p.donor_id || 1}`).replace(" ", "<br>"),
-        blood_type: p.blood_type_code || "O+",
-        component: "Whole Blood<br>(450 mL)",
-        units: units,
-        station: "Local Queue",
-        collected_at: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        collected_by: "Current Staff",
-        link_type: "Offline Queue",
-        link_value: "Stored in Local Cache",
-        notes: p.notes || "Logged offline — awaiting network sync.",
-        status: "pending",
-        status_sub: `uuid: ${String(item.client_uuid).slice(0, 8)}`,
-        can_delete: true,
-      });
-    });
+  } catch (e) {
+    console.warn("Could not read IndexedDB pending donations:", e);
   }
-} catch (e) {
-  console.warn("Could not read IndexedDB pending donations:", e);
+
+  // 2. Live database; the server already limits rows to the signed-in bank.
+  try {
+    const res = await fetch("../../api/donations.php");
+    const json = await res.json();
+
+    if (json && json.ok && json.data && Array.isArray(json.data.donations)) {
+      // Local calendar date (en-CA gives YYYY-MM-DD); toISOString() would use UTC and miss early-morning donations.
+      const todayStr = new Date().toLocaleDateString("en-CA");
+
+      json.data.donations.forEach((d) => {
+        const units = Number(d.units || 1);
+        if (d.collected_at && d.collected_at.startsWith(todayStr) && d.status !== "discarded") todayTotal += units;
+
+        const nameArr = String(d.full_name || "Unknown Donor").split(" ");
+        const formattedName = nameArr.length > 1 ? `${nameArr[0]}<br>${nameArr.slice(1).join(" ")}` : nameArr[0];
+
+        merged.push({
+          id: `db-${d.donation_id}`,
+          donor_name: formattedName,
+          blood_type: d.blood_type_code || "O+",
+          component: `${d.component_name || "Whole Blood"}<br>(450 mL)`,
+          units: units,
+          station: d.bank_name || "Central Bank",
+          collected_at: d.collected_at,
+          collected_by: "System Record",
+          link_type: "Status",
+          link_value: String(d.status || "collected").toUpperCase(),
+          notes: "Verified database record.",
+          status: "synced",
+          status_sub: `uuid: ${String(d.client_uuid).slice(0, 8)}`,
+          can_delete: false,
+        });
+      });
+    }
+  } catch (e) {
+    console.warn("Could not load donations from the server:", e);
+  }
+
+  const pct = Math.min(100, Math.round((todayTotal / shiftGoal) * 100));
+  const remaining = Math.max(0, shiftGoal - todayTotal);
+  const safeSet = (id, text) => {
+    const node = document.getElementById(id);
+    if (node) node.textContent = text;
+  };
+  safeSet("log-quota-text", `${todayTotal} / ${shiftGoal} Units`);
+  safeSet("log-quota-pct", `(${pct}%)`);
+  safeSet("log-quota-remaining", `${remaining} to`);
+  safeSet("log-quota-status", pct >= 100 ? "Quota Complete!" : "Tracking...");
+  const bar = document.getElementById("log-quota-bar");
+  if (bar) bar.style.width = `${pct}%`;
+
+  state.donations = merged;
+  renderList();
 }
 
 // ============================================================================
