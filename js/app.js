@@ -17,9 +17,6 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// On app pages, a 401 while loading data means the session ended: go to sign-in instead of showing empty data.
-// Not on index.html, where a 401 is just a wrong password; and only for GETs, because saves handle 401
-// themselves (scan.js queues the donation offline) and leaving mid-save could drop the record.
 if (location.pathname.includes("/pages/")) {
   const nativeFetch = window.fetch.bind(window);
   window.fetch = async (input, init) => {
@@ -156,16 +153,72 @@ if (document.readyState === "loading") {
   init();
 }
 function refreshTimeGreetings() {
- document.querySelectorAll('[data-time-greeting]').forEach(el=>{const h=new Date().getHours();el.textContent=h<12?'Good morning':h<18?'Good afternoon':'Good evening';});
+  document.querySelectorAll('[data-time-greeting]').forEach(el => { const h = new Date().getHours(); el.textContent = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; });
 }
 function initializeGreeting() {
- if(!document.querySelector('.welcome-heading, .header-greeting')) {const heading=document.querySelector('.topbar .brand-copy, .topbar > div');if(heading&&!heading.querySelector('[data-time-greeting]')){const el=document.createElement('small');el.dataset.timeGreeting='';el.className='time-greeting';heading.append(el);}}
- refreshTimeGreetings();setInterval(refreshTimeGreetings,30000);document.addEventListener('visibilitychange',refreshTimeGreetings);
+  if (!document.querySelector('.welcome-heading, .header-greeting')) { const heading = document.querySelector('.topbar .brand-copy, .topbar > div'); if (heading && !heading.querySelector('[data-time-greeting]')) { const el = document.createElement('small'); el.dataset.timeGreeting = ''; el.className = 'time-greeting'; heading.append(el); } }
+  refreshTimeGreetings(); setInterval(refreshTimeGreetings, 30000); document.addEventListener('visibilitychange', refreshTimeGreetings);
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initializeGreeting);else initializeGreeting();
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeGreeting); else initializeGreeting();
 
-// Organizer headings use the signed-in profile instead of a sample organization.
-if(location.pathname.includes('/pages/organizer/')) {
- fetch(new URL('api/profile.php',location.origin+APP_BASE),{credentials:'same-origin',cache:'no-store'})
- .then(r=>r.json()).then(result=>{if(result.ok){const heading=document.querySelector('.topbar p');if(heading)heading.textContent=result.data.org_name;}}).catch(()=>{});
+/* ==========================================================================
+   5. IDENTITY: topbar subtitle + sidebar brand/org, from the signed-in account
+   ========================================================================== */
+const ROLE_LABEL = { bank: "BANK", phlebotomist: "BANK", organizer: "ORGANIZER", donor: "DONOR", admin: "ADMIN" };
+const IDENTITY_CACHE_KEY = "kadugo-identity";
+
+function applyIdentity(data) {
+  const { role, org_name, full_name } = data;
+  const displayName = org_name || full_name || "";
+
+  const navBrand = document.getElementById("nav-brand");
+  if (navBrand) {
+    navBrand.textContent = "KA-DUGO\n" + (ROLE_LABEL[role] || "");
+  }
+
+  const navOrg = document.getElementById("nav-org");
+  if (navOrg) {
+    navOrg.textContent = displayName;
+  }
+
+  const donorBrandSub = document.querySelector(".sidebar-brand span:nth-child(2)");
+  if (donorBrandSub && role === "donor") {
+    donorBrandSub.textContent = "DONOR";
+  }
+
+  const navOrgFooter = document.getElementById("nav-org-footer");
+  if (navOrgFooter) {
+    navOrgFooter.textContent = org_name || "Ka-dugo Partner Bank";
+  }
+}
+
+function loadIdentity() {
+  const onAppPage = location.pathname.includes("/pages/bank/")
+    || location.pathname.includes("/pages/organizer/")
+    || location.pathname.includes("/pages/donor/");
+  if (!onAppPage) {
+    sessionStorage.removeItem(IDENTITY_CACHE_KEY);
+    return;
+  }
+
+  const cached = sessionStorage.getItem(IDENTITY_CACHE_KEY);
+  if (cached) applyIdentity(JSON.parse(cached));
+
+  if (!navigator.onLine) return;
+
+  fetch(new URL("api/profile.php", location.origin + APP_BASE), { credentials: "same-origin", cache: "no-store" })
+    .then((r) => r.json())
+    .then((result) => {
+      if (result.ok) {
+        applyIdentity(result.data);
+        sessionStorage.setItem(IDENTITY_CACHE_KEY, JSON.stringify(result.data));
+      }
+    })
+    .catch(() => { });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", loadIdentity);
+} else {
+  loadIdentity();
 }

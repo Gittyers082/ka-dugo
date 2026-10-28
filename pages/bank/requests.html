@@ -12,7 +12,11 @@
     <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
 
     <!-- Hide content until session role check completes. -->
-    <style>html[data-bank-access="pending"] body { visibility: hidden; }</style>
+    <style>
+        html[data-bank-access="pending"] body {
+            visibility: hidden;
+        }
+    </style>
     <script src="../../js/pages/bank-access.js" defer></script>
 </head>
 
@@ -59,7 +63,8 @@
                         <div>
                             <span class="t-label font-bold text-oxblood block mb-1">BANK DAILY TARGET: <span
                                     class="text-maroon" id="req-quota-text">— / 50 Units</span></span>
-                            <span class="t-caption text-urgent font-bold block" id="req-quota-deficit">Checking open requests…</span>
+                            <span class="t-caption text-urgent font-bold block" id="req-quota-deficit">Checking open
+                                requests…</span>
                         </div>
                     </div>
                     <div class="quota-badge bg-maroon text-bone font-bold text-center">
@@ -172,8 +177,8 @@
                                     <path d="M12 5v6"></path>
                                     <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
                                 </svg>
-                                <input type="text" id="ward-input" placeholder="e.g. Trauma Center ICU - Bay 4" maxlength="100"
-                                    class="t-body text-oxblood font-bold">
+                                <input type="text" id="ward-input" placeholder="e.g. Trauma Center ICU - Bay 4"
+                                    maxlength="100" class="t-body text-oxblood font-bold">
                             </div>
                         </div>
 
@@ -181,7 +186,8 @@
                             <label class="t-caption font-bold text-oxblood block mb-2 text-uppercase">Clinical Rationale
                                 & Notes</label>
                             <textarea id="notes-input"
-                                class="custom-textarea bg-surface border-line t-body text-oxblood" rows="3" placeholder="Clinical rationale (first line is added to the donor alert)"></textarea>
+                                class="custom-textarea bg-surface border-line t-body text-oxblood" rows="3"
+                                placeholder="Clinical rationale (first line is added to the donor alert)"></textarea>
                         </div>
 
                         <div class="input-card">
@@ -245,7 +251,8 @@
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <polyline points="12 6 12 12 16 14"></polyline>
                                     </svg>
-                                    <input type="datetime-local" id="needed-by-input" aria-label="Needed by date and time"
+                                    <input type="datetime-local" id="needed-by-input"
+                                        aria-label="Needed by date and time"
                                         class="t-body text-oxblood font-bold bg-transparent border-none w-full flex-1">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)"
                                         stroke-width="2">
@@ -266,7 +273,8 @@
                                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                         <circle cx="12" cy="12" r="10"></circle>
                                     </svg>
-                                    <span class="t-body text-oxblood font-bold flex-1" id="broadcast-status">Open - Critical Priority</span>
+                                    <span class="t-body text-oxblood font-bold flex-1" id="broadcast-status">Open -
+                                        Critical Priority</span>
                                     <span class="badge-pill bg-charcoal text-bone text-uppercase"
                                         style="font-size:10px;">Auto-Routed</span>
                                 </div>
@@ -297,8 +305,8 @@
                                 </svg>
                                 <h3 class="t-heading font-heading m-0 text-bone">EMERGENCY<br>NOTICE</h3>
                             </div>
-                            <span
-                                class="ep-badge bg-charcoal text-bone font-bold text-uppercase" id="preview-urgency">Critical<br>Urgency</span>
+                            <span class="ep-badge bg-charcoal text-bone font-bold text-uppercase"
+                                id="preview-urgency">Critical<br>Urgency</span>
                         </div>
 
                         <div class="ep-body p-4 bg-surface">
@@ -317,7 +325,8 @@
 
                             <div class="ep-clinical bg-bone p-3 mb-4">
                                 <span class="t-caption text-muted text-uppercase block mb-1">Clinical Indication:</span>
-                                <p class="t-caption text-oxblood m-0" id="preview-notes">No clinical rationale provided.</p>
+                                <p class="t-caption text-oxblood m-0" id="preview-notes">No clinical rationale provided.
+                                </p>
                             </div>
 
                             <div class="ep-footer flex-between border-top pt-3">
@@ -350,7 +359,8 @@
                     <!-- Existing Requests Feed -->
                     <div class="feed-header flex-between mb-4" id="existing">
                         <h3 class="t-title font-heading text-oxblood m-0">Existing Requests</h3>
-                        <a href="active_requests.html" id="view-all-count" class="t-caption text-urgent font-bold">View All</a>
+                        <a href="active_requests.html" id="view-all-count" class="t-caption text-urgent font-bold">View
+                            All</a>
                     </div>
 
                     <div class="feed-list" data-request-list data-limit="3" aria-live="polite">
@@ -412,6 +422,8 @@
                 </span>
                 Logout
             </a>
+            <span class="nav-brand" id="nav-brand">KA-DUGO</span>
+            <p class="nav-org" id="nav-org"></p>
         </nav>
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

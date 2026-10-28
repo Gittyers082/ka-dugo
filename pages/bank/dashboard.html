@@ -9,9 +9,13 @@
   <link rel="stylesheet" href="../../css/base.css" />
   <link rel="stylesheet" href="../../css/styles.css" />
   <link rel="stylesheet" href="../../css/bank_css/bank-dashboard.css" />
-    <!-- Hide content until session role check completes. -->
-    <style>html[data-bank-access="pending"] body { visibility: hidden; }</style>
-    <script src="../../js/pages/bank-access.js" defer></script>
+  <!-- Hide content until session role check completes. -->
+  <style>
+    html[data-bank-access="pending"] body {
+      visibility: hidden;
+    }
+  </style>
+  <script src="../../js/pages/bank-access.js" defer></script>
 </head>
 
 <body>
@@ -203,6 +207,8 @@
         </span>
         Logout
       </a>
+      <span class="nav-brand" id="nav-brand">KA-DUGO</span>
+      <p class="nav-org" id="nav-org"></p>
     </nav>
   </main>
   <script type="module" src="../../js/app.js"></script>
