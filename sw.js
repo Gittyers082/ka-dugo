@@ -4,7 +4,7 @@
    API (GET)    : network-first, last good response kept for offline display
    Old caches   : deleted on activate
    ========================================================================== */
-const VERSION = "v12";
+const VERSION = "v13";
 const CACHE_NAME = "kadugo-static-" + VERSION;
 const DYNAMIC_CACHE = "kadugo-dynamic-" + VERSION;
 

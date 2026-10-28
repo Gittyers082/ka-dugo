@@ -26,14 +26,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     const goals = { PRBC: 28, Platelets: 12, 'Whole Blood': 10, Total: 50 };
                     let counts = { PRBC: 0, Platelets: 0, 'Whole Blood': 0, Total: 0 };
 
-                    const todayStr = new Date().toISOString().split('T')[0];
+                    // Local calendar date (en-CA gives YYYY-MM-DD); toISOString() would use UTC and miss early-morning donations.
+                    const todayStr = new Date().toLocaleDateString('en-CA');
                     // The server already limits donations to the signed-in bank.
-                    const todayDonations = donData.data.donations.filter(d => d.collected_at.startsWith(todayStr));
+                    const todayDonations = donData.data.donations.filter(d => d.collected_at.startsWith(todayStr) && d.status !== 'discarded');
 
                     todayDonations.forEach(d => {
                         const units = parseFloat(d.units) || 1;
                         counts.Total += units;
-                        if (d.component_name === 'PRBC') counts.PRBC += units;
+                        if (d.component_name === 'Packed Red Blood Cells') counts.PRBC += units;
                         if (d.component_name === 'Platelets') counts.Platelets += units;
                         if (d.component_name === 'Whole Blood') counts['Whole Blood'] += units;
                     });
