@@ -113,6 +113,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const clientUuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => ((Math.random() * 16) | 0).toString(16));
   if (uuidInput) uuidInput.value = clientUuid;
 
+  // Tell staff where the next save goes: straight to the server, or into the offline queue.
+  const saveMode = document.getElementById("save-mode");
+  const showSaveMode = () => { if (saveMode) saveMode.textContent = navigator.onLine ? "SAVES ONLINE" : "QUEUES OFFLINE"; };
+  window.addEventListener("online", showSaveMode);
+  window.addEventListener("offline", showSaveMode);
+  showSaveMode();
+
   const driveSelect = document.querySelector(".custom-select");
   if (driveSelect) {
     fetch(DRIVES_API)
@@ -120,7 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((json) => {
         if (json && json.ok && json.data && Array.isArray(json.data.drives)) {
           // Drive titles/venues are organizer input, so build options as text, not HTML.
-          driveSelect.replaceChildren(...json.data.drives.map(d => new Option(`${d.title} - ${d.venue} (${d.ref_code})`, d.drive_id)));
+          const open = json.data.drives.filter(d => d.status === "scheduled" || d.status === "ongoing");
+          driveSelect.replaceChildren(new Option("No linked drive (walk-in)", ""), ...open.map(d => new Option(`${d.title} - ${d.venue} (${d.ref_code})`, d.drive_id)));
         }
       })
       .catch(() => { });
@@ -289,6 +297,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (nameEl) nameEl.textContent = donor.full_name;
     if (idEl) idEl.textContent = `Donor ID: #${donor.donor_id} (${donor.qr_code})`;
     if (btBadge) btBadge.textContent = donor.blood_type_code || "O+";
+    const btRole = matchedCard.querySelector(".blood-type-badge span.t-caption");
+    if (btRole) btRole.textContent = { "O-": "UNIVERSAL", "AB+": "UNIV. RECIPIENT" }[donor.blood_type_code] || "";
 
     if (cells[0] && donor.eligibility) {
       const age = donor.eligibility.age ?? "--";
@@ -296,13 +306,21 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="t-body font-bold text-oxblood">${age} yrs <span class="text-muted font-normal">(${donor.birthdate})</span></span>`;
     }
     if (cells[1]) {
+      const okWeight = Number(donor.weight_kg) >= 50;
       cells[1].innerHTML = `<span class="t-caption font-bold block mb-1">RECORDED WEIGHT</span>
-        <span class="t-body font-bold text-oxblood">${donor.weight_kg} kg <span class="text-success font-bold" style="font-size: 13px;">(>= 50kg req)</span></span>`;
+        <span class="t-body font-bold text-oxblood">${Number(donor.weight_kg)} kg <span class="${okWeight ? "text-success" : "text-urgent"} font-bold" style="font-size: 13px;">(${okWeight ? ">=" : "<"} 50kg req)</span></span>`;
     }
     if (cells[2]) {
       const lastDate = donor.last_donation_date || "First-time Donor";
       const labelSpan = cells[2].querySelector("span.t-label");
-      if (labelSpan) labelSpan.textContent = lastDate;
+      if (labelSpan) labelSpan.lastChild.textContent = ` ${lastDate}`; // keep the calendar icon
+      const agoSpan = cells[2].querySelector(":scope > span.t-caption");
+      if (agoSpan) {
+        const days = donor.last_donation_date
+          ? Math.floor((new Date(new Date().toLocaleDateString("en-CA")) - new Date(donor.last_donation_date)) / 86400000)
+          : null;
+        agoSpan.textContent = days === null ? "NO PRIOR DONATION" : `${days} DAY${days === 1 ? "" : "S"} AGO`;
+      }
     }
     if (alertBox && donor.eligibility) {
       const eligible = donor.eligibility.is_eligible;

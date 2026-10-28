@@ -57,7 +57,7 @@
                     <div class="progress-fill bg-maroon" id="log-quota-bar" style="width: 0%;"></div>
                 </div>
                 <div class="quota-card__bottom">
-                    <span>Shift Target: 50 Units</span>
+                    <span id="log-quota-goal">Shift Target: 50 Units</span>
                     <span class="text-success font-bold" id="log-quota-status">Tracking...</span>
                 </div>
             </section>
@@ -274,7 +274,7 @@
                             </div>
                         </div>
                         <p style="font-size: 13px; color: var(--muted); margin-top: 8px;">Estimated Reach: <strong
-                                id="reach-display" style="color: var(--urgent);">142 Donors</strong></p>
+                                id="reach-display" style="color: var(--urgent);">—</strong></p>
                     </div>
 
                     <!-- Step 3 -->
@@ -282,10 +282,10 @@
                         <div class="step-header">
                             <span class="step-count bg-maroon">3</span>
                             <h3 class="t-label">Alert Message Editor</h3>
-                            <span class="char-count" id="char-count">184 / 280</span>
+                            <span class="char-count" id="char-count">0 / 280</span>
                         </div>
                         <textarea id="broadcast-msg" class="form-control" rows="4"
-                            maxlength="280">URGENT: Ka-Dugo Bank & Civic Health Org need O- donors for the Downtown Blood Drive today. Immediate slots open. Tap to confirm booking.</textarea>
+                            maxlength="280">URGENT: Our blood bank needs O- donors today. If you are eligible, please visit the bank or book a drive slot in Ka-dugo.</textarea>
                     </div>
 
                     <button type="button" class="btn-broadcast dispatch-btn" id="dispatch-alert-btn"
@@ -315,9 +315,7 @@
                                 </div>
                             </div>
                             <h4 class="notif-title">URGENT BANK ALERT</h4>
-                            <p class="notif-body" id="preview-body">URGENT: Ka-Dugo Bank & Civic Health Org need O-
-                                donors for the Downtown Blood Drive today. Immediate slots open. Tap to confirm booking.
-                            </p>
+                            <p class="notif-body" id="preview-body">URGENT: Our blood bank needs O- donors today. If you are eligible, please visit the bank or book a drive slot in Ka-dugo.</p>
                             <div class="notif-footer">
                                 <span>⌾ Within 15km Geofence</span>
                             </div>

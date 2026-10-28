@@ -1,4 +1,5 @@
 import { getAllRecords, putRecord, deleteRecord } from '../db.js';
+import { GOALS, todayCounts } from './bank-quota.js';
 
 const BLOOD_TYPES = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 
@@ -318,7 +319,7 @@ function renderList() {
 async function syncDonationLogWithBackend() {
   const merged = [];
   let todayTotal = 0;
-  const shiftGoal = 50;
+  const shiftGoal = GOALS.Total;
 
   // 1. Local IndexedDB queue (Pending Sync)
   try {
@@ -352,12 +353,10 @@ async function syncDonationLogWithBackend() {
     const json = await res.json();
 
     if (json && json.ok && json.data && Array.isArray(json.data.donations)) {
-      // Local calendar date (en-CA gives YYYY-MM-DD); toISOString() would use UTC and miss early-morning donations.
-      const todayStr = new Date().toLocaleDateString("en-CA");
+      todayTotal = todayCounts(json.data.donations).Total;
 
       json.data.donations.forEach((d) => {
         const units = Number(d.units || 1);
-        if (d.collected_at && d.collected_at.startsWith(todayStr) && d.status !== "discarded") todayTotal += units;
 
         const nameArr = String(d.full_name || "Unknown Donor").split(" ");
         const formattedName = nameArr.length > 1 ? `${nameArr[0]}<br>${nameArr.slice(1).join(" ")}` : nameArr[0];
@@ -391,6 +390,7 @@ async function syncDonationLogWithBackend() {
     if (node) node.textContent = text;
   };
   safeSet("log-quota-text", `${todayTotal} / ${shiftGoal} Units`);
+  safeSet("log-quota-goal", `Shift Target: ${shiftGoal} Units`);
   safeSet("log-quota-pct", `(${pct}%)`);
   safeSet("log-quota-remaining", `${remaining} to`);
   safeSet("log-quota-status", pct >= 100 ? "Quota Complete!" : "Tracking...");
@@ -498,26 +498,41 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.add("selected");
       const type = btn.dataset.type;
 
-      // Auto-update message with selected blood type
+      // Auto-update message with selected blood type (no trailing \b: "+"/"-" before a space is not a word boundary)
       const currentMsg = msgInput.value;
-      msgInput.value = currentMsg.replace(/\b(?:O|A|B|AB)[+-]\b/g, type);
+      msgInput.value = currentMsg.replace(/\b(?:AB|A|B|O)[+-](?![\w+-])/g, type);
       updatePreview();
     });
   });
 
-  // Geofence Radius Slider
-  if (radiusSlider) {
-    radiusSlider.addEventListener("input", (e) => {
-      const val = e.target.value;
-      radiusDisplay.textContent = `${val} km`;
+  const BLOOD_TYPE_IDS = { "A+": 1, "A-": 2, "B+": 3, "B-": 4, "AB+": 5, "AB-": 6, "O+": 7, "O-": 8 };
+  const selectedType = () => document.querySelector("#broadcast-blood-grid .blood.selected")?.dataset.type || "O-";
+  let reachCount = 0;
+  let reachSequence = 0;
 
-      const estimatedDonors = { 5: 48, 10: 91, 15: 142, 20: 198, 25: 251, 30: 317 };
-      reachDisplay.textContent = `${estimatedDonors[val]} Donors`;
-
-      const footerSpan = document.querySelector(".notif-footer span");
-      if (footerSpan) footerSpan.textContent = `⌾ Within ${val}km Geofence`;
-    });
+  // Live count of eligible donors of the selected type within the radius of this bank.
+  async function updateReach() {
+    const sequence = ++reachSequence;
+    const radius = Number(radiusSlider.value);
+    radiusDisplay.textContent = `${radius} km`;
+    const footerSpan = document.querySelector(".notif-footer span");
+    if (footerSpan) footerSpan.textContent = `⌾ Within ${radius}km Geofence`;
+    reachDisplay.textContent = "Checking...";
+    reachCount = 0;
+    try {
+      const res = await fetch(`../../api/alerts.php?action=reach&blood_type_id=${BLOOD_TYPE_IDS[selectedType()]}&radius_km=${radius}`, { credentials: "same-origin", cache: "no-store" });
+      const json = await res.json();
+      if (sequence !== reachSequence) return;
+      if (!json.ok) throw new Error(json.error);
+      reachCount = json.data.count;
+      reachDisplay.textContent = `${reachCount} Donors`;
+    } catch (err) {
+      if (sequence === reachSequence) reachDisplay.textContent = "Unavailable";
+    }
   }
+  if (radiusSlider) radiusSlider.addEventListener("input", updateReach);
+  bloodButtons.forEach((btn) => btn.addEventListener("click", updateReach));
+  if (broadcastBtn) broadcastBtn.addEventListener("click", updateReach);
 
   // Live Message Editor
   function updatePreview() {
@@ -525,21 +540,45 @@ document.addEventListener("DOMContentLoaded", () => {
     charCount.textContent = `${text.length} / 280`;
     previewBody.textContent = text || "Your alert message will appear here.";
   }
-  if (msgInput) msgInput.addEventListener("input", updatePreview);
+  if (msgInput) {
+    msgInput.addEventListener("input", updatePreview);
+    updatePreview();
+  }
 
-  // Dispatch Action
+  // Dispatch: creates an active bank alert delivered to the matched donors' in-app inboxes.
   if (dispatchBtn) {
-    dispatchBtn.addEventListener("click", () => {
-      const originalText = dispatchBtn.textContent;
+    dispatchBtn.addEventListener("click", async () => {
+      const message = msgInput.value.trim();
+      if (!message) return showToast("Enter an alert message.");
+      if (!reachCount) return showToast("No eligible donors match this blood type and radius.");
+
       dispatchBtn.disabled = true;
       dispatchBtn.textContent = "Dispatching...";
-
-      setTimeout(() => {
+      try {
+        const res = await fetch("../../api/alerts.php", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender_type: "bank",
+            blood_type_id: BLOOD_TYPE_IDS[selectedType()],
+            radius_km: Number(radiusSlider.value),
+            level: 3,
+            message,
+            status: "active",
+            channel: "push",
+          }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.ok) throw new Error(json.error || `Dispatch failed (${res.status}).`);
         broadcastDialog.close();
-        showToast(`Emergency alert dispatched to ${reachDisplay.textContent}`);
+        showToast(`Emergency alert sent to ${json.data.recipients_notified} donor inbox(es).`);
+      } catch (err) {
+        showToast(err.message);
+      } finally {
         dispatchBtn.disabled = false;
         dispatchBtn.textContent = "Confirm & Dispatch Alert";
-      }, 1200);
+      }
     });
   }
 });

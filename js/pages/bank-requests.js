@@ -1,4 +1,5 @@
 import { el } from '../ui/dom.js';
+import { GOALS, loadTodayCounts } from './bank-quota.js';
 
 // ============================================================================
 // BANK REQUESTS LOGIC (Secure DOM Refactor)
@@ -170,6 +171,61 @@ document.addEventListener("DOMContentLoaded", () => {
     if (notesInput) notesInput.addEventListener("input", updateNotesPreview);
     if (doctorInput) doctorInput.addEventListener("input", updateNotesPreview);
 
+    // Preview follows the form: ward, urgency and deadline.
+    const wardInput = document.getElementById("ward-input");
+    const setText = (id, text) => { const node = document.getElementById(id); if (node) node.textContent = text; };
+
+    function updateWardPreview() {
+        setText("preview-ward", wardInput?.value.trim() || "Ward not set");
+    }
+    function updateUrgencyPreview() {
+        const label = state.urgency === "Urgent" ? "High" : state.urgency;
+        const badge = document.getElementById("preview-urgency");
+        if (badge) badge.replaceChildren(document.createTextNode(state.urgency), el("br"), document.createTextNode("Urgency"));
+        setText("broadcast-status", `Open - ${label} Priority`);
+    }
+    function updateDeadlinePreview() {
+        const due = neededByInput?.value ? new Date(neededByInput.value) : null;
+        if (!due || isNaN(due)) return setText("preview-deadline", "Deadline not set");
+        const mins = Math.round((due - Date.now()) / 60000);
+        if (mins <= 0) return setText("preview-deadline", "Deadline has passed");
+        const h = Math.floor(mins / 60), m = mins % 60;
+        setText("preview-deadline", `Deadline in ${String(h).padStart(2, "0")}h ${String(m).padStart(2, "0")}m`);
+    }
+    wardInput?.addEventListener("input", updateWardPreview);
+    neededByInput?.addEventListener("input", updateDeadlinePreview);
+    urgencyBtns.forEach(btn => btn.addEventListener("click", updateUrgencyPreview));
+    setInterval(updateDeadlinePreview, 60000);
+    updateWardPreview();
+    updateUrgencyPreview();
+    updateDeadlinePreview();
+    updateNotesPreview();
+
+    // Quota card: today's collected units vs the shift goal, and the biggest open-request deficit.
+    async function loadQuota() {
+        try {
+            const counts = await loadTodayCounts();
+            const pct = Math.min(100, Math.round((counts.Total / GOALS.Total) * 100));
+            setText("req-quota-text", `${counts.Total} / ${GOALS.Total} Units`);
+            setText("req-quota-pct", `${pct}%`);
+        } catch (err) {
+            setText("req-quota-text", "Unavailable");
+        }
+        try {
+            const res = await fetch("../../api/request.php?status=open", { credentials: "same-origin" });
+            const json = await res.json();
+            if (!json.ok) throw new Error(json.error);
+            // The API sorts open requests by urgency, then deadline; take the first one still short of units.
+            const top = json.data.requests.find(r => r.units_remaining > 0);
+            setText("req-quota-deficit", top
+                ? `${top.urgency === "critical" ? "Critical" : "Open"} Deficit: ${top.blood_type_code} (${top.units_remaining} Units Required)`
+                : "No open deficits");
+        } catch (err) {
+            setText("req-quota-deficit", "Open requests unavailable");
+        }
+    }
+    loadQuota();
+
     const radiusBtns = document.querySelectorAll(".radius-grid .radius-btn");
     radiusBtns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -242,6 +298,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 showToast(`SUCCESS: Request broadcasted to ${alert.recipients_notified} eligible donors.`);
+                window.dispatchEvent(new Event("kadugo:requests-changed"));
+                loadQuota();
                 dispatchBtn.textContent = "✓ Broadcast Active";
                 dispatchBtn.style.backgroundColor = "#287a4b";
                 setTimeout(() => {
