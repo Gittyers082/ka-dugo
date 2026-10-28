@@ -28,8 +28,8 @@
             window.location.replace('../../index.html');
             throw new Error('Please sign in with a donor account.');
         }
-        if (!response.ok || !json.success)
-            throw new Error(json.message || 'The request could not be completed.');
+        if (!response.ok || !json.ok)
+            throw new Error(json.error || 'The request could not be completed.');
         return json.data;
     }
     const first = (name) => String(name || 'Donor').trim().split(/\s+/)[0];

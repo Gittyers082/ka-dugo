@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const donRes = await fetch('../../api/donations.php');
             if (donRes.ok) {
                 const donData = await donRes.json();
-                if (donData.success) {
+                if (donData.ok) {
                     const goals = { PRBC: 28, Platelets: 12, 'Whole Blood': 10, Total: 50 };
                     let counts = { PRBC: 0, Platelets: 0, 'Whole Blood': 0, Total: 0 };
 
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (reqRes.ok) {
                 const reqData = await reqRes.json();
 
-                if (reqData.success && reqData.data.requests) {
+                if (reqData.ok && reqData.data.requests) {
                     const requests = reqData.data.requests;
 
                     let urgentCount = 0;

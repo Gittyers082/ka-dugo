@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cache: 'no-store'
             });
             const result = await response.json();
-            if (!response.ok || !result.success) throw new Error(result.message || 'Unable to load blood types.');
+            if (!response.ok || !result.ok) throw new Error(result.error || 'Unable to load blood types.');
             const types = result.data?.blood_types || [];
             if (!types.length) throw new Error('No blood types are configured in the database.');
             bloodTypeOptions.innerHTML = types.map((type) =>
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`../../api/drives.php?organizer_id=${organizerId}`);
             const result = await response.json();
-            if (!response.ok || !result.success) throw new Error(result.message || 'Unable to load drives.');
+            if (!response.ok || !result.ok) throw new Error(result.error || 'Unable to load drives.');
             const drives = result.data.drives || [];
             document.getElementById('managed-count').textContent = drives.length;
             document.getElementById('drive-total').textContent = drives.length;
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('../../api/drives.php', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ drive_id: selectedDrive.drive_id, slots }) });
             const result = await response.json();
-            if (!response.ok || !result.success) throw new Error(result.message || 'Unable to save slots.');
+            if (!response.ok || !result.ok) throw new Error(result.error || 'Unable to save slots.');
             dialog.close();
             await loadDrives();
         } catch (error) { alert(error.message); } finally { button.disabled = false; button.textContent = 'Save slot changes'; }
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('../../api/drives.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             const result = await response.json();
-            if (!response.ok || !result.success) throw new Error(result.message || 'Unable to publish drive.');
+            if (!response.ok || !result.ok) throw new Error(result.error || 'Unable to publish drive.');
             form.reset(); updateBloodTypeSelection(); setSlotTotal(60); await loadDrives(); document.getElementById('scheduled').scrollIntoView({ behavior: 'smooth' });
         } catch (error) { alert(error.message); } finally { submit.disabled = false; submit.innerHTML = 'Publish &amp; Open Donor Registration'; }
     });
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('Cancel this drive? It will no longer accept new registrations.')) return;
         const response = await fetch('../../api/drives.php', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ drive_id: driveId }) });
         const result = await response.json();
-        if (!response.ok || !result.success) return alert(result.message || 'Unable to cancel drive.');
+        if (!response.ok || !result.ok) return alert(result.error || 'Unable to cancel drive.');
         loadDrives();
     }
     loadBloodTypes();

@@ -1,39 +1,33 @@
 <?php
 // this is login.php - handles user authentication and session management
 declare(strict_types=1);
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/helpers.php';
 
 session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
-header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Method not allowed.']);
-    exit;
+    sendJson(false, 'Method not allowed.', null, 405);
 }
 
 $home = [
     'donor' => 'pages/donor/donor-dashboard.html',
     'bank' => 'pages/bank/dashboard.html',
-    'phlebotomist' => 'pages/bank/scan.html',   
-    'organizer' => 'pages/organizer/drives.html', 
-    'admin' => 'pages/bank/dashboard.html',   
+    'phlebotomist' => 'pages/bank/scan.html',
+    'organizer' => 'pages/organizer/drives.html',
+    'admin' => 'pages/bank/dashboard.html',
 ];
 
-$email = strtolower(trim($_POST['email'] ?? ''));
-$pass  = $_POST['password'] ?? '';
+// Arrays (email[]=x) are treated as empty instead of crashing trim().
+$email = is_string($_POST['email'] ?? null) ? strtolower(trim($_POST['email'])) : '';
+$pass  = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
 if ($email === '' || $pass === '') {
-    http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Enter your email and password.']);
-    exit;
+    sendJson(false, 'Enter your email and password.', null, 422);
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 100 || strlen($pass) > 255) {
-    http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Enter a valid email address.']);
-    exit;
+    sendJson(false, 'Enter a valid email address.', null, 422);
 }
 
 // shortcut: failed-attempt counter in a temp file per email+IP; move to a DB table if the app runs on more than one server
@@ -41,9 +35,7 @@ $throttleFile = sys_get_temp_dir() . '/kadugo_login_' . sha1($email . '|' . ($_S
 $attempts = is_file($throttleFile) ? (json_decode((string)file_get_contents($throttleFile), true) ?: []) : [];
 $attempts = array_filter($attempts, fn($t) => $t > time() - 900);
 if (count($attempts) >= 5) {
-    http_response_code(429);
-    echo json_encode(['ok' => false, 'error' => 'Too many failed attempts. Try again in 15 minutes.']);
-    exit;
+    sendJson(false, 'Too many failed attempts. Try again in 15 minutes.', null, 429);
 }
 
 $conn = getDbConnection();
@@ -56,15 +48,11 @@ $stmt->close();
 if (!$acct || !password_verify($pass, $acct['password_hash'])) {
     $attempts[] = time();
     file_put_contents($throttleFile, json_encode(array_values($attempts)), LOCK_EX);
-    http_response_code(401);
-    echo json_encode(['ok' => false, 'error' => 'Incorrect email or password.']);
-    exit;
+    sendJson(false, 'Incorrect email or password.', null, 401);
 }
 
 if ((int) $acct['is_active'] !== 1) {
-    http_response_code(403);
-    echo json_encode(['ok' => false, 'error' => 'This account is inactive. Contact your administrator.']);
-    exit;
+    sendJson(false, 'This account is inactive. Contact your administrator.', null, 403);
 }
 
 if (is_file($throttleFile)) unlink($throttleFile);
@@ -78,13 +66,8 @@ $upd->bind_param('i', $_SESSION['account_id']);
 $upd->execute();
 $upd->close();
 
-http_response_code(200);
-echo json_encode([
-    'ok'   => true,
-    'data' => [
-        'account_id' => $acct['account_id'],
-        'role' => $acct['role'],
-        'redirect' => $home[$acct['role']] ?? 'index.html',
-    ],
+sendJson(true, 'Signed in.', [
+    'account_id' => (int) $acct['account_id'],
+    'role' => $acct['role'],
+    'redirect' => $home[$acct['role']] ?? 'index.html',
 ]);
-exit;

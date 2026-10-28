@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch(DRIVES_API)
       .then((r) => r.json())
       .then((json) => {
-        if (json && json.success && json.data && Array.isArray(json.data.drives)) {
+        if (json && json.ok && json.data && Array.isArray(json.data.drives)) {
           // Drive titles/venues are organizer input, so build options as text, not HTML.
           driveSelect.replaceChildren(...json.data.drives.map(d => new Option(`${d.title} - ${d.venue} (${d.ref_code})`, d.drive_id)));
         }
@@ -261,8 +261,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const param = /^\d+$/.test(queryVal) ? `donor_id=${encodeURIComponent(queryVal)}` : `qr_code=${encodeURIComponent(queryVal)}`;
     const res = await fetch(`${DONORS_API}?${param}`);
     const json = await res.json();
-    if (!res.ok || !json.success || !json.data) {
-      throw new Error(json.message || "Donor not found.");
+    if (!res.ok || !json.ok || !json.data) {
+      throw new Error(json.error || "Donor not found.");
     }
     return json.data;
   }
@@ -403,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify(payload),
           });
           const json = await res.json().catch(() => ({}));
-          if (!res.ok || json.success === false) throw new Error("Offline");
+          if (!res.ok || json.ok === false) throw new Error("Offline");
           result.status = "saved";
         }
 

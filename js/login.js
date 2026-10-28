@@ -42,7 +42,7 @@ form?.addEventListener("submit", async (e) => {
 
             window.location.href = json.data.redirect;
         } else {
-            showError(json.error || json.message || "Couldn't sign you in. Try again.");
+            showError(json.error || "Couldn't sign you in. Try again.");
         }
     } catch (error) {
         console.error("Login Error:", error);

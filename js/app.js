@@ -152,5 +152,5 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 // Organizer headings use the signed-in profile instead of a sample organization.
 if(location.pathname.includes('/pages/organizer/')) {
  fetch(new URL('api/profile.php',location.origin+APP_BASE),{credentials:'same-origin',cache:'no-store'})
- .then(r=>r.json()).then(result=>{if(result.success){const heading=document.querySelector('.topbar p');if(heading)heading.textContent=result.data.org_name;}}).catch(()=>{});
+ .then(r=>r.json()).then(result=>{if(result.ok){const heading=document.querySelector('.topbar p');if(heading)heading.textContent=result.data.org_name;}}).catch(()=>{});
 }

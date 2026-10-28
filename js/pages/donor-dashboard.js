@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res = await fetch(`${DONORS_API}?${queryParam}`);
       const json = await res.json();
-      if (json && json.success && json.data) {
+      if (json && json.ok && json.data) {
         renderDonorDashboard(json.data);
       }
     } catch (e) {

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast=(text,error=false)=>{const el=$('.toast');el.textContent=text;el.classList.toggle('error',error);el.classList.add('show');setTimeout(()=>el.classList.remove('show'),5000);};
     async function json(url,options={}) {
         const res=await fetch(url,{credentials:'same-origin',cache:'no-store',...options});
-        const data=await res.json();if(!res.ok||!data.success)throw new Error(data.message||'Unable to contact the server.');return data.data;
+        const data=await res.json();if(!res.ok||!data.ok)throw new Error(data.error||'Unable to contact the server.');return data.data;
     }
     function updateMessage(){ $('.counter').textContent=`${message.value.length} / 280`;$('.alert-preview p').textContent=message.value||'Your alert message will appear here.';$('#message-status').textContent=message.value.trim()?'Message ready':'Enter a message'; }
     function reset(){message.value=`URGENT: ${state.bloodType} donors are needed. Eligible donors can open Ka-dugo to view available community blood drives and reserve a slot.`;updateMessage();}

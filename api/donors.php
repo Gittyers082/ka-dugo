@@ -87,13 +87,25 @@ if ($method === 'GET') {
 } elseif ($method === 'POST') {
     requireRole(['bank', 'phlebotomist', 'admin']);
     requireFields($input, ['full_name', 'birthdate', 'sex', 'weight_kg', 'contact_no', 'blood_type_id']);
+    $fullName = sanitizeString($input['full_name']);
+    $birthdate = validateDateString((string)$input['birthdate'], 'birthdate');
+    $sex = validateEnum(strtolower((string)$input['sex']), ['male', 'female'], 'sex');
+    $weightKg = validateFloatRange($input['weight_kg'], 20, 300, 'weight_kg');
+    $contactNo = sanitizeString($input['contact_no']);
+    $bloodTypeId = validateIntRange($input['blood_type_id'], 1, 8, 'blood_type_id');
     $qrCode = !empty($input['qr_code']) ? sanitizeString($input['qr_code']) : 'DNR-QR-' . time();
+    if ($fullName === '' || mb_strlen($fullName) > 100) sendJson(false, 'Full name must be 1–100 characters.', null, 422);
+    if ($birthdate > date('Y-m-d')) sendJson(false, 'birthdate cannot be in the future.', null, 422);
+    if (!preg_match('/^[+0-9() .-]{7,20}$/', $contactNo)) sendJson(false, 'Enter a valid contact number.', null, 422);
+    if (mb_strlen($qrCode) > 64) sendJson(false, 'qr_code must be at most 64 characters.', null, 422);
 
     $stmt = $conn->prepare("INSERT INTO donor (full_name, birthdate, sex, weight_kg, contact_no, blood_type_id, qr_code) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param('sssdsis', $input['full_name'], $input['birthdate'], $input['sex'], $input['weight_kg'], $input['contact_no'], $input['blood_type_id'], $qrCode);
+    $stmt->bind_param('sssdsis', $fullName, $birthdate, $sex, $weightKg, $contactNo, $bloodTypeId, $qrCode);
 
     if ($stmt->execute()) {
         sendJson(true, 'Donor created.', ['donor_id' => $stmt->insert_id, 'qr_code' => $qrCode], 201);
     }
     sendJson(false, 'Failed to create donor: ' . $stmt->error, null, 400);
+} else {
+    sendJson(false, 'Method not allowed.', null, 405);
 }
