@@ -24,7 +24,7 @@ body {
   background: var(--bg);
   display: flex;
   align-items: center;
-  padding: 20px 32px;
+  padding: 16px;
   gap: 18px;
   border-bottom: 2px solid var(--line);
   width: 100%;
@@ -38,8 +38,11 @@ body {
 .brand-copy h1 {
   margin: 0;
   color: var(--urgent);
-  font: 28px var(--font-heading);
+  font: clamp(20px, 6vw, 28px) var(--font-heading);
   line-height: 1.1;
+}
+.brand-copy {
+  min-width: 0;
 }
 .brand-copy p {
   margin: 4px 0 0;
@@ -324,9 +327,23 @@ body {
   padding-top: 20px;
 }
 
-/* ==========================================================================
-   FORM SECTION: GRID BUTTONS
-   ========================================================================== */
+@media (min-width: 768px) {
+  .topbar {
+    padding: 20px 32px;
+  }
+
+  .page-content {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .requests-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  }
+}
+
+/* ========================= FORM SECTION: GRID BUTTONS ====================== */
 .form-section {
   margin-bottom: 24px;
   padding-bottom: 24px;
