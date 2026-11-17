@@ -1,345 +1,113 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" data-bank-access="pending">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Donation Log | Ka-dugo Bank</title>
-
+    <meta name="theme-color" content="#2a0605">
+    <title>Donation log | Ka-dugo Blood bank</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="manifest" href="../../manifest.json">
     <link rel="stylesheet" href="../../css/tokens.css">
     <link rel="stylesheet" href="../../css/base.css">
-    <link rel="stylesheet" href="../../css/bank_css/donation-log.css">
-    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
-    <link rel="stylesheet" href="../../css/bank_css/bank-shell.css?v=2" />
-
-    <!-- Hide content until session role check completes. -->
-    <style>
-        html[data-bank-access="pending"] body {
-            visibility: hidden;
-        }
-    </style>
-    <script src="../../js/pages/bank-access.js" defer></script>
+    <link rel="stylesheet" href="../../css/ui.css">
+    <script src="../../js/guard.js" data-roles="bank"></script>
 </head>
 
-<body>
-    <main class="app-shell">
-
-        <!-- Topbar -->
-        <header class="topbar">
-            <img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo" />
-            <div class="brand-copy">
-                <h1>Donation Log</h1>
-                <p>Ka-dugo Bank Management</p>
+<body class="ui">
+    <div class="shell">
+        <aside class="side mobile-logout">
+            <a class="side-brand" href="dashboard.html">
+                <img src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+                <small>Blood bank</small>
+            </a>
+            <p class="side-label">Workspace</p>
+            <nav class="side-nav" aria-label="Blood bank navigation">
+                <a class="side-link" href="dashboard.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Dashboard</span></a>
+                <a class="side-link is-active" aria-current="page" href="donation-log.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Donation log</span></a>
+                <a class="side-link" href="requests.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></svg><span>Post request</span></a>
+                <a class="side-link" href="active_requests.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span>Open requests</span><span class="side-count" id="nav-open-requests"></span></a>
+            </nav>
+            <div class="side-foot">
+                <div class="side-user">
+                    <span class="avatar" id="nav-initials" aria-hidden="true"></span>
+                    <span><strong id="nav-org"></strong><small>Blood bank</small></span>
+                </div>
+                <a class="side-link logout-link" href="../../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Logout</span></a>
             </div>
-            <button class="refresh" aria-label="Refresh" id="refresh-btn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 2v6h-6"></path>
-                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                    <path d="M3 2v6h6"></path>
-                </svg>
-            </button>
-        </header>
+        </aside>
 
-        <section class="page-content">
+        <main class="main">
+            <header class="page-top">
+                <div>
+                    <p class="eyebrow"><span data-time-greeting></span> • Units collected by your phlebotomists</p>
+                    <h1>Donation log</h1>
+                </div>
+                <div class="page-actions"><span class="pill is-soft no-dot">Today <strong id="quota-text">—</strong></span></div>
+            </header>
+            <form class="stack" id="filters" role="search">
+                <div class="toolbar">
+                    <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" name="search" placeholder="Search donor, QR code or record ID" aria-label="Search donations"></label>
+                    <select name="status" aria-label="Status">
+                        <option value="">All statuses</option>
+                        <option value="collected">Collected</option>
+                        <option value="tested">Tested</option>
+                        <option value="processed">Processed</option>
+                        <option value="transfused">Transfused</option>
+                        <option value="discarded">Discarded</option>
+                    </select>
+                    <select name="sort" aria-label="Sort">
+                        <option value="collected_at:desc">Newest first</option>
+                        <option value="collected_at:asc">Oldest first</option>
+                        <option value="donor:asc">Donor A–Z</option>
+                        <option value="units:desc">Most units</option>
+                        <option value="status:asc">Status</option>
+                    </select>
+                </div>
+                <div class="seg is-scroll" id="type-chips" role="group" aria-label="Filter by blood type"></div>
+            </form>
 
-            <!-- Quota Card -->
-            <section class="card quota-card">
-                <div class="quota-card__top">
-                    <div class="quota-info">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--maroon)" stroke="var(--maroon)"
-                            stroke-width="2">
-                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                        </svg>
-                        <span class="quota-text">Daily Bank Quota: <strong id="log-quota-text">0 / 50 Units</strong>
-                            <span id="log-quota-pct">(0%)</span></span>
-                    </div>
-                    <div class="quota-divider"></div>
-                    <div class="quota-target">
-                        <strong class="text-urgent" id="log-quota-remaining">50 to</strong><br><span
-                            class="text-urgent">Goal</span>
-                    </div>
-                    <button type="button" class="btn-broadcast" id="broadcast-alert-btn">Broadcast Alert</button>
-                </div>
-                <div class="progress-track">
-                    <div class="progress-fill bg-maroon" id="log-quota-bar" style="width: 0%;"></div>
-                </div>
-                <div class="quota-card__bottom">
-                    <span id="log-quota-goal">Shift Target: 50 Units</span>
-                    <span class="text-success font-bold" id="log-quota-status">Tracking...</span>
-                </div>
+            <section class="card">
+                <div class="card-head"><div><h2><span id="dl-count">0</span> records</h2><p id="quota-remaining"></p></div><span class="pill is-warn no-dot" id="dl-cache" hidden>Offline copy</span></div>
+                <div class="items cols-2" id="dl-cards" aria-live="polite"></div>
+                <p class="empty" id="dl-empty" hidden>No donations match your search or filters.</p>
             </section>
-
-            <!-- Search Area -->
-            <div class="search-container">
-                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="search" id="dl-search" class="search-input" placeholder="Search donor name or ID...">
-            </div>
-
-            <!-- Filter Chips -->
-            <div class="dl-chips" id="type-chips" role="group" aria-label="Filter by blood type"></div>
-
-            <!-- List Header -->
-            <div class="list-header">
-                <span class="section-label">HISTORICAL LOG</span>
-                <label class="sort-label">
-                    Sort:
-                    <select id="dl-sort" class="sort-select">
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
+        </main>
+    </div>
+    <dialog class="modal" id="edit-dialog">
+        <form method="dialog" id="edit-form">
+            <div><h2>Update donation</h2><p id="edit-donor"></p></div>
+            <div class="form-grid cols-2">
+                <label class="field"><span>Units</span><input type="number" id="edit-units" min="0.25" max="2" step="0.25" required></label>
+                <label class="field"><span>Status</span>
+                    <select id="edit-status">
+                        <option value="collected">Collected</option>
+                        <option value="tested">Tested</option>
+                        <option value="processed">Processed</option>
+                        <option value="transfused">Transfused</option>
+                        <option value="discarded">Discarded</option>
                     </select>
                 </label>
             </div>
-
-            <!-- Cards Container -->
-            <div class="dl-cards" id="dl-cards" aria-live="polite"></div>
-            <p class="dl-empty" id="dl-empty" hidden>No donations match your search or filters.</p>
-        </section>
-
-        <!-- Navigation -->
-        <nav class="bottom-nav">
-            <a href="dashboard.html">
-                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg></span>
-                Home
-            </a>
-            <a class="active" href="donation-log.html">
-                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg></span>
-                Log
-            </a>
-            <a href="scan.html">
-                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="3" y1="9" x2="21" y2="9"></line>
-                        <line x1="9" y1="21" x2="9" y2="9"></line>
-                    </svg></span>
-                Scan
-            </a>
-            <a href="requests.html">
-                <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="1" y="3" width="15" height="13"></rect>
-                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
-                    </svg></span>
-                Requests
-            </a>
-            <a href="index.html" id="logout-btn" class="logout-link">
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                </span>
-                Logout
-            </a>
-            <span class="nav-brand" id="nav-brand">KA-DUGO</span>
-            <p class="nav-org" id="nav-org"></p>
-        </nav>
-    </main>
-
-    <!-- Action Feedback & Modals -->
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <!-- Edit Dialog Modal -->
-    <dialog class="confirm-dialog form-dialog" id="edit-dialog">
-        <section>
-            <button class="close-dialog" id="cancel-edit-x" aria-label="Close">×</button>
-            <h2 style="color: var(--oxblood); font-family: var(--font-heading); margin-top: 0; text-align: left;">Edit
-                Record</h2>
-            <p style="text-align: left; margin-bottom: 24px;">Update details for <strong id="edit-donor-name"
-                    class="text-maroon"></strong></p>
-
-            <form id="edit-form">
-                <input type="hidden" id="edit-id">
-
-                <div class="form-group">
-                    <label for="edit-component">Component</label>
-                    <input type="text" id="edit-component" class="form-control" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit-units">Units</label>
-                        <input type="number" id="edit-units" class="form-control" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-station">Station</label>
-                        <input type="text" id="edit-station" class="form-control" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-notes">Clinical Observations</label>
-                    <textarea id="edit-notes" class="form-control" rows="4"></textarea>
-                </div>
-
-                <div class="dialog-actions">
-                    <button type="button" class="cancel-dialog" id="cancel-edit-btn">Cancel</button>
-                    <button type="submit" class="approve-dialog">Save Changes</button>
-                </div>
-            </form>
-        </section>
-    </dialog>
-
-    <!-- Details Dialog Modal -->
-    <dialog class="confirm-dialog form-dialog" id="details-dialog">
-        <section>
-            <button class="close-dialog" id="close-details-x" aria-label="Close">×</button>
-            <h2 style="color: var(--oxblood); font-family: var(--font-heading); margin-top: 0; text-align: left;">
-                Donation Details</h2>
-            <div id="details-content" style="text-align: left; margin-top: 24px;">
-                <!-- Populated dynamically by JS -->
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
             </div>
-            <div class="dialog-actions">
-                <button type="button" class="cancel-dialog" id="close-details-btn" style="width: 100%;">Close
-                    Window</button>
-            </div>
-        </section>
+        </form>
     </dialog>
-
-    <!-- Delete Dialog Modal -->
-    <dialog class="confirm-dialog" id="delete-dialog">
-        <section>
-            <button class="close-dialog" id="cancel-delete-x" aria-label="Close">×</button>
-            <span class="dialog-icon" style="background: var(--maroon);">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"></path>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-            </span>
-            <h2 style="color: var(--oxblood); font-family: var(--font-heading);">Delete Record?</h2>
-            <p>This action cannot be undone once it is removed from the local cache.</p>
-            <div class="dialog-actions">
-                <button type="button" class="cancel-dialog" id="cancel-delete-btn">Cancel</button>
-                <button type="button" class="approve-dialog" id="confirm-delete-btn"
-                    style="background: var(--maroon); border-color: var(--maroon);">Delete Record</button>
+    <dialog class="modal" id="delete-dialog">
+        <form method="dialog">
+            <div><h2>Delete this donation?</h2><p id="delete-donor"></p></div>
+            <p class="note is-bad">The record is removed from the database and the donor's last donation date is recalculated.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+                <button type="button" class="btn btn-accent" id="confirm-delete">Delete</button>
             </div>
-        </section>
+        </form>
     </dialog>
-
-    <!-- Broadcast Alert Modal -->
-    <dialog class="confirm-dialog form-dialog broadcast-dialog" id="broadcast-dialog">
-        <section class="broadcast-layout">
-            <button class="close-dialog" id="close-broadcast-x" aria-label="Close">×</button>
-
-            <header class="broadcast-header">
-                <h2 style="color: var(--urgent); font-family: var(--font-heading); margin-top: 0; text-align: left;">
-                    Emergency Broadcast Protocol</h2>
-                <p style="text-align: left; margin-bottom: 24px; color: var(--muted);">Dispatch an urgent alert to
-                    eligible donors within your radius.</p>
-            </header>
-
-            <div class="broadcast-grid">
-                <!-- Left Column: Form -->
-                <div class="broadcast-form">
-
-                    <!-- Step 1 -->
-                    <div class="broadcast-step">
-                        <div class="step-header">
-                            <span class="step-count bg-maroon">1</span>
-                            <h3 class="t-label">Select Blood Type</h3>
-                        </div>
-                        <div class="blood-grid" id="broadcast-blood-grid">
-                            <button class="blood selected" type="button" data-type="O-"><strong>O-</strong></button>
-                            <button class="blood" type="button" data-type="O+"><strong>O+</strong></button>
-                            <button class="blood" type="button" data-type="A-"><strong>A-</strong></button>
-                            <button class="blood" type="button" data-type="A+"><strong>A+</strong></button>
-                            <button class="blood" type="button" data-type="B-"><strong>B-</strong></button>
-                            <button class="blood" type="button" data-type="B+"><strong>B+</strong></button>
-                            <button class="blood" type="button" data-type="AB-"><strong>AB-</strong></button>
-                            <button class="blood" type="button" data-type="AB+"><strong>AB+</strong></button>
-                        </div>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="broadcast-step">
-                        <div class="step-header">
-                            <span class="step-count bg-maroon">2</span>
-                            <h3 class="t-label">Geofence Radius</h3>
-                            <span class="radius-badge" id="radius-display">15 km</span>
-                        </div>
-                        <div class="range-container">
-                            <input type="range" id="broadcast-radius" min="5" max="30" step="5" value="15">
-                            <div class="range-labels">
-                                <span>5km</span><span>15km</span><span>30km</span>
-                            </div>
-                        </div>
-                        <p style="font-size: 13px; color: var(--muted); margin-top: 8px;">Estimated Reach: <strong
-                                id="reach-display" style="color: var(--urgent);">—</strong></p>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="broadcast-step">
-                        <div class="step-header">
-                            <span class="step-count bg-maroon">3</span>
-                            <h3 class="t-label">Alert Message Editor</h3>
-                            <span class="char-count" id="char-count">0 / 280</span>
-                        </div>
-                        <textarea id="broadcast-msg" class="form-control" rows="4"
-                            maxlength="280">URGENT: Our blood bank needs O- donors today. If you are eligible, please visit the bank or book a drive slot in Ka-dugo.</textarea>
-                    </div>
-
-                    <button type="button" class="btn-broadcast dispatch-btn" id="dispatch-alert-btn"
-                        style="width: 100%; height: 56px; font-size: 16px; margin-top: 16px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" style="display:inline; vertical-align:middle; margin-right:8px;">
-                            <path d="M22 2L11 13"></path>
-                            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
-                        </svg>
-                        Confirm & Dispatch Alert
-                    </button>
-                </div>
-
-                <!-- Right Column: Phone Preview -->
-                <div class="broadcast-preview">
-                    <div class="preview-header">
-                        <strong>Live Donor Preview</strong>
-                        <span>Lock Screen Viewport</span>
-                    </div>
-                    <div class="phone-mockup">
-                        <div class="notification-bubble">
-                            <div class="notif-top">
-                                <img src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-Dugo" class="notif-logo">
-                                <div class="notif-meta">
-                                    <strong>Ka-Dugo Alert</strong>
-                                    <span>Just now</span>
-                                </div>
-                            </div>
-                            <h4 class="notif-title">URGENT BANK ALERT</h4>
-                            <p class="notif-body" id="preview-body">URGENT: Our blood bank needs O- donors today. If you
-                                are eligible, please visit the bank or book a drive slot in Ka-dugo.</p>
-                            <div class="notif-footer">
-                                <span>⌾ Within 15km Geofence</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </dialog>
-
+    <div class="toast" role="status" aria-live="polite"></div>
     <script type="module" src="../../js/app.js"></script>
-    <script type="module" src="../../js/pages/account.js"></script>
-    <script type="module" src="../../js/pages/bank-log.js"></script>
+    <script type="module" src="../../js/bank/donation-log.js"></script>
 </body>
 
 </html>

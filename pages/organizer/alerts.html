@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a0605">
+    <title>Invitations | Ka-dugo Organizer</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/ui.css">
+    <script src="../../js/guard.js" data-roles="organizer"></script>
+</head>
+
+<body class="ui">
+    <div class="shell">
+        <aside class="side mobile-logout">
+            <a class="side-brand" href="dashboard.html">
+                <img src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+                <small>Organizer</small>
+            </a>
+            <p class="side-label">Workspace</p>
+            <nav class="side-nav" aria-label="Organizer navigation">
+                <a class="side-link" href="dashboard.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Dashboard</span></a>
+                <a class="side-link" href="drives.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/></svg><span>Drives</span></a>
+                <a class="side-link is-active" aria-current="page" href="alerts.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9"/><path d="M10 21h4"/></svg><span>Invitations</span></a>
+                <a class="side-link" href="account.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 3.6-6 8-6s7.2 2 8 6"/></svg><span>Account</span></a>
+            </nav>
+            <div class="side-foot">
+                <div class="side-user">
+                    <span class="avatar" id="nav-initials" aria-hidden="true"></span>
+                    <span><strong id="nav-org"></strong><small>Organizer</small></span>
+                </div>
+                <a class="side-link logout-link" href="../../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="page-top">
+                <div>
+                    <p class="eyebrow"><span data-time-greeting></span> • In-app alerts to eligible donors near a drive</p>
+                    <h1>Drive invitations</h1>
+                </div>
+                <div class="page-actions"></div>
+            </header>
+            <div class="grid grid-split">
+                <form class="card stack" id="alert-form">
+                    <div class="card-head"><div><h2>New invitation</h2><p>Urgent patient needs are posted by blood banks, not organizers.</p></div></div>
+
+                    <label class="field"><span>1 · Drive</span><select id="alert-drive"></select></label>
+                    <p class="muted" id="drive-context"></p>
+
+                    <div class="field">
+                        <span class="field-label">2 · Blood type <span class="pill is-soft no-dot" id="selected-type">—</span></span>
+                        <div class="choice-grid blood-grid">
+                            <button type="button" class="blood" data-type="O-" aria-pressed="false">O-</button>
+                            <button type="button" class="blood" data-type="O+" aria-pressed="false">O+</button>
+                            <button type="button" class="blood" data-type="A-" aria-pressed="false">A-</button>
+                            <button type="button" class="blood" data-type="A+" aria-pressed="false">A+</button>
+                            <button type="button" class="blood" data-type="B-" aria-pressed="false">B-</button>
+                            <button type="button" class="blood" data-type="B+" aria-pressed="false">B+</button>
+                            <button type="button" class="blood" data-type="AB-" aria-pressed="false">AB-</button>
+                            <button type="button" class="blood" data-type="AB+" aria-pressed="false">AB+</button>
+                        </div>
+                        <p class="muted">Types this drive does not collect are disabled.</p>
+                    </div>
+
+                    <div class="field">
+                        <span class="field-label">3 · Radius from the drive <span class="pill is-muted no-dot" id="radius-label">15 km</span></span>
+                        <input class="radius-input" type="range" min="5" max="30" step="5" value="15" aria-label="Radius in kilometers">
+                        <div class="bar-labels"><span>5 km</span><span>15 km</span><span>30 km</span></div>
+                    </div>
+
+                    <label class="field">
+                        <span>4 · Message <span class="pill is-muted no-dot counter">0 / 280</span></span>
+                        <textarea id="alert-message" maxlength="280" rows="4"></textarea>
+                    </label>
+                    <div class="toolbar"><button type="button" class="btn btn-soft btn-sm" id="reset-protocol">Reset to template</button><span class="muted" id="message-status"></span></div>
+                </form>
+
+                <div class="stack">
+                    <section class="card">
+                        <div class="card-head"><h2>Estimated reach</h2></div>
+                        <p class="big-number" id="reach-count">—</p>
+                        <p class="muted" id="reach-context">Eligible donors within the radius.</p>
+                        <p class="muted" id="eligible-donor-count"></p>
+                    </section>
+                    <section class="card">
+                        <div class="card-head"><h2>Donor preview</h2><span class="pill is-soft no-dot">Drive invitation</span></div>
+                        <div class="tile alert-preview">
+                            <strong id="preview-org">Ka-dugo</strong>
+                            <p>Your message will appear here.</p>
+                        </div>
+                    </section>
+                    <div class="stack">
+                        <button class="btn btn-accent btn-block dispatch" type="button" disabled>Send invitation</button>
+                        <button class="btn btn-ghost btn-block" id="save-draft" type="button">Save draft</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <dialog class="modal confirm-dialog">
+        <div>
+            <h2>Send this invitation?</h2>
+            <p>It appears in the matching donors’ Ka-dugo notifications right away.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost cancel-dialog">Review</button>
+                <button type="button" class="btn btn-accent approve-dialog">Send now</button>
+            </div>
+        </div>
+    </dialog>
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="../../js/app.js"></script>
+    <script type="module" src="../../js/organizer/alerts.js"></script>
+</body>
+
+</html>

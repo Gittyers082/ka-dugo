@@ -19,10 +19,17 @@
             background-color: var(--oxblood);
             /* Dark red background */
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             font-family: var(--font-body);
+        }
+
+        /* The status bar from app.js spans the top instead of sitting beside the content. */
+        .offline-page #network-status-bar {
+            position: fixed;
+            inset: 0 0 auto;
         }
 
         .offline-container {
@@ -145,7 +152,7 @@
         <img class="offline-logo" src="assets/icons/bone/192-bone_icon.png" alt="Offline Heart Icon">
 
         <!-- Reconnect Button -->
-        <button class="btn-reconnect" onclick="window.location.reload()">Reconnect</button>
+        <button class="btn-reconnect" id="reconnect" type="button">Reconnect</button>
 
         <!-- Hover Message -->
         <div class="tooltip-container">
@@ -160,6 +167,13 @@
         </div>
     </main>
 
+    <script type="module" src="js/app.js"></script>
+    <script>
+        // Go back to the page that failed to load, or reload this one.
+        document.getElementById('reconnect').addEventListener('click', () => {
+            if (history.length > 1) history.back(); else location.reload();
+        });
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,133 @@
+/* ==========================================================================
+   PHLEBOTOMIST SCANNER — camera viewport, steps and eligibility box
+   (layout, cards and forms come from ui.css)
+   ========================================================================== */
+.scanner-viewport {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 280px;
+  padding: var(--space-4);
+  overflow: hidden;
+  border: none;
+  border-radius: var(--r-tile);
+  background: var(--oxblood);
+  color: var(--bone);
+  font: inherit;
+  cursor: pointer;
+}
+
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scanner-viewport.camera-active .scanner-video { opacity: 0.9; }
+.scanner-viewport.flash-boost .scanner-video { filter: brightness(1.35) contrast(1.15); }
+
+.scanner-brackets {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  border: 2px dashed rgb(228 221 214 / 0.35);
+  border-radius: 12px;
+}
+
+.scanner-prompt {
+  margin-top: auto;
+  padding-bottom: var(--space-4);
+  font: 600 13px/1.3 var(--font-body);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.laser-line {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  height: 2px;
+  background: #ff4d4d;
+  box-shadow: 0 0 10px 2px rgb(255 77 77 / 0.6);
+  animation: laser-sweep 2.4s ease-in-out infinite;
+}
+
+.scanner-viewport.scan-success .scanner-brackets {
+  border-color: #7fd39b;
+}
+
+@keyframes laser-sweep {
+  0%, 100% { top: 12%; }
+  50% { top: 86%; }
+}
+
+/* Scan → Eligibility → Record */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.steps .step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--ink-soft);
+  font: 600 12px/1.2 var(--font-body);
+}
+
+.steps .step::before {
+  content: "";
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: rgb(42 6 5 / 0.12);
+}
+
+.steps .step.active { color: var(--accent); }
+.steps .step.active::before { background: var(--accent); }
+
+/* Eligibility result (scan.js sets alert-box + is-eligible / is-deferred / is-unverified) */
+.alert-box {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-field);
+  background: var(--tile);
+}
+
+.alert-box.is-eligible { background: var(--ok-soft); color: var(--ok); }
+.alert-box.is-deferred { background: var(--accent-soft); color: var(--accent); }
+.alert-box.is-unverified { background: var(--warn-soft); color: var(--warn); }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.data-cell {
+  padding: var(--space-3);
+  border-radius: var(--r-field);
+  background: var(--tile);
+}
+
+.data-cell dt {
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.data-cell dd {
+  font-weight: 700;
+}
+
+#flash-btn[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bone);
+}

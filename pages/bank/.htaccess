@@ -1,5 +1,0 @@
-# The project is served from http://localhost/kadugo/ on Apache/WAMP.
-# Route EVERY bank HTML page through session-based role authorization.
-# Requires Apache mod_rewrite and AllowOverride FileInfo (or All).
-RewriteEngine On
-RewriteRule ^(dashboard|donation-log|requests|active_requests|scan)\.html$ /kadugo/api/bank-page.php?page=$1 [L,QSA]

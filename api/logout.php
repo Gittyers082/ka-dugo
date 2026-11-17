@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendJson(false, 'Method not allowed.', null, 405);
 }
 
-if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+startSession();
 $_SESSION = [];
 if (ini_get('session.use_cookies')) {
     $params = session_get_cookie_params();

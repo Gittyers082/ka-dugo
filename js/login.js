@@ -38,8 +38,7 @@ form?.addEventListener("submit", async (e) => {
         });
         const json = await res.json();
         if (json.ok) {
-            localStorage.setItem('kadugo_active_user', json.data.account_id);
-
+            // The server session decides who is signed in; nothing about the account is stored in the browser.
             window.location.href = json.data.redirect;
         } else {
             showError(json.error || "Couldn't sign you in. Try again.");

@@ -32,3 +32,33 @@ Prompt 1: "[("Based on our branding and color palette, give me the tokens and ba
 
 ============================================================================
 */
+# Ka-dugo — roles and modules
+
+| Role | Pages | Owns | Donation (main transaction) |
+|---|---|---|---|
+| Donor | `pages/donor/` | bookings, digital QR, own history, notifications | — |
+| Organizer | `pages/organizer/` | drives (GPS venue, partner bank, slots), turnout (check-in / no-show), drive invitations | — |
+| Blood bank | `pages/bank/` | blood requests + request alerts, donation log, daily quota | Read, Update, Delete |
+| Phlebotomist | `pages/phlebotomist/` | scan donor QR → eligibility → record; works offline (IndexedDB queue) | **Create** |
+| Admin | `pages/admin/` | oversight of every bank/organizer/donation, activate or deactivate accounts | Read (all banks) |
+
+Rules enforced by the API (not only the UI):
+- A bank alert must point to one of that bank's open requests; an organizer alert must point to one of its own upcoming drives that has a GPS location.
+- Only phlebotomists create donations; `client_uuid` makes every offline re-send idempotent, and the server re-checks eligibility on sync.
+- A deactivated account is signed out on its next request.
+
+## Setup
+1. Import `database/kadugo.sql` (creates `kadugo_db` with sample data; dates near "today" are relative).
+2. Serve the folder with XAMPP Apache at `http://localhost/kadugo/` and sign in at `index.html`.
+
+## Sample accounts (all use the seed password)
+admin@kadugo.org · trece.bloodbank@kadugo.org · dasma.bloodbank@kadugo.org · phleb.juan@kadugo.org · phleb.maria@kadugo.org · redcross.cavite@org.ph · cvsu.ssc@org.ph · miguel.cruz@gmail.com (donor) · jenny.ramos@gmail.com (inactive donor, for the admin toggle demo)
+
+## Third-party file
+`js/vendor/jsQR.js` (jsQR 1.4.0, Apache-2.0) decodes QR codes from camera frames on browsers without
+`BarcodeDetector` (Chrome on Windows). It is stored locally and pre-cached by the service worker, so
+scanning works offline. Everything else is vanilla HTML, CSS and JavaScript.
+
+## Styles
+Every signed-in page uses `css/tokens.css` + `css/base.css` + `css/ui.css` (shared layout and components).
+`css/phlebotomist/scan.css` adds the camera viewport; `css/styles.css` styles the sign-in page.

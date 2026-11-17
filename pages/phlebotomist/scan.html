@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a0605">
+    <title>Scan donor | Ka-dugo Phlebotomist</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/ui.css">
+    <link rel="stylesheet" href="../../css/phlebotomist/scan.css">
+    <script src="../../js/guard.js" data-roles="phlebotomist"></script>
+</head>
+
+<body class="ui">
+    <div class="shell">
+        <aside class="side mobile-logout">
+            <a class="side-brand" href="scan.html">
+                <img src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+                <small>Phlebotomist</small>
+            </a>
+            <p class="side-label">Workspace</p>
+            <nav class="side-nav" aria-label="Phlebotomist navigation">
+                <a class="side-link is-active" aria-current="page" href="scan.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg><span>Scan donor</span></a>
+                <a class="side-link" href="collections.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Today</span><span class="side-count" data-pending-count></span></a>
+            </nav>
+            <div class="side-foot">
+                <div class="side-user">
+                    <span class="avatar" id="nav-initials" aria-hidden="true"></span>
+                    <span><strong id="nav-org"></strong><small>Phlebotomist</small></span>
+                </div>
+                <a class="side-link logout-link" href="../../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="page-top">
+                <div>
+                    <p class="eyebrow"><span data-time-greeting></span> • Scan → eligibility → record • works offline</p>
+                    <h1>Log new donation</h1>
+                </div>
+                <div class="page-actions"><span class="pill is-soft" id="save-mode">SAVES ONLINE</span></div>
+            </header>
+            <ol class="steps progress-stepper" aria-label="Progress">
+                <li class="step active" data-step="1">1 · Scan</li>
+                <li class="step" data-step="2">2 · Eligibility</li>
+                <li class="step" data-step="3">3 · Record</li>
+            </ol>
+
+            <div class="grid grid-split-r">
+                <section class="card stack">
+                    <div class="card-head flush"><h2>QR viewport</h2><button type="button" class="btn btn-soft btn-sm" id="flash-btn" aria-pressed="false">Flash</button></div>
+                    <button type="button" class="scanner-viewport" id="scanner-viewport" aria-label="Start or stop the camera">
+                        <span class="scanner-brackets">
+                            <span class="laser-line"></span>
+                            <span class="scanner-prompt" id="scanner-prompt">TAP TO START CAMERA</span>
+                        </span>
+                    </button>
+                    <p class="muted" id="scanner-engine"></p>
+                    <form class="field" id="lookup-form">
+                        <label class="field-label" for="donor-code">Or type the donor ID / QR code</label>
+                        <div class="toolbar">
+                            <input class="input" type="text" id="donor-code" placeholder="e.g. 1 or DNR-QR-…" autocomplete="off" required>
+                            <button type="submit" class="btn btn-primary">Look up</button>
+                        </div>
+                    </form>
+                </section>
+
+                <div class="stack" id="donor-panel" hidden>
+                    <section class="card stack">
+                        <div class="item-head">
+                            <span class="badge-box" id="donor-type"></span>
+                            <div class="row-main"><strong id="donor-name"></strong><span id="donor-ref"></span></div>
+                        </div>
+                        <dl class="facts" id="donor-facts"></dl>
+                        <div class="alert-box" id="eligibility-box" role="status">
+                            <strong id="eligibility-title"></strong>
+                            <p id="eligibility-detail"></p>
+                        </div>
+                    </section>
+
+                    <form class="card stack" id="collection-form">
+                        <div class="card-head flush"><h2>Collection</h2></div>
+                        <label class="field"><span>Component</span>
+                            <select id="component">
+                                <option value="1">Whole Blood</option>
+                                <option value="2">Packed Red Blood Cells</option>
+                                <option value="3">Platelets</option>
+                                <option value="4">Fresh Frozen Plasma</option>
+                            </select>
+                        </label>
+                        <div class="field">
+                            <span class="field-label">Units (450 mL each)</span>
+                            <div class="stepper"><button type="button" id="units-minus" aria-label="Fewer units">−</button><output id="units-display" aria-live="polite">1 Unit</output><button type="button" id="units-plus" aria-label="More units">+</button></div>
+                        </div>
+                        <label class="field"><span>Blood drive</span><select id="drive"><option value="">Walk-in (no drive)</option></select></label>
+                        <p class="muted" id="record-ref"></p>
+                        <div class="toolbar">
+                            <button type="submit" class="btn btn-accent" id="save-btn">Save donation</button>
+                            <button type="reset" class="btn btn-ghost" id="cancel-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="../../js/app.js"></script>
+    <script type="module" src="../../js/    <script src="../../js/vendor/jsQR.js"></script>"></script>
+    <script type="module" src="../../js/phlebotomist/scan.js"></script>
+</body>
+
+</html>

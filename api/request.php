@@ -1,12 +1,12 @@
 <?php
-// this is request.php - handles incoming HTTP requests for blood drive management
+// this is request.php - blood requests a bank posts for its patients (bank: full CRUD, admin: read-only)
 declare(strict_types=1);
 require_once __DIR__ . '/validation.php';
 
 $conn = getDbConnection();
 $input = getRequestData();
 $method = getRequestMethod($input);
-requireRole($method === 'GET' ? ['bank', 'admin', 'organizer'] : ['bank', 'admin']);
+requireRole($method === 'GET' ? ['bank', 'admin'] : ['bank']);
 
 // Bank staff only see and manage their own bank's requests; the session decides, not the browser.
 $sessionBankId = signedInBankId();
@@ -17,13 +17,10 @@ if ($sessionBankId !== null) {
         $own = $conn->prepare('SELECT 1 FROM blood_request WHERE request_id = ? AND bank_id = ?');
         $own->bind_param('ii', $ownRequestId, $sessionBankId);
         $own->execute();
-        if (!$own->get_result()->fetch_assoc()) sendJson(false, 'Blood request not found for this bank.', null, 404);
+        if (!$own->get_result()->fetch_assoc()) {
+            sendJson(false, 'Blood request not found for this bank.', null, 404);
+        }
     }
-} elseif ($method === 'POST' && empty($input['bank_id'])) {
-    // shortcut: admin has no linked bank, so default to the first one; add a bank picker when there are several banks
-    $first = $conn->prepare('SELECT MIN(bank_id) AS id FROM blood_bank');
-    $first->execute();
-    $input['bank_id'] = (int)($first->get_result()->fetch_assoc()['id'] ?? 0);
 }
 
 if ($method === 'GET') {

@@ -1,128 +1,82 @@
 <!DOCTYPE html>
-<html data-theme="light" lang="en">
-    <head>
-        <meta charset="utf-8"/>
-        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-        <title>Notifications - Ka-dugo</title>
-        <link href="../../assets/icons/kadugo-ico.ico" rel="icon" type="image/x-icon"/>
-        <link href="../../css/tokens.css" rel="stylesheet"/>
-        <link href="../../css/base.css" rel="stylesheet"/>
-        <link href="../../css/styles.css" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/donor-dashboard.css?v=profile-qr-2" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/notifications.css?notifs-3" rel="stylesheet"/>
-        <link href="../../css/Donor_Css/donor-data.css?db-1" rel="stylesheet"/>
-    </head>
-    <body class="dashboard-layout donor-dashboard notifications-page">
-        <!-- Donor Sidebar -->
-        <aside aria-label="Donor navigation" class="sidebar">
-            <div aria-label="Ka-dugo Donor" class="sidebar-brand">
-                <span>KA-DUGO</span>
-                <span>DONOR</span>
-            </div>
-            <nav aria-label="Main menu" class="nav-menu">
-                <!-- Dashboard -->
-                <a aria-current="page" class="nav-item active t-button" href="donor-dashboard.html">
-                    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
-                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
-                    <span>Dashboard</span>
-                </a>
-                <!-- My Donations -->
-                <a class="nav-item t-button" href="my-donations.html">
-                    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" x2="8" y1="13" y2="13"></line>
-                        <line x1="16" x2="8" y1="17" y2="17"></line>
-                    </svg>
-                    <span>My Donations</span>
-                </a>
-                <!-- Drives & Booking -->
-                <a class="nav-item t-button" href="drives-booking.html">
-                    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="20">
-                        <rect height="16" rx="2" width="18" x="3" y="5"></rect>
-                        <path d="M7 3v5M17 3v5M3 10h18"></path>
-                    </svg>
-                    <span>Drives &amp; Booking</span>
-                </a>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a0605">
+    <title>Notifications | Ka-dugo Donor</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/ui.css">
+    <script src="../../js/guard.js" data-roles="donor"></script>
+</head>
+
+<body class="ui">
+    <div class="shell">
+        <aside class="side">
+            <a class="side-brand" href="donor-dashboard.html">
+                <img src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+                <small>Donor</small>
+            </a>
+            <p class="side-label">Workspace</p>
+            <nav class="side-nav" aria-label="Donor navigation">
+                <a class="side-link" href="donor-dashboard.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Dashboard</span></a>
+                <a class="side-link" href="drives-booking.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 11h18"/></svg><span>Drives</span></a>
+                <a class="side-link" href="my-donations.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Donations</span></a>
+                <a class="side-link is-active" aria-current="page" href="notifications.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9"/><path d="M10 21h4"/></svg><span>Alerts</span><span class="side-count" id="nav-unread"></span></a>
+                <a class="side-link" href="profile.html"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 3.6-6 8-6s7.2 2 8 6"/></svg><span>Profile</span></a>
             </nav>
-            <!-- Clickable Profile Picture -->
-            <div class="nav-profile">
-                <a aria-label="Open donor account" class="profile-image-link" href="profile.html">
-                    <img alt="Donor Profile" class="avatar" src="../../assets/img/avatar-placeholder.svg"/>
-                </a>
+            <div class="side-foot">
+                <div class="side-user">
+                    <span class="avatar" id="nav-initials" aria-hidden="true"></span>
+                    <span><strong id="nav-org"></strong><small>Donor</small></span>
+                </div>
+                <a class="side-link logout-link" href="../../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Logout</span></a>
             </div>
         </aside>
-        <!-- Main Workspace -->
-        <div class="dashboard-workspace">
-            <!--Top Bar-->
-            <header class="topbar">
-                <img alt="Ka-dugo logo" class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg"/>
-                <div class="brand-copy">
-                    <h2>Donor Dashboard</h2>
-                    <p>Ka-dugo Donor Portal</p>
+
+        <main class="main">
+            <header class="page-top">
+                <div>
+                    <p class="eyebrow"><span data-time-greeting></span> • <span id="unread-summary">0 unread</span></p>
+                    <h1>Notifications</h1>
                 </div>
-                <!-- Refresh Control -->
-                <button aria-label="Refresh this page" class="refresh-button" title="Refresh" type="button">
-                    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24" width="24">
-                        <path d="M3 11a9 9 0 0 1 15.4-6.4L21 7"></path>
-                        <path d="M21 3v4h-4"></path>
-                        <path d="M21 13a9 9 0 0 1-15.4 6.4L3 17"></path>
-                        <path d="M3 21v-4h4"></path>
-                    </svg>
-                </button>
+                <div class="page-actions"><div class="seg" role="group" aria-label="Show">
+                    <button type="button" id="show-all-alerts" aria-pressed="true">All</button>
+                    <button type="button" id="show-unread-alerts" aria-pressed="false">Unread <span id="unread-tab-count">0</span></button>
+                </div>
+                <button type="button" class="btn btn-ghost" id="mark-all-alerts-read">Mark all read</button>
+                <button type="button" class="icon-btn" id="refresh-notifications" aria-label="Refresh">↻</button></div>
             </header>
-            <main class="dashboard-content" id="notifications-main">
-                <!-- Page Header -->
-                <header class="notifications-heading">
-                    <div>
-                        <a class="notifications-back" href="donor-dashboard.html">← Back to Dashboard</a>
-                        <h1>Notifications</h1>
-                        <p>Blood requests and announcements sent to your donor account.</p>
-                    </div>
-                    <span aria-live="polite" class="notification-summary" id="unread-summary">— unread</span>
-                </header>
-                <!-- All and Unread Tabs -->
-                <section aria-label="Donor notifications" class="notification-panel">
-                    <div class="notification-toolbar">
-                        <div aria-label="Filter notifications" class="notification-tabs" role="tablist">
-                            <button aria-selected="true" class="notice-tab active" id="show-all-alerts" role="tab" type="button">All</button>
-                            <button aria-selected="false" class="notice-tab" id="show-unread-alerts" role="tab" type="button">Unread <span id="unread-tab-count">0</span></button>
-                        </div>
-                        <div class="notification-toolbar-actions">
-                            <button class="mark-all-read" id="refresh-notifications" type="button">Refresh</button>
-                            <button class="mark-all-read" id="mark-all-alerts-read" type="button">Mark all as read</button>
-                        </div>
-                    </div>
-                    <!--Example alerts-->
-                    <div class="notification-list" id="donor-notification-list">
-                        <p class="donor-data-status" id="notification-load-status" role="status">Loading your notifications...</p>
-                    </div>
-                    <p class="donor-data-status" id="notification-feedback" role="status" hidden></p>
-                    <!-- Empty State -->
-                    <div class="notifications-empty" hidden="" id="notifications-empty">
-                        <p>No unread notifications.</p>
-                        <button id="empty-show-all" type="button">See all notifications</button>
-                    </div>
-                </section>
-            </main>
-        </div>
-        <!-- Notification Detail Dialog -->
-        <div class="notice-overlay" hidden="" id="notice-overlay">
-            <section aria-labelledby="notice-detail-title" aria-modal="true" class="notice-dialog" role="dialog">
-                <button aria-label="Close notification" class="notice-close" id="notice-close" type="button">×</button>
-                <span class="notice-dialog-kind" id="notice-detail-kind"></span>
-                <h2 id="notice-detail-title"></h2>
-                <p class="notice-dialog-sender" id="notice-detail-sender"></p>
-                <p class="notice-dialog-message" id="notice-detail-message"></p>
-                <div class="notice-dialog-actions">
-                    <button class="notice-done" id="notice-done" type="button">Done</button>
-                    <button class="notice-go" id="notice-go" type="button" aria-label="Go to Drives and Booking">Go →</button>
+            <p class="note is-bad" id="notification-feedback" hidden></p>
+            <section class="card">
+                <ul class="list" id="donor-notification-list" aria-live="polite"></ul>
+                <div class="empty" id="notifications-empty" hidden>
+                    <p>No notifications yet.</p>
+                    <button type="button" class="btn btn-soft btn-sm section-gap" id="empty-show-all">Show all</button>
                 </div>
             </section>
+        </main>
+    </div>
+    <div class="overlay" id="notice-overlay" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="notice-detail-title">
+            <span class="pill is-soft no-dot" id="notice-detail-kind"></span>
+            <h2 id="notice-detail-title"></h2>
+            <p class="muted" id="notice-detail-sender"></p>
+            <p id="notice-detail-message"></p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" id="notice-close">Close</button>
+                <button type="button" class="btn btn-ghost" id="notice-done">Done</button>
+                <button type="button" class="btn btn-primary" id="notice-go" hidden>Open drive</button>
+            </div>
         </div>
-        <script defer="" src="../../js/donor_js/donor-common.js?go-drives-2"></script>
-        <script defer="" src="../../js/donor_js/donor-notifications.js?go-drives-2"></script>
-    </body>
+    </div>
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="../../js/app.js"></script>
+    <script type="module" src="../../js/donor/donor-notifications.js"></script>
+</body>
+
 </html>

@@ -3,20 +3,11 @@
 declare(strict_types=1);
 require_once __DIR__ . '/helpers.php';
 
-session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
-session_start();
+startSession();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendJson(false, 'Method not allowed.', null, 405);
 }
-
-$home = [
-    'donor' => 'pages/donor/donor-dashboard.html',
-    'bank' => 'pages/bank/dashboard.html',
-    'phlebotomist' => 'pages/bank/scan.html',
-    'organizer' => 'pages/organizer/drives.html',
-    'admin' => 'pages/bank/dashboard.html',
-];
 
 // Arrays (email[]=x) are treated as empty instead of crashing trim().
 $email = is_string($_POST['email'] ?? null) ? strtolower(trim($_POST['email'])) : '';
@@ -69,5 +60,5 @@ $upd->close();
 sendJson(true, 'Signed in.', [
     'account_id' => (int) $acct['account_id'],
     'role' => $acct['role'],
-    'redirect' => $home[$acct['role']] ?? 'index.html',
+    'redirect' => ROLE_HOME[$acct['role']] ?? 'index.html',
 ]);

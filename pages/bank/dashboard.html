@@ -1,220 +1,88 @@
-<!doctype html>
-<html lang="en" data-theme="light" data-bank-access="pending">
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Bank Dashboard | Ka-dugo Bank</title>
-  <link rel="stylesheet" href="../../css/tokens.css" />
-  <link rel="stylesheet" href="../../css/base.css" />
-  <link rel="stylesheet" href="../../css/styles.css" />
-  <link rel="stylesheet" href="../../css/bank_css/bank-dashboard.css" />
-  <link rel="stylesheet" href="../../css/bank_css/bank-shell.css?v=2" />
-  <!-- Hide content until session role check completes. -->
-  <style>
-    html[data-bank-access="pending"] body {
-      visibility: hidden;
-    }
-  </style>
-  <script src="../../js/pages/bank-access.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a0605">
+    <title>Dashboard | Ka-dugo Blood bank</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/ui.css">
+    <script src="../../js/guard.js" data-roles="bank"></script>
 </head>
 
-<body>
-  <main class="app-shell">
-    <!-- Topbar -->
-    <header class="topbar">
-      <img class="brand-logo" src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo" />
-      <div class="brand-copy">
-        <h1>Bank Dashboard</h1>
-        <p>Ka-dugo Bank Management</p>
-      </div>
-      <button class="refresh" aria-label="Refresh" id="refresh-btn">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 2v6h-6"></path>
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-          <path d="M3 2v6h6"></path>
-        </svg>
-      </button>
-    </header>
-
-    <!-- Main Content Area -->
-    <section class="page-content">
-      <div class="dashboard-grid">
-        <!-- Left Column: Metrics & Priority -->
-        <!-- Left Column: Metrics & Priority -->
-        <div class="col-metrics">
-          <header class="date-header">
-            <h2 class="t-heading text-oxblood font-bold">
-              Loading Date...
-            </h2>
-          </header>
-
-          <!-- Daily Quota Card -->
-          <article class="card quota-card">
-            <h3 class="t-title text-maroon font-heading">Daily Quota</h3>
-            <div class="quota-stats">
-              <span class="t-display text-maroon font-bold" id="quota-total-text">0/50</span>
-              <span class="t-label text-maroon" id="quota-trend">↗ Live</span>
+<body class="ui">
+    <div class="shell">
+        <aside class="side mobile-logout">
+            <a class="side-brand" href="dashboard.html">
+                <img src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+                <small>Blood bank</small>
+            </a>
+            <p class="side-label">Workspace</p>
+            <nav class="side-nav" aria-label="Blood bank navigation">
+                <a class="side-link is-active" aria-current="page" href="dashboard.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Dashboard</span></a>
+                <a class="side-link" href="donation-log.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Donation log</span></a>
+                <a class="side-link" href="requests.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></svg><span>Post request</span></a>
+                <a class="side-link" href="active_requests.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span>Open requests</span><span class="side-count" id="nav-open-requests"></span></a>
+            </nav>
+            <div class="side-foot">
+                <div class="side-user">
+                    <span class="avatar" id="nav-initials" aria-hidden="true"></span>
+                    <span><strong id="nav-org"></strong><small>Blood bank</small></span>
+                </div>
+                <a class="side-link logout-link" href="../../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Logout</span></a>
             </div>
-            <div class="progress-track mt-2">
-              <div class="progress-fill bg-maroon" id="quota-progress-bar" style="width: 0%"></div>
+        </aside>
+
+        <main class="main">
+            <header class="page-top">
+                <div>
+                    <p class="eyebrow"><span data-time-greeting></span> • <span id="today-label"></span></p>
+                    <h1><span id="nav-org-title">Bank dashboard</span></h1>
+                </div>
+                <div class="page-actions"><a class="btn btn-ghost" href="donation-log.html">Donation log</a><a class="btn btn-primary" href="requests.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Post request</a></div>
+            </header>
+            <section class="stats" aria-label="Today">
+                <div class="stat"><span class="stat-label">Collected today</span><span class="stat-value" id="stat-today">—</span><span class="stat-meta">Units, by your phlebotomists</span></div>
+                <div class="stat"><span class="stat-label">Open requests</span><span class="stat-value" id="stat-requests">—</span><span class="stat-meta">Your patients</span></div>
+                <div class="stat"><span class="stat-label">Urgent</span><span class="stat-value" id="stat-urgent">—</span><span class="stat-meta">High or critical</span></div>
+                <div class="stat is-accent"><span class="stat-label">Daily quota</span><span class="stat-value" id="stat-quota">—</span><span class="stat-meta" id="quota-total">—</span></div>
+            </section>
+
+            <div class="grid grid-split">
+                <section class="card">
+                    <div class="card-head"><div><h2>Open blood requests</h2><p>Ranked by urgency and deadline</p></div><a class="link" href="active_requests.html">View all</a></div>
+                    <ul class="list" id="requests-feed"></ul>
+                </section>
+                <div class="stack">
+                    <section class="card">
+                        <div class="card-head"><h2>Today's quota</h2></div>
+                        <div class="bar"><i id="quota-bar"></i></div>
+                        <p class="muted section-gap" id="quota-remaining"></p>
+                        <div class="meta section-gap" id="quota-components"></div>
+                    </section>
+                    <section class="card">
+                        <div class="card-head"><h2>Most urgent</h2><span class="pill is-accent">Priority</span></div>
+                        <p><strong id="priority-title">No open requests</strong></p>
+                        <p class="note section-gap" id="priority-reach">Post a request to alert nearby eligible donors.</p>
+                        <a class="btn btn-accent btn-block section-gap" href="requests.html">Post request &amp; alert donors</a>
+                    </section>
+                </div>
             </div>
-            <p class="t-caption text-muted mt-2" id="quota-remaining-text">
-              Loading Shift Goal...
-            </p>
-            <div class="tag-group">
-              <span class="badge-pill bg-maroon" id="quota-prbc">PRBC: 0/28</span>
-              <span class="badge-pill bg-maroon" id="quota-platelets">Platelets: 0/12</span>
-              <span class="badge-pill bg-maroon" id="quota-wb">Whole Blood: 0/10</span>
-            </div>
-          </article>
 
-          <div class="stats-row">
-            <!-- Open Requests Stat -->
-            <article class="card stat-card flex-1">
-              <h3 class="t-label text-maroon font-bold mb-1">
-                OPEN REQUESTS
-              </h3>
-              <p class="t-title text-oxblood font-heading" id="active-requests-text">0 Active</p>
-              <p class="t-caption text-urgent font-bold mt-1" id="urgent-requests-text">
-                0 urgent protocol
-              </p>
-            </article>
+            <section class="card">
+                <div class="card-head"><div><h2>Drives at your bank</h2><p>Organizers host them; your phlebotomists collect.</p></div></div>
+                <ul class="list" id="drives-list"></ul>
+            </section>
+        </main>
+    </div>
 
-            <!-- Pending Sync Stat -->
-            <article class="card stat-card outline flex-1">
-              <h3 class="t-label text-maroon font-bold mb-1">PENDING SYNC</h3>
-              <p class="t-title text-maroon font-heading" id="dashboard-sync-count">
-                0 Records
-              </p>
-              <p class="t-caption text-muted mt-1">Local Queue Secure</p>
-            </article>
-          </div>
-
-          <!-- Priority Alert Card -->
-          <article class="card priority-card outline-urgent">
-            <span class="badge-urgent t-caption">HIGH PRIORITY</span>
-            <h3 class="t-label font-bold text-oxblood mt-2">
-              Donor Emergency Broadcast & Outreach
-            </h3>
-            <div class="alert-box">
-              <div class="flex-between">
-                <span class="t-label font-bold text-oxblood">Targeted Notification Ready</span>
-                <span class="t-caption text-urgent font-bold">Instant Delivery</span>
-              </div>
-              <p class="t-caption text-oxblood mt-1" id="priority-reach-text">
-                Checking donor reach...
-              </p>
-            </div>
-            <button class="btn-primary t-button w-full bg-maroon mt-4" onclick="window.location.href = 'requests.html'">
-              Post Request & Alert Donors
-            </button>
-          </article>
-        </div>
-
-        <!-- Right Column: Scanner Banner & Request Feed -->
-        <div class="col-feed">
-          <!-- Scanner Banner -->
-          <article class="card scanner-banner bg-oxblood text-bone text-center p-6">
-            <span class="t-label text-urgent font-bold">⚡ RAPID ADMISSION</span>
-            <h2 class="t-display font-heading mt-2 mb-4">Scan Donor QR</h2>
-            <button class="btn-primary w-full bg-maroon t-button mb-4" onclick="window.location.href = 'scan.html'">
-              Launch Scanner
-            </button>
-            <div class="flex-row gap-4 justify-center">
-              <button class="btn-secondary t-label font-bold bg-transparent text-bone outline-bone"
-                onclick="window.location.href = 'donation-log.html'">
-                Donation Log
-              </button>
-              <button class="btn-secondary t-label font-bold bg-transparent text-bone outline-bone"
-                onclick="window.location.href = 'requests.html'">
-                Post Request
-              </button>
-            </div>
-          </article>
-
-          <!-- Requests Feed Header -->
-          <div class="feed-header flex-between mb-4">
-            <div>
-              <h3 class="t-title text-maroon font-heading">
-                Open Blood Requests
-              </h3>
-              <p class="t-caption text-muted">
-                Ranked by protocol urgency and transfusion deadline
-              </p>
-            </div>
-            <div class="count-badge bg-maroon text-bone t-heading font-bold" id="feed-count-badge">
-              0
-            </div>
-          </div>
-
-          <!-- Dynamic Requests Container -->
-          <div id="requests-feed-container">
-            <p class="t-caption text-muted text-center py-4">Loading active hospital requests...</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Navigation (Dark Red Sidebar on Desktop) -->
-    <nav class="bottom-nav">
-      <a class="active" href="dashboard.html">
-        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg></span>
-        Home
-      </a>
-      <a href="donation-log.html">
-        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg></span>
-        Log
-      </a>
-      <a href="scan.html">
-        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="3" y1="9" x2="21" y2="9"></line>
-            <line x1="9" y1="21" x2="9" y2="9"></line>
-          </svg></span>
-        Scan
-      </a>
-      <a href="requests.html">
-        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="1" y="3" width="15" height="13"></rect>
-            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-            <circle cx="5.5" cy="18.5" r="2.5"></circle>
-            <circle cx="18.5" cy="18.5" r="2.5"></circle>
-          </svg></span>
-        Requests
-      </a>
-      <a href="index.html" id="logout-btn" class="logout-link">
-        <span class="nav-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-        </span>
-        Logout
-      </a>
-      <span class="nav-brand" id="nav-brand">KA-DUGO</span>
-      <p class="nav-org" id="nav-org"></p>
-    </nav>
-  </main>
-  <script type="module" src="../../js/app.js"></script>
-  <script type="module" src="../../js/pages/account.js"></script>
-  <script type="module" src="../../js/pages/bank-dashboard.js"></script>
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="../../js/app.js"></script>
+    <script type="module" src="../../js/bank/dashboard.js"></script>
 </body>
 
 </html>

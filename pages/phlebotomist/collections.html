@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2a0605">
+    <title>Today | Ka-dugo Phlebotomist</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/icons/kadugo-ico.ico">
+    <link rel="manifest" href="../../manifest.json">
+    <link rel="stylesheet" href="../../css/tokens.css">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/ui.css">
+    <link rel="stylesheet" href="../../css/phlebotomist/scan.css">
+    <script src="../../js/guard.js" data-roles="phlebotomist"></script>
+</head>
+
+<body class="ui">
+    <div class="shell">
+        <aside class="side mobile-logout">
+            <a class="side-brand" href="scan.html">
+                <img src="../../assets/icons/crimson/crimson-logo.svg" alt="Ka-dugo">
+                <small>Phlebotomist</small>
+            </a>
+            <p class="side-label">Workspace</p>
+            <nav class="side-nav" aria-label="Phlebotomist navigation">
+                <a class="side-link" href="scan.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg><span>Scan donor</span></a>
+                <a class="side-link is-active" aria-current="page" href="collections.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Today</span><span class="side-count" data-pending-count></span></a>
+            </nav>
+            <div class="side-foot">
+                <div class="side-user">
+                    <span class="avatar" id="nav-initials" aria-hidden="true"></span>
+                    <span><strong id="nav-org"></strong><small>Phlebotomist</small></span>
+                </div>
+                <a class="side-link logout-link" href="../../index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg><span>Logout</span></a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="page-top">
+                <div>
+                    <p class="eyebrow"><span data-time-greeting></span> • Saved records and this device’s offline queue</p>
+                    <h1>Today's collections</h1>
+                </div>
+                <div class="page-actions"><input type="date" id="day" class="select-compact" aria-label="Collection day"></div>
+            </header>
+            <section class="stats">
+                <div class="stat"><span class="stat-label">Saved</span><span class="stat-value" id="sum-saved">0</span><span class="stat-meta">Donations on the server</span></div>
+                <div class="stat"><span class="stat-label">Units</span><span class="stat-value" id="sum-units">0</span><span class="stat-meta">Collected this day</span></div>
+                <div class="stat is-accent"><span class="stat-label">Waiting to sync</span><span class="stat-value" data-pending-count>0</span><span class="stat-meta">On this device</span></div>
+            </section>
+            <p class="note is-warn" id="cache-note" hidden>Offline — showing the list as it was last loaded.</p>
+
+            <div class="grid grid-2">
+                <section class="card">
+                    <div class="card-head"><div><h2>On this device</h2><p>Not yet sent to the server</p></div><button type="button" class="btn btn-soft btn-sm" id="sync-now">Sync now</button></div>
+                    <ul class="list" id="queue-list"></ul>
+                </section>
+                <section class="card">
+                    <div class="card-head"><div><h2>Saved to the server</h2><p>Your collections for the selected day</p></div></div>
+                    <ul class="list" id="saved-list"></ul>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="../../js/app.js"></script>
+    <script type="module" src="../../js/phlebotomist/collections.js"></script>
+</body>
+
+</html>

@@ -203,6 +203,9 @@
 }
 
 .not-now-link {
+  display: block;
+  margin-top: var(--space-3);
+  text-align: center;
   color: var(--bone);
   text-decoration: underline;
   text-underline-offset: 4px;

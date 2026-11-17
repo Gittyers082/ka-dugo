@@ -81,6 +81,84 @@ a {
   font: 400 var(--text-nav)/1 var(--font-body);
 }
 
+/* The hidden attribute always wins over component display rules. */
+[hidden] {
+  display: none !important;
+}
+
+/* Page guard (js/guard.js): keep the page hidden until the role check finishes. */
+html[data-access="pending"] body {
+  visibility: hidden;
+}
+
+/* Online / offline status bar (js/app.js) */
+#network-status-bar {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  padding: 6px var(--space-4);
+  font: 600 var(--text-nav)/1.4 var(--font-body);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+#network-status-bar.status-online {
+  background: #e7f3ec;
+  color: #1f6b40;
+}
+
+#network-status-bar.status-syncing {
+  background: #fff4dc;
+  color: #7a5200;
+}
+
+#network-status-bar.status-offline {
+  background: var(--oxblood);
+  color: var(--bone);
+}
+
+/* Toast (js/ui/toast.js) */
+.toast {
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  bottom: 120px;
+  transform: translate(-50%, 20px);
+  max-width: calc(100% - 32px);
+  padding: 13px 18px;
+  border-radius: var(--radius-full);
+  background: var(--oxblood);
+  color: var(--bone);
+  font: 600 var(--text-caption)/1.4 var(--font-body);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast.error {
+  background: var(--maroon);
+}
+
+@media (min-width: 900px) {
+  .toast {
+    left: calc(50% + 130px);
+    bottom: 40px;
+  }
+}
+
+.time-greeting {
+  display: block;
+  margin: 6px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 /* Accessibility */
 :focus-visible {
   outline: 2px solid var(--text);

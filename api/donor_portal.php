@@ -5,19 +5,14 @@ declare(strict_types=1);
 /* Donor Portal API: authenticated read/write operations using the existing SQL schema. */
 require_once __DIR__ . '/eligibility.php';
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
-    session_start();
-}
+startSession();
 header('Cache-Control: no-store, private');
 
 $action = (string)($_GET['action'] ?? 'overview');
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $accountId = (int)($_SESSION['account_id'] ?? 0);
 
-if ($accountId <= 0 || ($_SESSION['role'] ?? '') !== 'donor') {
-    sendJson(false, 'Please log in as a donor.', null, $accountId <= 0 ? 401 : 403);
-}
+requireRole(['donor']);
 $db = getDbConnection();
 
 $stmt = $db->prepare(
@@ -99,19 +94,6 @@ function validPositiveId(mixed $v): int
     return $id;
 }
 
-function eligibilityData(mysqli $db, array $donor): array
-{
-    $defs = donorQuery(
-        $db,
-        'SELECT reason, ends_on'
-            . ' FROM donor_deferral'
-            . ' WHERE donor_id = ? AND starts_on <= CURRENT_DATE AND (ends_on IS NULL OR ends_on >= CURRENT_DATE)',
-        'i',
-        [(int)$donor['donor_id']]
-    );
-    return evaluateDonorEligibility($donor, $defs);
-}
-
 function bookedRegistrations(mysqli $db, int $donorId): array
 {
     return donorQuery(
@@ -186,7 +168,7 @@ if ($method === 'GET') {
     // Compare request deadlines using the PHP application's Asia/Manila timezone.
     $nowManila = date('Y-m-d H:i:s');
     if ($action === 'me' || $action === 'overview') {
-        $donor['eligibility'] = eligibilityData($db, $donor);
+        $donor['eligibility'] = donorEligibility($db, $donor);
         $history = historyRows($db, $donorId);
         $donor['history_count'] = count($history);
         $donor['total_units'] = (float) array_sum(
@@ -386,17 +368,13 @@ if ($method !== 'POST') {
     sendJson(false, 'Method not allowed.', null, 405);
 }
 
-if ($action === 'logout') {
-    require __DIR__ . '/logout.php';
-}
-
 /* changes: Self-reported donation creation removed; history is read-only for donors. */
 
 if ($action === 'book' || $action === 'reschedule' || $action === 'cancel_booking') {
     $regId = $action === 'book' ? 0 : validPositiveId($input['registration_id'] ?? null);
     $driveId = $action === 'book' ? validPositiveId($input['drive_id'] ?? null) : 0;
     $slotId = $action === 'cancel_booking' ? 0 : validPositiveId($input['slot_id'] ?? null);
-    if ($action === 'book' && !eligibilityData($db, $donor)['is_eligible']) {
+    if ($action === 'book' && !donorEligibility($db, $donor)['is_eligible']) {
         sendJson(false, 'You are currently not eligible to book a donation.', null, 422);
     }
 
